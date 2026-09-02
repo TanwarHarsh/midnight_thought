@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v4) — 3D Celestial Sky</title>
+    <title>The Midnight Thought (v5) — 3D Celestial Sky</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,8 @@
             --star-white-glow: rgba(255, 255, 255, 0.95);
             --star-yellow: #ffd166;
             --star-yellow-glow: rgba(255, 209, 102, 0.95);
+            --star-mine: #00f0ff;
+            --star-mine-glow: rgba(0, 240, 255, 0.95);
         }
 
         * {
@@ -115,7 +117,13 @@
             font-weight: 600;
         }
 
-        .active-users-badge {
+        .stats-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .active-users-badge, .total-thoughts-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -129,6 +137,12 @@
             letter-spacing: 0.5px;
             box-shadow: 0 0 14px rgba(166, 188, 255, 0.15);
             transition: all 0.3s ease;
+        }
+
+        .total-thoughts-badge {
+            color: #ffe8a3;
+            border-color: rgba(255, 214, 102, 0.4);
+            box-shadow: 0 0 14px rgba(255, 214, 102, 0.15);
         }
 
         .live-dot {
@@ -182,7 +196,7 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* 3D Interactive Star in Sky (+10% Size Increase & Read/Unread Color System) */
+        /* 3D Interactive Star in Sky (+10% Size Increase & Color System) */
         .star {
             position: absolute;
             border-radius: 50%;
@@ -205,16 +219,23 @@
             border-radius: 50%;
         }
 
-        /* UNREAD STARS: Pure Brilliant Celestial White */
+        /* 1. UNREAD STARS: Pure Celestial White */
         .star.unread {
             background-color: var(--star-white) !important;
             box-shadow: 0 0 16px var(--star-white-glow), 0 0 32px var(--star-white), 0 0 48px var(--star-white-glow);
         }
 
-        /* READ STARS: Warm Golden Amber Yellow */
+        /* 2. READ STARS: Warm Golden Amber Yellow */
         .star.read {
             background-color: var(--star-yellow) !important;
             box-shadow: 0 0 16px var(--star-yellow-glow), 0 0 32px var(--star-yellow), 0 0 50px rgba(255, 183, 3, 0.8);
+        }
+
+        /* 3. USER'S OWN POSTED STARS: Radiant Electric Cyan */
+        .star.mine {
+            background-color: var(--star-mine) !important;
+            box-shadow: 0 0 18px var(--star-mine-glow), 0 0 36px var(--star-mine), 0 0 54px rgba(0, 240, 255, 0.9);
+            animation: pulse-mine-star 2.6s infinite ease-in-out;
         }
 
         .star:hover {
@@ -228,7 +249,12 @@
             50% { opacity: 1; transform: scale(1.24); }
         }
 
-        /* 3D Navigation Guide Tip */
+        @keyframes pulse-mine-star {
+            0%, 100% { opacity: 0.85; transform: scale(0.96); box-shadow: 0 0 16px var(--star-mine-glow), 0 0 32px var(--star-mine); }
+            50% { opacity: 1; transform: scale(1.30); box-shadow: 0 0 24px var(--star-mine-glow), 0 0 46px var(--star-mine), 0 0 60px rgba(0, 240, 255, 0.95); }
+        }
+
+        /* 3D Navigation Guide Tip & Legend */
         .hint-drag {
             position: absolute;
             top: 85px;
@@ -237,11 +263,35 @@
             font-size: 0.72rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(166, 188, 255, 0.55);
+            color: rgba(166, 188, 255, 0.65);
             pointer-events: none;
             z-index: 10;
-            transition: opacity 1s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 32, 56, 0.4);
+            padding: 5px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(166, 188, 255, 0.15);
         }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.68rem;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-unread { background: #ffffff; box-shadow: 0 0 6px #fff; }
+        .dot-read { background: #ffd166; box-shadow: 0 0 6px #ffd166; }
+        .dot-mine { background: #00f0ff; box-shadow: 0 0 6px #00f0ff; }
 
         /* Casting Interface */
         .interface {
@@ -374,6 +424,24 @@
             transform: translateY(0) scale(1);
         }
 
+        .modal-badge {
+            display: inline-block;
+            margin-bottom: 16px;
+            font-size: 0.74rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 16px;
+            font-weight: 600;
+        }
+
+        .modal-badge.mine {
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
         .modal-text {
             font-family: 'Cinzel', Georgia, serif;
             font-size: 1.24rem;
@@ -481,6 +549,7 @@
             .header-title { font-size: 1rem; letter-spacing: 3px; }
             .interface { bottom: 25px; }
             .input-box { padding: 18px 20px; }
+            .hint-drag { top: 75px; font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -494,14 +563,25 @@
         </div>
     </div>
 
-    <div class="hint-drag" id="hintDrag">✦ Drag sky to explore in 3D ✦</div>
+    <!-- 3D Navigation Guide & Color Legend -->
+    <div class="hint-drag" id="hintDrag">
+        <span class="legend-item"><span class="legend-dot dot-unread"></span>Unread</span>
+        <span class="legend-item"><span class="legend-dot dot-read"></span>Read</span>
+        <span class="legend-item"><span class="legend-dot dot-mine"></span>Your Star</span>
+    </div>
 
     <header class="top-header">
         <div class="header-left">
             <div class="header-title">The Midnight Thought</div>
-            <div class="active-users-badge" id="activeUsersBadge" title="Live stargazers currently connected">
-                <span class="live-dot"></span>
-                <span id="activeUsersCount">1 online</span>
+            <div class="stats-group">
+                <div class="active-users-badge" id="activeUsersBadge" title="Live stargazers currently connected">
+                    <span class="live-dot"></span>
+                    <span id="activeUsersCount">1 online</span>
+                </div>
+                <div class="total-thoughts-badge" id="totalThoughtsBadge" title="Total thoughts in the sky">
+                    <span>✨</span>
+                    <span id="totalThoughtsCount">0 thoughts</span>
+                </div>
             </div>
         </div>
         <div class="header-actions">
@@ -532,6 +612,7 @@
 
     <div class="overlay" id="overlay">
         <div class="modal">
+            <div id="modalBadgeContainer"></div>
             <p class="modal-text" id="modalText">A passing cloud...</p>
             <div class="modal-reactions">
                 <button class="reaction-btn" id="warmthBtn" title="Send Warmth to this thought">
@@ -568,25 +649,48 @@
         }
 
         /* ==========================================================================
-           READ / UNREAD STARS TRACKING ENGINE
+           STAR COLOR & OWNERSHIP TRACKING ENGINE
+           - Cyan (Mine): Created by current user
+           - Yellow (Read): Read by current user
+           - White (Unread): Other user's unread star
            ========================================================================== */
         let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
+        let myThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_my_thoughts') || '[]'));
+
+        function markThoughtAsMine(thoughtId) {
+            if (!thoughtId) return;
+            myThoughtIds.add(thoughtId.toString());
+            localStorage.setItem('midnight_my_thoughts', JSON.stringify([...myThoughtIds]));
+            
+            const starEl = document.querySelector(`.star[data-id="${thoughtId}"]`);
+            if (starEl) {
+                starEl.className = 'star mine';
+            }
+        }
+
+        function isThoughtMine(thoughtId) {
+            return myThoughtIds.has(thoughtId ? thoughtId.toString() : '');
+        }
 
         function markThoughtAsRead(thoughtId) {
             if (!thoughtId) return;
             readThoughtIds.add(thoughtId.toString());
             localStorage.setItem('midnight_read_thoughts', JSON.stringify([...readThoughtIds]));
             
-            // Update the star element visual immediately
             const starEl = document.querySelector(`.star[data-id="${thoughtId}"]`);
-            if (starEl) {
-                starEl.classList.remove('unread');
-                starEl.classList.add('read');
+            if (starEl && !isThoughtMine(thoughtId)) {
+                starEl.className = 'star read';
             }
         }
 
         function isThoughtRead(thoughtId) {
             return readThoughtIds.has(thoughtId ? thoughtId.toString() : '');
+        }
+
+        function getStarClass(thoughtId) {
+            if (isThoughtMine(thoughtId)) return 'mine';
+            if (isThoughtRead(thoughtId)) return 'read';
+            return 'unread';
         }
 
         /* ==========================================================================
@@ -760,7 +864,7 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            // Star size increased by 10%
+            // Star size +10%
             const baseSize = (s3 * 2.5 + 4.5) * 1.10;
             const size = Number(baseSize.toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
@@ -774,8 +878,17 @@
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
         }
 
+        function updateTotalThoughtsCount() {
+            const el = document.getElementById('totalThoughtsCount');
+            if (el) {
+                const count = thoughtsArr.length;
+                el.innerText = count === 1 ? '1 thought' : `${count} thoughts`;
+            }
+        }
+
         async function loadThoughts(isBackground = false) {
             if (!isBackground) renderStars();
+            updateTotalThoughtsCount();
 
             if (dbClient) {
                 try {
@@ -807,6 +920,7 @@
                             thoughtsArr = newThoughts;
                             saveThoughtsLocal();
                             renderStars();
+                            updateTotalThoughtsCount();
                         }
                     }
                 } catch(err) {
@@ -818,7 +932,7 @@
         function initRealtime() {
             if (!dbClient) return;
             try {
-                // 1. Live Thoughts sync
+                // 1. Live Thoughts sync channel
                 const thoughtsChannel = dbClient.channel('thoughts_live_channel');
                 thoughtsChannel
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'thoughts' }, () => {
@@ -826,7 +940,7 @@
                     })
                     .subscribe();
 
-                // 2. Live Presence / Active Users
+                // 2. Live Presence / Active Users channel
                 const presenceChannel = dbClient.channel('stargazers_presence', {
                     config: {
                         presence: {
@@ -905,7 +1019,6 @@
         });
         resizeCanvas();
 
-        // 3D Pointer & Touch Controls
         function onPointerDown(e) {
             if (e.target.closest('.star') || e.target.closest('.interface') || e.target.closest('.top-header') || e.target.closest('.modal')) {
                 return;
@@ -932,7 +1045,6 @@
                 targetPanX += deltaX * 0.25;
                 targetPanY += deltaY * 0.25;
 
-                // Clamp tilt to prevent disorientation
                 targetRotX = Math.max(-28, Math.min(28, targetRotX));
                 targetRotY = Math.max(-45, Math.min(45, targetRotY));
                 targetPanX = Math.max(-120, Math.min(120, targetPanX));
@@ -1026,10 +1138,8 @@
             thought.x = props.x;
             thought.y = props.y;
 
-            const isRead = isThoughtRead(thought.id);
             const star = document.createElement('div');
-            star.classList.add('star');
-            star.classList.add(isRead ? 'read' : 'unread');
+            star.className = 'star ' + getStarClass(thought.id);
             star.dataset.index = index;
             star.dataset.id = thought.id;
 
@@ -1049,7 +1159,7 @@
             });
 
             star.addEventListener('click', (e) => {
-                if (hasMoved) return; // Ignore accidental drags
+                if (hasMoved) return;
                 e.stopPropagation();
                 openThoughtModal(index);
             });
@@ -1058,7 +1168,6 @@
         }
 
         function animateCanvas() {
-            // Smooth 3D spring interpolation
             curRotX += (targetRotX - curRotX) * 0.08;
             curRotY += (targetRotY - curRotY) * 0.08;
             curPanX += (targetPanX - curPanX) * 0.08;
@@ -1076,7 +1185,6 @@
                 starElements.forEach(el => {
                     const idx = parseInt(el.dataset.index);
                     const rect = el.getBoundingClientRect();
-                    // Canvas space mapped relative to skyStage
                     starPoints.push({
                         index: idx,
                         x: (rect.left + rect.width / 2 - stageRect.left) + canvas.width * 0.166,
@@ -1139,6 +1247,7 @@
            ========================================================================== */
         const overlay = document.getElementById('overlay');
         const modalText = document.getElementById('modalText');
+        const modalBadgeContainer = document.getElementById('modalBadgeContainer');
         const warmthBtn = document.getElementById('warmthBtn');
         const warmthCount = document.getElementById('warmthCount');
         const resonateBtn = document.getElementById('resonateBtn');
@@ -1149,8 +1258,15 @@
             activeThoughtIndex = index;
             const thought = thoughtsArr[index];
 
-            // Turn star to yellow (Read state)
+            // Mark thought as read if not mine
             markThoughtAsRead(thought.id);
+
+            // Show badge if user's own star
+            if (isThoughtMine(thought.id)) {
+                modalBadgeContainer.innerHTML = `<span class="modal-badge mine">✨ Your Star in the Sky</span>`;
+            } else {
+                modalBadgeContainer.innerHTML = '';
+            }
 
             modalText.innerText = `"${thought.text}"`;
             warmthCount.innerText = thought.warmth || 0;
@@ -1226,7 +1342,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           5. Casting Interface (Dual-Storage Architecture)
+           5. Casting Interface (Cyan Star Assignment for Own Thoughts)
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1254,12 +1370,13 @@
                 y: coordY
             };
 
-            // User's own cast thought starts as Read (yellow)
-            markThoughtAsRead(tempId);
+            // Immediately mark as user's own star (Cyan)
+            markThoughtAsMine(tempId);
 
             thoughtsArr.push(newThought);
             saveThoughtsLocal();
             createStarElement(newThought, thoughtsArr.length - 1);
+            updateTotalThoughtsCount();
 
             audio.playCastShimmer();
             const sStar = new ShootingStar();
@@ -1295,7 +1412,7 @@
                     } else if (data && data.length > 0) {
                         const cloudId = data[0].id.toString();
                         newThought.id = cloudId;
-                        markThoughtAsRead(cloudId);
+                        markThoughtAsMine(cloudId);
                         saveThoughtsLocal();
                     }
                 } catch(err) {
