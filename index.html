@@ -617,6 +617,9 @@
         /* ==========================================================================
            2. Data Model & Storage
            ========================================================================== */
+        /* ==========================================================================
+           2. Data Model & Permanent Star Coordinates Engine
+           ========================================================================== */
         const starColors = [
             { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.9)' },
             { color: '#eef4ff', glow: 'rgba(215, 230, 255, 0.85)' },
@@ -625,23 +628,46 @@
             { color: '#fff5ea', glow: 'rgba(255, 245, 234, 0.85)' }
         ];
 
+        // Fixed initial default coordinates
         const defaultThoughts = [
-            "I wonder if you still look at the moon and think of me.",
-            "Everyone thinks I have my life figured out, but I'm completely lost.",
-            "I passed my final exam today. I wish there was someone to celebrate with.",
-            "I told her I was over it, but I still check her profile every night.",
-            "Be kind to yourself tonight. You are doing the best you can.",
-            "Left a high paying job to focus on my sanity. Scared but happy.",
-            "I missed my bus today, but I got to see a beautiful sunset because of it."
-        ].map((text, i) => ({
-            id: (i + 1).toString(),
-            text: text,
-            warmth: Math.floor(Math.random() * 60 + 25),
-            resonate: Math.floor(Math.random() * 40 + 15),
-            colorIndex: i % starColors.length,
-            x: Math.random() * 88 + 6,
-            y: Math.random() * 55 + 16
-        }));
+            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, colorIndex: 0, x: 22.5, y: 26.0 },
+            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, colorIndex: 1, x: 48.0, y: 21.5 },
+            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, colorIndex: 2, x: 75.5, y: 29.0 },
+            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, colorIndex: 3, x: 33.0, y: 49.0 },
+            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, colorIndex: 4, x: 62.5, y: 53.0 },
+            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, colorIndex: 1, x: 83.0, y: 44.5 },
+            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, colorIndex: 2, x: 15.5, y: 59.0 }
+        ];
+
+        // Deterministic property generator: guarantees a star's position, size, and glow NEVER change
+        function getDeterministicProps(thought, index) {
+            const seedStr = `${thought.id || index}_${thought.text || ''}`;
+            let hash = 0;
+            for (let i = 0; i < seedStr.length; i++) {
+                hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+                hash |= 0;
+            }
+            const s1 = Math.abs(hash % 10000) / 10000;
+            const s2 = Math.abs((hash * 37) % 10000) / 10000;
+            const s3 = Math.abs((hash * 79) % 10000) / 10000;
+            const s4 = Math.abs((hash * 131) % 10000) / 10000;
+
+            const x = (thought.x !== undefined && thought.x !== null && !isNaN(Number(thought.x)))
+                ? Number(thought.x) 
+                : Number((s1 * 84 + 8).toFixed(2));
+
+            const y = (thought.y !== undefined && thought.y !== null && !isNaN(Number(thought.y)))
+                ? Number(thought.y) 
+                : Number((s2 * 50 + 18).toFixed(2));
+
+            const size = Number((s3 * 2.5 + 4.5).toFixed(1)); // 4.5px - 7px
+            const delay = Number((-(s4 * 5)).toFixed(2));
+            const colorIndex = (thought.colorIndex !== undefined && thought.colorIndex !== null)
+                ? thought.colorIndex
+                : (thought.color_index !== undefined ? thought.color_index : Math.floor(s1 * starColors.length));
+
+            return { x, y, size, delay, colorIndex };
+        }
 
         let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
 
@@ -661,15 +687,18 @@
                     if (error) throw error;
 
                     if (data && data.length > 0) {
-                        thoughtsArr = data.map(item => ({
-                            id: item.id.toString(),
-                            text: item.text,
-                            warmth: item.warmth || 0,
-                            resonate: item.resonate || 0,
-                            colorIndex: item.color_index || 0,
-                            x: item.x || (Math.random() * 88 + 6),
-                            y: item.y || (Math.random() * 55 + 16)
-                        }));
+                        thoughtsArr = data.map((item, idx) => {
+                            const props = getDeterministicProps(item, idx);
+                            return {
+                                id: item.id.toString(),
+                                text: item.text,
+                                warmth: item.warmth || 0,
+                                resonate: item.resonate || 0,
+                                colorIndex: props.colorIndex,
+                                x: props.x,
+                                y: props.y
+                            };
+                        });
                     }
                 } catch(err) {
                     console.warn("Supabase fetch failed, falling back to local thoughts:", err.message);
@@ -687,14 +716,15 @@
                     const newItem = payload.new;
                     const exists = thoughtsArr.some(t => t.id === newItem.id.toString());
                     if (!exists) {
+                        const props = getDeterministicProps(newItem, thoughtsArr.length);
                         const newThought = {
                             id: newItem.id.toString(),
                             text: newItem.text,
                             warmth: newItem.warmth || 1,
                             resonate: newItem.resonate || 0,
-                            colorIndex: newItem.color_index || 0,
-                            x: newItem.x || (Math.random() * 88 + 6),
-                            y: newItem.y || (Math.random() * 55 + 16)
+                            colorIndex: props.colorIndex,
+                            x: props.x,
+                            y: props.y
                         };
                         thoughtsArr.push(newThought);
                         createStarElement(newThought, thoughtsArr.length - 1);
@@ -805,26 +835,23 @@
         }
 
         function createStarElement(thought, index) {
-            const palette = starColors[(thought.colorIndex !== undefined ? thought.colorIndex : index) % starColors.length];
+            const props = getDeterministicProps(thought, index);
+            thought.x = props.x;
+            thought.y = props.y;
+            thought.colorIndex = props.colorIndex;
+
+            const palette = starColors[props.colorIndex % starColors.length];
             const star = document.createElement('div');
             star.classList.add('star');
             star.dataset.index = index;
 
-            if (thought.x === undefined || thought.y === undefined) {
-                thought.x = Math.random() * 88 + 6;
-                thought.y = Math.random() * 55 + 16;
-            }
-
-            const size = Math.random() * 3 + 4.5;
-            const delay = Math.random() * -5;
-
-            star.style.left = `${thought.x}%`;
-            star.style.top = `${thought.y}%`;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
+            star.style.left = `${props.x}%`;
+            star.style.top = `${props.y}%`;
+            star.style.width = `${props.size}px`;
+            star.style.height = `${props.size}px`;
             star.style.backgroundColor = palette.color;
-            star.style.boxShadow = `0 0 ${size * 3.5}px ${palette.glow}, 0 0 ${size * 7}px ${palette.color}, 0 0 ${size * 12}px ${palette.glow}`;
-            star.style.animationDelay = `${delay}s`;
+            star.style.boxShadow = `0 0 ${props.size * 3.5}px ${palette.glow}, 0 0 ${props.size * 7}px ${palette.color}, 0 0 ${props.size * 12}px ${palette.glow}`;
+            star.style.animationDelay = `${props.delay}s`;
 
             star.addEventListener('mouseenter', () => {
                 hoveredStarIndex = index;
@@ -1015,8 +1042,8 @@
             if (!text) return;
 
             const colorIdx = Math.floor(Math.random() * starColors.length);
-            const coordX = Math.random() * 88 + 6;
-            const coordY = Math.random() * 55 + 16;
+            const coordX = Number((Math.random() * 84 + 8).toFixed(2));
+            const coordY = Number((Math.random() * 50 + 18).toFixed(2));
 
             let newThought = {
                 id: Date.now().toString(),
