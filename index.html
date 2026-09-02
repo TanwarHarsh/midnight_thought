@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
+    <!-- Supabase JS Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -453,20 +453,18 @@
 
     <script>
         /* ==========================================================================
-           SUPABASE CONFIGURATION (ENTER YOUR DETAILS HERE)
+           SUPABASE CONFIGURATION & CLIENT INITIALIZATION
            ========================================================================== */
-        const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co"; // <-- Line 458: Replace with your Supabase Project URL
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";          // <-- Line 459: Replace with your Supabase Anon Key
+        const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";
 
-        // Initialize Supabase client if valid credentials are provided
-        const isSupabaseConfigured = SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("YOUR_PROJECT_ID") && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY";
         let supabaseClient = null;
         try {
-            if (isSupabaseConfigured && window.supabase && typeof window.supabase.createClient === 'function') {
+            if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch(e) {
-            console.error("Failed to initialize Supabase:", e);
+            console.warn("Supabase initialization error:", e);
         }
 
         /* ==========================================================================
@@ -479,7 +477,6 @@
                 this.droneGain = null;
                 this.reverbGain = null;
                 this.oscillators = [];
-                // Pentatonic celestial scale frequencies (Hz)
                 this.chimeScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
             }
 
@@ -509,13 +506,11 @@
             startAmbient() {
                 if (!this.ctx) return;
                 
-                // Master ambient gain
                 this.droneGain = this.ctx.createGain();
                 this.droneGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
                 this.droneGain.gain.exponentialRampToValueAtTime(0.14, this.ctx.currentTime + 3);
                 this.droneGain.connect(this.ctx.destination);
 
-                // Warm ethereal binaural chord (D minor / F maj9 pad)
                 const baseFreqs = [73.42, 110.0, 146.83, 220.0, 261.63, 329.63];
                 this.oscillators = baseFreqs.map((freq, idx) => {
                     const osc = this.ctx.createOscillator();
@@ -622,9 +617,6 @@
         const audio = new CelestialAudio();
 
         /* ==========================================================================
-           2. Data Model & Storage
-           ========================================================================== */
-        /* ==========================================================================
            2. Data Model & Permanent Star Coordinates Engine
            ========================================================================== */
         const starColors = [
@@ -635,7 +627,6 @@
             { color: '#fff5ea', glow: 'rgba(255, 245, 234, 0.85)' }
         ];
 
-        // Fixed initial default coordinates
         const defaultThoughts = [
             { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, colorIndex: 0, x: 22.5, y: 26.0 },
             { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, colorIndex: 1, x: 48.0, y: 21.5 },
@@ -646,7 +637,6 @@
             { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, colorIndex: 2, x: 15.5, y: 59.0 }
         ];
 
-        // Deterministic property generator: guarantees a star's position, size, and glow NEVER change
         function getDeterministicProps(thought, index) {
             const seedStr = `${thought.id || index}_${thought.text || ''}`;
             let hash = 0;
@@ -667,7 +657,7 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            const size = Number((s3 * 2.5 + 4.5).toFixed(1)); // 4.5px - 7px
+            const size = Number((s3 * 2.5 + 4.5).toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
             const colorIndex = (thought.colorIndex !== undefined && thought.colorIndex !== null)
                 ? thought.colorIndex
@@ -682,7 +672,6 @@
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
         }
 
-        // Fetch thoughts from Supabase or fallback to LocalStorage
         async function loadThoughts() {
             if (supabaseClient) {
                 try {
@@ -714,43 +703,46 @@
             renderStars();
         }
 
-        // Setup real-time listener if Supabase is active
         function initRealtime() {
             if (!supabaseClient) return;
-            supabaseClient
-                .channel('public:thoughts')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
-                    const newItem = payload.new;
-                    const exists = thoughtsArr.some(t => t.id === newItem.id.toString());
-                    if (!exists) {
-                        const props = getDeterministicProps(newItem, thoughtsArr.length);
-                        const newThought = {
-                            id: newItem.id.toString(),
-                            text: newItem.text,
-                            warmth: newItem.warmth || 1,
-                            resonate: newItem.resonate || 0,
-                            colorIndex: props.colorIndex,
-                            x: props.x,
-                            y: props.y
-                        };
-                        thoughtsArr.push(newThought);
-                        createStarElement(newThought, thoughtsArr.length - 1);
-                        audio.playCastShimmer();
-                    }
-                })
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'thoughts' }, (payload) => {
-                    const updatedItem = payload.new;
-                    const idx = thoughtsArr.findIndex(t => t.id === updatedItem.id.toString());
-                    if (idx !== -1) {
-                        thoughtsArr[idx].warmth = updatedItem.warmth;
-                        thoughtsArr[idx].resonate = updatedItem.resonate;
-                        if (activeThoughtIndex === idx) {
-                            warmthCount.innerText = updatedItem.warmth;
-                            resonateCount.innerText = updatedItem.resonate;
+            try {
+                supabaseClient
+                    .channel('public:thoughts')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
+                        const newItem = payload.new;
+                        const exists = thoughtsArr.some(t => t.id === newItem.id.toString());
+                        if (!exists) {
+                            const props = getDeterministicProps(newItem, thoughtsArr.length);
+                            const newThought = {
+                                id: newItem.id.toString(),
+                                text: newItem.text,
+                                warmth: newItem.warmth || 1,
+                                resonate: newItem.resonate || 0,
+                                colorIndex: props.colorIndex,
+                                x: props.x,
+                                y: props.y
+                            };
+                            thoughtsArr.push(newThought);
+                            createStarElement(newThought, thoughtsArr.length - 1);
+                            audio.playCastShimmer();
                         }
-                    }
-                })
-                .subscribe();
+                    })
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'thoughts' }, (payload) => {
+                        const updatedItem = payload.new;
+                        const idx = thoughtsArr.findIndex(t => t.id === updatedItem.id.toString());
+                        if (idx !== -1) {
+                            thoughtsArr[idx].warmth = updatedItem.warmth;
+                            thoughtsArr[idx].resonate = updatedItem.resonate;
+                            if (activeThoughtIndex === idx) {
+                                warmthCount.innerText = updatedItem.warmth;
+                                resonateCount.innerText = updatedItem.resonate;
+                            }
+                        }
+                    })
+                    .subscribe();
+            } catch(e) {
+                console.warn("Realtime subscription notice:", e);
+            }
         }
 
         /* ==========================================================================
@@ -986,7 +978,6 @@
             }
         });
 
-        // Reaction Handler (Supports Supabase + LocalStorage)
         async function handleReaction(type) {
             if (activeThoughtIndex === null) return;
             const thought = thoughtsArr[activeThoughtIndex];
@@ -1017,7 +1008,6 @@
             sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
             saveThoughtsLocal();
 
-            // Sync with Supabase if configured
             if (supabaseClient && !isNaN(Number(thought.id))) {
                 try {
                     await supabaseClient
@@ -1062,7 +1052,6 @@
                 y: coordY
             };
 
-            // Save to Supabase if connected
             if (supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient
