@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Midnight Thought — Cast Your Thoughts Into the Night</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Midnight Thought (v4) — 3D Celestial Sky</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,10 @@
             --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
             --accent: #a6bcff;
             --accent-glow: rgba(166, 188, 255, 0.75);
-            --star-glow: rgba(200, 225, 255, 0.85);
+            --star-white: #ffffff;
+            --star-white-glow: rgba(255, 255, 255, 0.95);
+            --star-yellow: #ffd166;
+            --star-yellow-glow: rgba(255, 209, 102, 0.95);
         }
 
         * {
@@ -31,6 +34,36 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: #f0f6fc;
             user-select: none;
+            touch-action: none;
+        }
+
+        /* 3D Celestial Viewport */
+        #viewport-3d {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            perspective: 1200px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+            cursor: grab;
+            z-index: 1;
+        }
+
+        #viewport-3d:active {
+            cursor: grabbing;
+        }
+
+        #sky-stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            will-change: transform;
+            pointer-events: none;
         }
 
         #sky-canvas {
@@ -39,17 +72,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
             pointer-events: none;
         }
 
         #sky-container {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
+            pointer-events: auto;
         }
 
+        /* Top controls header */
         .top-header {
             position: absolute;
             top: 25px;
@@ -59,7 +94,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            z-index: 100;
+            pointer-events: auto;
         }
 
         .header-left {
@@ -146,47 +182,78 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
+        /* 3D Interactive Star in Sky (+10% Size Increase & Read/Unread Color System) */
         .star {
             position: absolute;
             border-radius: 50%;
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, opacity 0.4s ease;
-            animation: pulse-star 3s infinite ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, background-color 0.4s ease;
+            animation: pulse-star 3.2s infinite ease-in-out;
             will-change: transform, opacity;
+            pointer-events: auto;
         }
 
+        /* Hit-box extension for easy tapping on mobile/desktop */
         .star::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             transform: translate(-50%, -50%);
             border-radius: 50%;
+        }
+
+        /* UNREAD STARS: Pure Brilliant Celestial White */
+        .star.unread {
+            background-color: var(--star-white) !important;
+            box-shadow: 0 0 16px var(--star-white-glow), 0 0 32px var(--star-white), 0 0 48px var(--star-white-glow);
+        }
+
+        /* READ STARS: Warm Golden Amber Yellow */
+        .star.read {
+            background-color: var(--star-yellow) !important;
+            box-shadow: 0 0 16px var(--star-yellow-glow), 0 0 32px var(--star-yellow), 0 0 50px rgba(255, 183, 3, 0.8);
         }
 
         .star:hover {
             transform: scale(2.6) !important;
             z-index: 50 !important;
-            filter: brightness(1.5);
-            box-shadow: 0 0 25px #ffffff, 0 0 45px var(--accent) !important;
+            filter: brightness(1.6);
         }
 
         @keyframes pulse-star {
-            0%, 100% { opacity: 0.65; transform: scale(0.92); }
-            50% { opacity: 1; transform: scale(1.22); }
+            0%, 100% { opacity: 0.7; transform: scale(0.93); }
+            50% { opacity: 1; transform: scale(1.24); }
         }
 
+        /* 3D Navigation Guide Tip */
+        .hint-drag {
+            position: absolute;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(166, 188, 255, 0.55);
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 1s ease;
+        }
+
+        /* Casting Interface */
         .interface {
             position: absolute;
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
+            z-index: 100;
             width: 90%;
             max-width: 520px;
             text-align: center;
+            pointer-events: auto;
         }
 
         .input-box {
@@ -269,12 +336,13 @@
             color: #8da2c0;
         }
 
+        /* Modal Overlay */
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(1, 4, 9, 0.82);
             backdrop-filter: blur(10px);
-            z-index: 100;
+            z-index: 200;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -361,10 +429,6 @@
             transition: transform 0.3s ease;
         }
 
-        .reaction-btn:active .sparkle-icon {
-            transform: scale(1.4) rotate(15deg);
-        }
-
         .reaction-count {
             font-weight: 700;
             font-size: 0.85rem;
@@ -422,13 +486,20 @@
 </head>
 <body>
 
-    <canvas id="sky-canvas"></canvas>
-    <div id="sky-container"></div>
+    <!-- 3D Celestial Viewport for Pan / Tilt Rotation -->
+    <div id="viewport-3d">
+        <div id="sky-stage">
+            <canvas id="sky-canvas"></canvas>
+            <div id="sky-container"></div>
+        </div>
+    </div>
+
+    <div class="hint-drag" id="hintDrag">✦ Drag sky to explore in 3D ✦</div>
 
     <header class="top-header">
         <div class="header-left">
             <div class="header-title">The Midnight Thought</div>
-            <div class="active-users-badge" id="activeUsersBadge" title="Stargazers currently looking at the sky">
+            <div class="active-users-badge" id="activeUsersBadge" title="Live stargazers currently connected">
                 <span class="live-dot"></span>
                 <span id="activeUsersCount">1 online</span>
             </div>
@@ -481,6 +552,9 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        /* ==========================================================================
+           SUPABASE CONFIGURATION & CLIENT INITIALIZATION
+           ========================================================================== */
         const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";
 
@@ -493,6 +567,31 @@
             console.warn("Supabase init notice:", e);
         }
 
+        /* ==========================================================================
+           READ / UNREAD STARS TRACKING ENGINE
+           ========================================================================== */
+        let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
+
+        function markThoughtAsRead(thoughtId) {
+            if (!thoughtId) return;
+            readThoughtIds.add(thoughtId.toString());
+            localStorage.setItem('midnight_read_thoughts', JSON.stringify([...readThoughtIds]));
+            
+            // Update the star element visual immediately
+            const starEl = document.querySelector(`.star[data-id="${thoughtId}"]`);
+            if (starEl) {
+                starEl.classList.remove('unread');
+                starEl.classList.add('read');
+            }
+        }
+
+        function isThoughtRead(thoughtId) {
+            return readThoughtIds.has(thoughtId ? thoughtId.toString() : '');
+        }
+
+        /* ==========================================================================
+           1. Audio Synthesizer (Zero External Assets)
+           ========================================================================== */
         class CelestialAudio {
             constructor() {
                 this.ctx = null;
@@ -628,22 +727,17 @@
 
         const audio = new CelestialAudio();
 
-        const starColors = [
-            { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.9)' },
-            { color: '#eef4ff', glow: 'rgba(215, 230, 255, 0.85)' },
-            { color: '#ffe9a8', glow: 'rgba(255, 233, 168, 0.85)' },
-            { color: '#d0e0ff', glow: 'rgba(166, 188, 255, 0.85)' },
-            { color: '#fff5ea', glow: 'rgba(255, 245, 234, 0.85)' }
-        ];
-
+        /* ==========================================================================
+           2. Data Model & Coordinates (Star Size +10% Applied)
+           ========================================================================== */
         const defaultThoughts = [
-            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, colorIndex: 0, x: 22.5, y: 26.0 },
-            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, colorIndex: 1, x: 48.0, y: 21.5 },
-            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, colorIndex: 2, x: 75.5, y: 29.0 },
-            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, colorIndex: 3, x: 33.0, y: 49.0 },
-            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, colorIndex: 4, x: 62.5, y: 53.0 },
-            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, colorIndex: 1, x: 83.0, y: 44.5 },
-            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, colorIndex: 2, x: 15.5, y: 59.0 }
+            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, x: 22.5, y: 26.0 },
+            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, x: 48.0, y: 21.5 },
+            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, x: 75.5, y: 29.0 },
+            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, x: 33.0, y: 49.0 },
+            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, x: 62.5, y: 53.0 },
+            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, x: 83.0, y: 44.5 },
+            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, x: 15.5, y: 59.0 }
         ];
 
         function getDeterministicProps(thought, index) {
@@ -666,13 +760,12 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            const size = Number((s3 * 2.5 + 4.5).toFixed(1));
+            // Star size increased by 10%
+            const baseSize = (s3 * 2.5 + 4.5) * 1.10;
+            const size = Number(baseSize.toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
-            const colorIndex = (thought.colorIndex !== undefined && thought.colorIndex !== null)
-                ? thought.colorIndex
-                : (thought.color_index !== undefined ? thought.color_index : Math.floor(s1 * starColors.length));
 
-            return { x, y, size, delay, colorIndex };
+            return { x, y, size, delay };
         }
 
         let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
@@ -701,7 +794,7 @@
                                 text: item.text,
                                 warmth: item.warmth || 0,
                                 resonate: item.resonate || 0,
-                                colorIndex: props.colorIndex,
+                                color_index: item.color_index || 0,
                                 x: props.x,
                                 y: props.y
                             };
@@ -725,15 +818,15 @@
         function initRealtime() {
             if (!dbClient) return;
             try {
-                // 1. Live Thoughts sync channel
+                // 1. Live Thoughts sync
                 const thoughtsChannel = dbClient.channel('thoughts_live_channel');
                 thoughtsChannel
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'thoughts' }, (payload) => {
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'thoughts' }, () => {
                         loadThoughts(true);
                     })
                     .subscribe();
 
-                // 2. Live Presence / Active Users channel
+                // 2. Live Presence / Active Users
                 const presenceChannel = dbClient.channel('stargazers_presence', {
                     config: {
                         presence: {
@@ -770,24 +863,97 @@
             }, 5000);
         }
 
+        /* ==========================================================================
+           3. 3D Celestial Canvas & Dynamic 3D Camera Controls
+           ========================================================================== */
         const canvas = document.getElementById('sky-canvas');
         const ctx = canvas.getContext('2d');
         const skyContainer = document.getElementById('sky-container');
+        const skyStage = document.getElementById('sky-stage');
+        const viewport3D = document.getElementById('viewport-3d');
 
         let showConstellations = true;
         let hoveredStarIndex = null;
         let activeThoughtIndex = null;
         let shootingStars = [];
 
+        // 3D Camera Physics State
+        let targetRotX = 0;
+        let targetRotY = 0;
+        let targetPanX = 0;
+        let targetPanY = 0;
+        let curRotX = 0;
+        let curRotY = 0;
+        let curPanX = 0;
+        let curPanY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let hasMoved = false;
+
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth * 1.5;
+            canvas.height = window.innerHeight * 1.5;
+            canvas.style.width = '150%';
+            canvas.style.height = '150%';
+            canvas.style.left = '-25%';
+            canvas.style.top = '-25%';
         }
         window.addEventListener('resize', () => {
             resizeCanvas();
             renderStars();
         });
         resizeCanvas();
+
+        // 3D Pointer & Touch Controls
+        function onPointerDown(e) {
+            if (e.target.closest('.star') || e.target.closest('.interface') || e.target.closest('.top-header') || e.target.closest('.modal')) {
+                return;
+            }
+            isDragging = true;
+            hasMoved = false;
+            dragStartX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+            dragStartY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        }
+
+        function onPointerMove(e) {
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+
+            if (isDragging) {
+                const deltaX = clientX - dragStartX;
+                const deltaY = clientY - dragStartY;
+                if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+                    hasMoved = true;
+                }
+                targetRotY += deltaX * 0.045;
+                targetRotX -= deltaY * 0.045;
+
+                targetPanX += deltaX * 0.25;
+                targetPanY += deltaY * 0.25;
+
+                // Clamp tilt to prevent disorientation
+                targetRotX = Math.max(-28, Math.min(28, targetRotX));
+                targetRotY = Math.max(-45, Math.min(45, targetRotY));
+                targetPanX = Math.max(-120, Math.min(120, targetPanX));
+                targetPanY = Math.max(-80, Math.min(80, targetPanY));
+
+                dragStartX = clientX;
+                dragStartY = clientY;
+            }
+        }
+
+        function onPointerUp() {
+            isDragging = false;
+        }
+
+        viewport3D.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        viewport3D.addEventListener('touchstart', onPointerDown, { passive: true });
+        window.addEventListener('touchmove', onPointerMove, { passive: true });
+        window.addEventListener('touchend', onPointerUp);
 
         class ShootingStar {
             constructor() {
@@ -859,19 +1025,18 @@
             const props = getDeterministicProps(thought, index);
             thought.x = props.x;
             thought.y = props.y;
-            thought.colorIndex = props.colorIndex;
 
-            const palette = starColors[props.colorIndex % starColors.length];
+            const isRead = isThoughtRead(thought.id);
             const star = document.createElement('div');
             star.classList.add('star');
+            star.classList.add(isRead ? 'read' : 'unread');
             star.dataset.index = index;
+            star.dataset.id = thought.id;
 
             star.style.left = `${props.x}%`;
             star.style.top = `${props.y}%`;
             star.style.width = `${props.size}px`;
             star.style.height = `${props.size}px`;
-            star.style.backgroundColor = palette.color;
-            star.style.boxShadow = `0 0 ${props.size * 3.5}px ${palette.glow}, 0 0 ${props.size * 7}px ${palette.color}, 0 0 ${props.size * 12}px ${palette.glow}`;
             star.style.animationDelay = `${props.delay}s`;
 
             star.addEventListener('mouseenter', () => {
@@ -883,7 +1048,9 @@
                 hoveredStarIndex = null;
             });
 
-            star.addEventListener('click', () => {
+            star.addEventListener('click', (e) => {
+                if (hasMoved) return; // Ignore accidental drags
+                e.stopPropagation();
                 openThoughtModal(index);
             });
 
@@ -891,23 +1058,33 @@
         }
 
         function animateCanvas() {
+            // Smooth 3D spring interpolation
+            curRotX += (targetRotX - curRotX) * 0.08;
+            curRotY += (targetRotY - curRotY) * 0.08;
+            curPanX += (targetPanX - curPanX) * 0.08;
+            curPanY += (targetPanY - curPanY) * 0.08;
+
+            skyStage.style.transform = `translate3d(${curPanX}px, ${curPanY}px, 0) rotateX(${curRotX}deg) rotateY(${curRotY}deg)`;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (showConstellations) {
                 const starPoints = [];
                 const starElements = document.querySelectorAll('.star');
+                const stageRect = skyStage.getBoundingClientRect();
 
                 starElements.forEach(el => {
                     const idx = parseInt(el.dataset.index);
                     const rect = el.getBoundingClientRect();
+                    // Canvas space mapped relative to skyStage
                     starPoints.push({
                         index: idx,
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2
+                        x: (rect.left + rect.width / 2 - stageRect.left) + canvas.width * 0.166,
+                        y: (rect.top + rect.height / 2 - stageRect.top) + canvas.height * 0.166
                     });
                 });
 
-                const maxDistance = Math.min(canvas.width, canvas.height) * 0.28;
+                const maxDistance = Math.min(window.innerWidth, window.innerHeight) * 0.28;
 
                 for (let i = 0; i < starPoints.length; i++) {
                     for (let j = i + 1; j < starPoints.length; j++) {
@@ -957,6 +1134,9 @@
         }
         requestAnimationFrame(animateCanvas);
 
+        /* ==========================================================================
+           4. Modal & Reactions Handling
+           ========================================================================== */
         const overlay = document.getElementById('overlay');
         const modalText = document.getElementById('modalText');
         const warmthBtn = document.getElementById('warmthBtn');
@@ -968,6 +1148,9 @@
         function openThoughtModal(index) {
             activeThoughtIndex = index;
             const thought = thoughtsArr[index];
+
+            // Turn star to yellow (Read state)
+            markThoughtAsRead(thought.id);
 
             modalText.innerText = `"${thought.text}"`;
             warmthCount.innerText = thought.warmth || 0;
@@ -1042,6 +1225,9 @@
         warmthBtn.addEventListener('click', () => handleReaction('warmth'));
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
+        /* ==========================================================================
+           5. Casting Interface (Dual-Storage Architecture)
+           ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
         const charCount = document.getElementById('charCount');
@@ -1054,7 +1240,6 @@
             const text = thoughtInput.value.trim();
             if (!text) return;
 
-            const colorIdx = Math.floor(Math.random() * starColors.length);
             const coordX = Number((Math.random() * 84 + 8).toFixed(2));
             const coordY = Number((Math.random() * 50 + 18).toFixed(2));
 
@@ -1064,10 +1249,13 @@
                 text: text,
                 warmth: 1,
                 resonate: 0,
-                colorIndex: colorIdx,
+                color_index: 0,
                 x: coordX,
                 y: coordY
             };
+
+            // User's own cast thought starts as Read (yellow)
+            markThoughtAsRead(tempId);
 
             thoughtsArr.push(newThought);
             saveThoughtsLocal();
@@ -1095,7 +1283,7 @@
                                 text: text,
                                 warmth: 1,
                                 resonate: 0,
-                                color_index: colorIdx,
+                                color_index: 0,
                                 x: coordX,
                                 y: coordY
                             }
@@ -1103,18 +1291,11 @@
                         .select();
 
                     if (error) {
-                        const retry = await dbClient
-                            .from('thoughts')
-                            .insert([{ text: text, warmth: 1, resonate: 0 }])
-                            .select();
-                        data = retry.data;
-                        error = retry.error;
-                    }
-
-                    if (error) {
                         console.error("Supabase cloud insert notice:", error.message);
                     } else if (data && data.length > 0) {
-                        newThought.id = data[0].id.toString();
+                        const cloudId = data[0].id.toString();
+                        newThought.id = cloudId;
+                        markThoughtAsRead(cloudId);
                         saveThoughtsLocal();
                     }
                 } catch(err) {
@@ -1130,6 +1311,9 @@
             }
         });
 
+        /* ==========================================================================
+           6. Controls
+           ========================================================================== */
         const constellationToggle = document.getElementById('constellationToggle');
         constellationToggle.addEventListener('click', () => {
             showConstellations = !showConstellations;
