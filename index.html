@@ -7,11 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client Library -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            /* 50% more luminous midnight radiance */
             --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
             --accent: #a6bcff;
             --accent-glow: rgba(166, 188, 255, 0.75);
@@ -35,7 +34,6 @@
             user-select: none;
         }
 
-        /* Ambient background canvas for constellation lines & shooting stars */
         #sky-canvas {
             position: absolute;
             top: 0;
@@ -53,7 +51,6 @@
             z-index: 2;
         }
 
-        /* Top controls header */
         .top-header {
             position: absolute;
             top: 25px;
@@ -113,7 +110,6 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* Interactive Star in Sky */
         .star {
             position: absolute;
             border-radius: 50%;
@@ -146,7 +142,6 @@
             50% { opacity: 1; transform: scale(1.22); }
         }
 
-        /* Casting Interface Container */
         .interface {
             position: absolute;
             bottom: 40px;
@@ -231,7 +226,6 @@
             color: #8da2c0;
         }
 
-        /* Thought Modal Overlay */
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -281,7 +275,6 @@
             text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
         }
 
-        /* Reaction Bar inside Modal */
         .modal-reactions {
             display: flex;
             align-items: center;
@@ -351,7 +344,6 @@
             text-shadow: 0 0 10px rgba(166, 188, 255, 0.6);
         }
 
-        /* Subtle Audio helper notification */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -387,17 +379,11 @@
 </head>
 <body>
 
-    <!-- Dynamic 2D Canvas for Shooting Stars and Constellation Lines -->
     <canvas id="sky-canvas"></canvas>
-
-    <!-- Interactive HTML Star Layer -->
     <div id="sky-container"></div>
 
-    <!-- Top Navigation Header -->
     <header class="top-header">
         <div class="header-title">The Midnight Thought</div>
-
-        <!-- Controls: Audio & Constellations -->
         <div class="header-actions">
             <button class="icon-btn active" id="constellationToggle" title="Toggle Constellation Lines">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -414,11 +400,9 @@
         </div>
     </header>
 
-    <!-- Casting Interface -->
     <div class="interface">
         <div class="input-box">
             <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the night..."></textarea>
-            
             <div class="cast-actions">
                 <span class="char-count" id="charCount">0/250</span>
                 <button class="cast-btn" id="castBtn">Cast Into the Night</button>
@@ -426,11 +410,9 @@
         </div>
     </div>
 
-    <!-- Reading Overlay Modal -->
     <div class="overlay" id="overlay">
         <div class="modal">
             <p class="modal-text" id="modalText">A passing cloud...</p>
-
             <div class="modal-reactions">
                 <button class="reaction-btn" id="warmthBtn" title="Send Warmth to this thought">
                     <span class="sparkle-icon">✨</span>
@@ -443,28 +425,26 @@
                     <span class="reaction-count" id="resonateCount">0</span>
                 </button>
             </div>
-
             <span class="close-btn" id="closeBtn">Return to the Stars (Esc)</span>
         </div>
     </div>
 
-    <!-- Subtle Toast Notification -->
     <div class="toast" id="toast"></div>
 
     <script>
         /* ==========================================================================
-           SUPABASE CONFIGURATION & CLIENT INITIALIZATION
+           SUPABASE CONFIGURATION
            ========================================================================== */
         const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";
 
-        let supabaseClient = null;
+        let dbClient = null;
         try {
             if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch(e) {
-            console.warn("Supabase initialization error:", e);
+            console.warn("Supabase init notice:", e);
         }
 
         /* ==========================================================================
@@ -475,7 +455,6 @@
                 this.ctx = null;
                 this.isPlaying = false;
                 this.droneGain = null;
-                this.reverbGain = null;
                 this.oscillators = [];
                 this.chimeScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
             }
@@ -505,7 +484,6 @@
 
             startAmbient() {
                 if (!this.ctx) return;
-                
                 this.droneGain = this.ctx.createGain();
                 this.droneGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
                 this.droneGain.gain.exponentialRampToValueAtTime(0.14, this.ctx.currentTime + 3);
@@ -515,7 +493,6 @@
                 this.oscillators = baseFreqs.map((freq, idx) => {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    
                     osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
                     osc.frequency.setValueAtTime(freq + (Math.random() * 0.4 - 0.2), this.ctx.currentTime);
 
@@ -524,7 +501,6 @@
                     filter.frequency.setValueAtTime(450 + idx * 60, this.ctx.currentTime);
 
                     gain.gain.setValueAtTime(0.18 / baseFreqs.length, this.ctx.currentTime);
-
                     osc.connect(filter);
                     filter.connect(gain);
                     gain.connect(this.droneGain);
@@ -553,16 +529,13 @@
 
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, now);
-
                     gain.gain.setValueAtTime(0.22, now);
                     gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
 
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
-
                     osc.start(now);
                     osc.stop(now + 2.6);
                 } catch(e) {}
@@ -579,13 +552,11 @@
 
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-
                         gain.gain.setValueAtTime(0.14, now + idx * 0.08);
                         gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 1.9);
 
                         osc.connect(gain);
                         gain.connect(this.ctx.destination);
-
                         osc.start(now + idx * 0.08);
                         osc.stop(now + idx * 0.08 + 2.0);
                     });
@@ -598,11 +569,9 @@
                     const now = this.ctx.currentTime;
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(1500, now);
                     osc.frequency.exponentialRampToValueAtTime(450, now + 1.2);
-
                     gain.gain.setValueAtTime(0.06, now);
                     gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
 
@@ -673,9 +642,9 @@
         }
 
         async function loadThoughts() {
-            if (supabaseClient) {
+            if (dbClient) {
                 try {
-                    const { data, error } = await supabaseClient
+                    const { data, error } = await dbClient
                         .from('thoughts')
                         .select('*')
                         .order('created_at', { ascending: true });
@@ -697,16 +666,16 @@
                         });
                     }
                 } catch(err) {
-                    console.warn("Supabase fetch failed, falling back to local thoughts:", err.message);
+                    console.warn("Supabase fetch notice:", err.message);
                 }
             }
             renderStars();
         }
 
         function initRealtime() {
-            if (!supabaseClient) return;
+            if (!dbClient) return;
             try {
-                supabaseClient
+                dbClient
                     .channel('public:thoughts')
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
                         const newItem = payload.new;
@@ -1008,14 +977,14 @@
             sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
             saveThoughtsLocal();
 
-            if (supabaseClient && !isNaN(Number(thought.id))) {
+            if (dbClient && !isNaN(Number(thought.id))) {
                 try {
-                    await supabaseClient
+                    await dbClient
                         .from('thoughts')
                         .update({ [type]: thought[type] })
                         .eq('id', Number(thought.id));
                 } catch(e) {
-                    console.error("Failed to update reaction on Supabase:", e);
+                    console.error("Supabase reaction update notice:", e);
                 }
             }
         }
@@ -1024,7 +993,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           5. Casting Interface (Supports Supabase + LocalStorage)
+           5. Casting Interface
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1052,9 +1021,9 @@
                 y: coordY
             };
 
-            if (supabaseClient) {
+            if (dbClient) {
                 try {
-                    const { data, error } = await supabaseClient
+                    const { data, error } = await dbClient
                         .from('thoughts')
                         .insert([
                             {
@@ -1069,14 +1038,14 @@
                         .select();
 
                     if (error) {
-                        console.error("Supabase insert error details:", error);
+                        console.error("Supabase insert details:", error);
                         throw error;
                     }
                     if (data && data.length > 0) {
                         newThought.id = data[0].id.toString();
                     }
                 } catch(err) {
-                    console.warn("Supabase cast failed, falling back to local:", err.message);
+                    console.warn("Supabase cast notice, saving locally:", err.message);
                 }
             }
 
