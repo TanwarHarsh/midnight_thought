@@ -667,13 +667,16 @@
         let thoughtsArr = [...cachedThoughts];
 
         function saveThoughtsLocal() {
+        // 1. Initial state
+        let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
+
+        function saveThoughtsLocal() {
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
         }
 
-        // 2. Fetch and merge Supabase thoughts without ever losing local creations
-        async function loadThoughts() {
-            // Instant render from cache
-            renderStars();
+        // 2. Fetch shared cloud database (Syncs Laptop & Phone identically)
+        async function loadThoughts(isBackground = false) {
+            if (!isBackground) renderStars();
 
             if (dbClient) {
                 try {
@@ -685,10 +688,9 @@
                     if (error) {
                         console.warn("Supabase fetch notice:", error.message);
                     } else if (data && data.length > 0) {
-                        const dbMap = new Map();
-                        data.forEach((item, idx) => {
+                        const newThoughts = data.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
-                            dbMap.set(item.text.trim(), {
+                            return {
                                 id: item.id.toString(),
                                 text: item.text,
                                 warmth: item.warmth || 0,
@@ -696,23 +698,21 @@
                                 colorIndex: props.colorIndex,
                                 x: props.x,
                                 y: props.y
-                            });
+                            };
                         });
 
-                        // Preserve local thoughts that are not in DB yet
-                        const mergedList = Array.from(dbMap.values());
-                        thoughtsArr.forEach(localItem => {
-                            if (!dbMap.has(localItem.text.trim())) {
-                                mergedList.push(localItem);
-                            }
-                        });
+                        // Check if new items arrived
+                        const hasChanges = newThoughts.length !== thoughtsArr.length || 
+                                           newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate);
 
-                        thoughtsArr = mergedList;
-                        saveThoughtsLocal();
-                        renderStars();
+                        if (hasChanges) {
+                            thoughtsArr = newThoughts;
+                            saveThoughtsLocal();
+                            renderStars();
+                        }
                     }
                 } catch(err) {
-                    console.warn("Supabase load error, cached thoughts active:", err.message);
+                    console.warn("Supabase sync notice:", err.message);
                 }
             }
         }
@@ -720,45 +720,24 @@
         function initRealtime() {
             if (!dbClient) return;
             try {
-                dbClient
-                    .channel('public:thoughts')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
-                        const newItem = payload.new;
-                        const exists = thoughtsArr.some(t => t.text.trim() === newItem.text.trim() || t.id === newItem.id.toString());
-                        if (!exists) {
-                            const props = getDeterministicProps(newItem, thoughtsArr.length);
-                            const newThought = {
-                                id: newItem.id.toString(),
-                                text: newItem.text,
-                                warmth: newItem.warmth || 1,
-                                resonate: newItem.resonate || 0,
-                                colorIndex: props.colorIndex,
-                                x: props.x,
-                                y: props.y
-                            };
-                            thoughtsArr.push(newThought);
-                            saveThoughtsLocal();
-                            createStarElement(newThought, thoughtsArr.length - 1);
-                            audio.playCastShimmer();
-                        }
+                const channel = dbClient.channel('thoughts_live_feed');
+                
+                channel
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'thoughts' }, (payload) => {
+                        console.log("Realtime event received:", payload.eventType);
+                        loadThoughts(true);
                     })
-                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'thoughts' }, (payload) => {
-                        const updatedItem = payload.new;
-                        const idx = thoughtsArr.findIndex(t => t.id === updatedItem.id.toString());
-                        if (idx !== -1) {
-                            thoughtsArr[idx].warmth = updatedItem.warmth;
-                            thoughtsArr[idx].resonate = updatedItem.resonate;
-                            saveThoughtsLocal();
-                            if (activeThoughtIndex === idx) {
-                                warmthCount.innerText = updatedItem.warmth;
-                                resonateCount.innerText = updatedItem.resonate;
-                            }
-                        }
-                    })
-                    .subscribe();
+                    .subscribe((status) => {
+                        console.log("Supabase realtime channel status:", status);
+                    });
             } catch(e) {
                 console.warn("Realtime subscription notice:", e);
             }
+
+            // Fallback: Automatic Background Sync every 5 seconds across all devices
+            setInterval(() => {
+                loadThoughts(true);
+            }, 5000);
         }
 
         /* ==========================================================================
