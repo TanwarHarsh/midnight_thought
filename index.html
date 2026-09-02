@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v5) — 3D Celestial Sky</title>
+    <title>The Midnight Thought (v6) — 3D Celestial Sky</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -409,7 +409,7 @@
         .modal {
             background: rgba(15, 32, 56, 0.92);
             border: 1px solid rgba(166, 188, 255, 0.35);
-            padding: 42px 36px 32px;
+            padding: 40px 36px 30px;
             border-radius: 26px;
             max-width: 490px;
             width: 88%;
@@ -426,7 +426,7 @@
 
         .modal-badge {
             display: inline-block;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             font-size: 0.74rem;
             letter-spacing: 1.5px;
             text-transform: uppercase;
@@ -446,7 +446,7 @@
             font-family: 'Cinzel', Georgia, serif;
             font-size: 1.24rem;
             line-height: 1.75;
-            margin-bottom: 32px;
+            margin-bottom: 18px;
             color: #ffffff;
             white-space: pre-wrap;
             font-weight: 500;
@@ -454,12 +454,30 @@
             text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
         }
 
+        /* Message Timestamp Styling */
+        .modal-timestamp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: #a6bcff;
+            opacity: 0.85;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            font-style: italic;
+        }
+
+        .modal-timestamp svg {
+            opacity: 0.75;
+        }
+
         .modal-reactions {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 14px;
-            margin-bottom: 26px;
+            margin-bottom: 24px;
         }
 
         .reaction-btn {
@@ -614,6 +632,16 @@
         <div class="modal">
             <div id="modalBadgeContainer"></div>
             <p class="modal-text" id="modalText">A passing cloud...</p>
+            
+            <!-- Timestamp of the Thought -->
+            <div class="modal-timestamp" id="modalTimestamp">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span id="modalTimeText">Just now</span>
+            </div>
+
             <div class="modal-reactions">
                 <button class="reaction-btn" id="warmthBtn" title="Send Warmth to this thought">
                     <span class="sparkle-icon">✨</span>
@@ -691,6 +719,43 @@
             if (isThoughtMine(thoughtId)) return 'mine';
             if (isThoughtRead(thoughtId)) return 'read';
             return 'unread';
+        }
+
+        /* ==========================================================================
+           TIMESTAMP FORMATTER HELPER
+           ========================================================================== */
+        function formatThoughtTime(isoStr) {
+            if (!isoStr) return "In the quiet hours of night";
+            try {
+                const date = new Date(isoStr);
+                if (isNaN(date.getTime())) return "In the quiet hours of night";
+
+                const now = new Date();
+                const diffMs = now.getTime() - date.getTime();
+                const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
+
+                let relative = "";
+                if (diffMins < 1) {
+                    relative = "Cast just now";
+                } else if (diffMins < 60) {
+                    relative = `Cast ${diffMins} min${diffMins === 1 ? '' : 's'} ago`;
+                } else if (diffHours < 24) {
+                    relative = `Cast ${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+                } else if (diffDays === 1) {
+                    relative = "Cast yesterday";
+                } else {
+                    relative = `Cast ${diffDays} days ago`;
+                }
+
+                const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+                return `${relative} • ${timeStr}, ${dateStr}`;
+            } catch(e) {
+                return "In the quiet hours of night";
+            }
         }
 
         /* ==========================================================================
@@ -832,16 +897,17 @@
         const audio = new CelestialAudio();
 
         /* ==========================================================================
-           2. Data Model & Coordinates (Star Size +10% Applied)
+           2. Data Model & Coordinates (Star Size +10% & Timestamps)
            ========================================================================== */
+        const nowMs = Date.now();
         const defaultThoughts = [
-            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, x: 22.5, y: 26.0 },
-            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, x: 48.0, y: 21.5 },
-            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, x: 75.5, y: 29.0 },
-            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, x: 33.0, y: 49.0 },
-            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, x: 62.5, y: 53.0 },
-            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, x: 83.0, y: 44.5 },
-            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, x: 15.5, y: 59.0 }
+            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, x: 22.5, y: 26.0, created_at: new Date(nowMs - 3600000 * 3).toISOString() },
+            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, x: 48.0, y: 21.5, created_at: new Date(nowMs - 3600000 * 7).toISOString() },
+            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, x: 75.5, y: 29.0, created_at: new Date(nowMs - 3600000 * 12).toISOString() },
+            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, x: 33.0, y: 49.0, created_at: new Date(nowMs - 3600000 * 18).toISOString() },
+            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, x: 62.5, y: 53.0, created_at: new Date(nowMs - 3600000 * 26).toISOString() },
+            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, x: 83.0, y: 44.5, created_at: new Date(nowMs - 3600000 * 34).toISOString() },
+            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, x: 15.5, y: 59.0, created_at: new Date(nowMs - 3600000 * 48).toISOString() }
         ];
 
         function getDeterministicProps(thought, index) {
@@ -908,6 +974,7 @@
                                 warmth: item.warmth || 0,
                                 resonate: item.resonate || 0,
                                 color_index: item.color_index || 0,
+                                created_at: item.created_at || new Date().toISOString(),
                                 x: props.x,
                                 y: props.y
                             };
@@ -1248,6 +1315,7 @@
         const overlay = document.getElementById('overlay');
         const modalText = document.getElementById('modalText');
         const modalBadgeContainer = document.getElementById('modalBadgeContainer');
+        const modalTimeText = document.getElementById('modalTimeText');
         const warmthBtn = document.getElementById('warmthBtn');
         const warmthCount = document.getElementById('warmthCount');
         const resonateBtn = document.getElementById('resonateBtn');
@@ -1258,10 +1326,8 @@
             activeThoughtIndex = index;
             const thought = thoughtsArr[index];
 
-            // Mark thought as read if not mine
             markThoughtAsRead(thought.id);
 
-            // Show badge if user's own star
             if (isThoughtMine(thought.id)) {
                 modalBadgeContainer.innerHTML = `<span class="modal-badge mine">✨ Your Star in the Sky</span>`;
             } else {
@@ -1269,6 +1335,7 @@
             }
 
             modalText.innerText = `"${thought.text}"`;
+            modalTimeText.innerText = formatThoughtTime(thought.created_at);
             warmthCount.innerText = thought.warmth || 0;
             resonateCount.innerText = thought.resonate || 0;
 
@@ -1342,7 +1409,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           5. Casting Interface (Cyan Star Assignment for Own Thoughts)
+           5. Casting Interface (Automatic Timestamp Assignment)
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1360,17 +1427,19 @@
             const coordY = Number((Math.random() * 50 + 18).toFixed(2));
 
             const tempId = "local_" + Date.now().toString();
+            const nowIso = new Date().toISOString();
+
             let newThought = {
                 id: tempId,
                 text: text,
                 warmth: 1,
                 resonate: 0,
                 color_index: 0,
+                created_at: nowIso,
                 x: coordX,
                 y: coordY
             };
 
-            // Immediately mark as user's own star (Cyan)
             markThoughtAsMine(tempId);
 
             thoughtsArr.push(newThought);
@@ -1412,6 +1481,9 @@
                     } else if (data && data.length > 0) {
                         const cloudId = data[0].id.toString();
                         newThought.id = cloudId;
+                        if (data[0].created_at) {
+                            newThought.created_at = data[0].created_at;
+                        }
                         markThoughtAsMine(cloudId);
                         saveThoughtsLocal();
                     }
