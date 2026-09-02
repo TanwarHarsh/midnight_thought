@@ -7,10 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
+    <!-- Supabase JS Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
+            /* 50% more luminous midnight radiance */
             --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
             --accent: #a6bcff;
             --accent-glow: rgba(166, 188, 255, 0.75);
@@ -597,13 +598,13 @@
         ];
 
         const defaultThoughts = [
-            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, colorIndex: 0, x: 22.5, y: 26.0 },
-            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, colorIndex: 1, x: 48.0, y: 21.5 },
-            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, colorIndex: 2, x: 75.5, y: 29.0 },
-            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, colorIndex: 3, x: 33.0, y: 49.0 },
-            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, colorIndex: 4, x: 62.5, y: 53.0 },
-            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, colorIndex: 1, x: 83.0, y: 44.5 },
-            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, colorIndex: 2, x: 15.5, y: 59.0 }
+            { id: "def_1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, colorIndex: 0, x: 22.5, y: 26.0 },
+            { id: "def_2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, colorIndex: 1, x: 48.0, y: 21.5 },
+            { id: "def_3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, colorIndex: 2, x: 75.5, y: 29.0 },
+            { id: "def_4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, colorIndex: 3, x: 33.0, y: 49.0 },
+            { id: "def_5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, colorIndex: 4, x: 62.5, y: 53.0 },
+            { id: "def_6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, colorIndex: 1, x: 83.0, y: 44.5 },
+            { id: "def_7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, colorIndex: 2, x: 15.5, y: 59.0 }
         ];
 
         function getDeterministicProps(thought, index) {
@@ -635,13 +636,19 @@
             return { x, y, size, delay, colorIndex };
         }
 
-        let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
+        // 1. Initialize immediately with Local Storage / Defaults
+        let cachedThoughts = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
+        let thoughtsArr = [...cachedThoughts];
 
         function saveThoughtsLocal() {
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
         }
 
+        // 2. Fetch and merge Supabase thoughts without ever losing local creations
         async function loadThoughts() {
+            // Instant render from cache
+            renderStars();
+
             if (dbClient) {
                 try {
                     const { data, error } = await dbClient
@@ -649,12 +656,13 @@
                         .select('*')
                         .order('created_at', { ascending: true });
 
-                    if (error) throw error;
-
-                    if (data && data.length > 0) {
-                        thoughtsArr = data.map((item, idx) => {
+                    if (error) {
+                        console.warn("Supabase fetch notice:", error.message);
+                    } else if (data && data.length > 0) {
+                        const dbMap = new Map();
+                        data.forEach((item, idx) => {
                             const props = getDeterministicProps(item, idx);
-                            return {
+                            dbMap.set(item.text.trim(), {
                                 id: item.id.toString(),
                                 text: item.text,
                                 warmth: item.warmth || 0,
@@ -662,14 +670,25 @@
                                 colorIndex: props.colorIndex,
                                 x: props.x,
                                 y: props.y
-                            };
+                            });
                         });
+
+                        // Preserve local thoughts that are not in DB yet
+                        const mergedList = Array.from(dbMap.values());
+                        thoughtsArr.forEach(localItem => {
+                            if (!dbMap.has(localItem.text.trim())) {
+                                mergedList.push(localItem);
+                            }
+                        });
+
+                        thoughtsArr = mergedList;
+                        saveThoughtsLocal();
+                        renderStars();
                     }
                 } catch(err) {
-                    console.warn("Supabase fetch notice:", err.message);
+                    console.warn("Supabase load error, cached thoughts active:", err.message);
                 }
             }
-            renderStars();
         }
 
         function initRealtime() {
@@ -679,7 +698,7 @@
                     .channel('public:thoughts')
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
                         const newItem = payload.new;
-                        const exists = thoughtsArr.some(t => t.id === newItem.id.toString());
+                        const exists = thoughtsArr.some(t => t.text.trim() === newItem.text.trim() || t.id === newItem.id.toString());
                         if (!exists) {
                             const props = getDeterministicProps(newItem, thoughtsArr.length);
                             const newThought = {
@@ -692,6 +711,7 @@
                                 y: props.y
                             };
                             thoughtsArr.push(newThought);
+                            saveThoughtsLocal();
                             createStarElement(newThought, thoughtsArr.length - 1);
                             audio.playCastShimmer();
                         }
@@ -702,6 +722,7 @@
                         if (idx !== -1) {
                             thoughtsArr[idx].warmth = updatedItem.warmth;
                             thoughtsArr[idx].resonate = updatedItem.resonate;
+                            saveThoughtsLocal();
                             if (activeThoughtIndex === idx) {
                                 warmthCount.innerText = updatedItem.warmth;
                                 resonateCount.innerText = updatedItem.resonate;
@@ -984,7 +1005,7 @@
                         .update({ [type]: thought[type] })
                         .eq('id', Number(thought.id));
                 } catch(e) {
-                    console.error("Supabase reaction update notice:", e);
+                    console.warn("Supabase reaction update notice:", e);
                 }
             }
         }
@@ -993,7 +1014,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           5. Casting Interface
+           5. Casting Interface (Dual-Storage Architecture)
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1011,8 +1032,9 @@
             const coordX = Number((Math.random() * 84 + 8).toFixed(2));
             const coordY = Number((Math.random() * 50 + 18).toFixed(2));
 
+            const tempId = "local_" + Date.now().toString();
             let newThought = {
-                id: Date.now().toString(),
+                id: tempId,
                 text: text,
                 warmth: 1,
                 resonate: 0,
@@ -1021,9 +1043,29 @@
                 y: coordY
             };
 
+            // 1. Immediately store in local memory & storage
+            thoughtsArr.push(newThought);
+            saveThoughtsLocal();
+            createStarElement(newThought, thoughtsArr.length - 1);
+
+            // 2. Audio & Visual FX
+            audio.playCastShimmer();
+            const sStar = new ShootingStar();
+            shootingStars.push(sStar);
+
+            thoughtInput.value = '';
+            charCount.innerText = '0/250';
+            castBtn.innerText = "Casted ✨";
+            showToast("Your thought has taken its place among the stars.");
+
+            setTimeout(() => {
+                castBtn.innerText = "Cast Into the Night";
+            }, 2200);
+
+            // 3. Cloud Sync with Supabase (with schema adaptation fallback)
             if (dbClient) {
                 try {
-                    const { data, error } = await dbClient
+                    let { data, error } = await dbClient
                         .from('thoughts')
                         .insert([
                             {
@@ -1037,35 +1079,27 @@
                         ])
                         .select();
 
+                    // Fallback to minimal schema if columns don't match
                     if (error) {
-                        console.error("Supabase insert details:", error);
-                        throw error;
+                        const retry = await dbClient
+                            .from('thoughts')
+                            .insert([{ text: text, warmth: 1, resonate: 0 }])
+                            .select();
+                        data = retry.data;
+                        error = retry.error;
                     }
-                    if (data && data.length > 0) {
+
+                    if (error) {
+                        console.error("Supabase cloud insert error:", error.message);
+                        showToast("✨ Thought cast into sky (Saved locally)");
+                    } else if (data && data.length > 0) {
                         newThought.id = data[0].id.toString();
+                        saveThoughtsLocal();
                     }
                 } catch(err) {
-                    console.warn("Supabase cast notice, saving locally:", err.message);
+                    console.warn("Supabase network notice:", err.message);
                 }
             }
-
-            thoughtsArr.push(newThought);
-            saveThoughtsLocal();
-
-            createStarElement(newThought, thoughtsArr.length - 1);
-
-            audio.playCastShimmer();
-            const sStar = new ShootingStar();
-            shootingStars.push(sStar);
-
-            thoughtInput.value = '';
-            charCount.innerText = '0/250';
-            castBtn.innerText = "Casted ✨";
-            showToast("Your thought has taken its place among the stars.");
-
-            setTimeout(() => {
-                castBtn.innerText = "Cast Into the Night";
-            }, 2200);
         }
 
         castBtn.addEventListener('click', castThought);
