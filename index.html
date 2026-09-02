@@ -277,7 +277,7 @@
         }
 
         .modal-text {
-            font-family: 'Cinzel', serif;
+            font-family: 'Cinzel', Georgia, serif;
             font-size: 1.24rem;
             line-height: 1.75;
             margin-bottom: 32px;
@@ -662,12 +662,7 @@
             return { x, y, size, delay, colorIndex };
         }
 
-        // 1. Initialize immediately with Local Storage / Defaults
-        let cachedThoughts = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
-        let thoughtsArr = [...cachedThoughts];
-
-        function saveThoughtsLocal() {
-        // 1. Initial state
+        // 1. Initial State
         let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
 
         function saveThoughtsLocal() {
@@ -687,7 +682,7 @@
 
                     if (error) {
                         console.warn("Supabase fetch notice:", error.message);
-                    } else if (data && data.length > 0) {
+                    } else if (Array.isArray(data)) {
                         const newThoughts = data.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
                             return {
@@ -701,7 +696,7 @@
                             };
                         });
 
-                        // Check if new items arrived
+                        // Detect changes or empty/truncated table
                         const hasChanges = newThoughts.length !== thoughtsArr.length || 
                                            newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate);
 
