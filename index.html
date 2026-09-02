@@ -460,7 +460,14 @@
 
         // Initialize Supabase client if valid credentials are provided
         const isSupabaseConfigured = SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("YOUR_PROJECT_ID") && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY";
-        const supabase = isSupabaseConfigured && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        let supabaseClient = null;
+        try {
+            if (isSupabaseConfigured && window.supabase && typeof window.supabase.createClient === 'function') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch(e) {
+            console.error("Failed to initialize Supabase:", e);
+        }
 
         /* ==========================================================================
            1. Audio Synthesizer (Web Audio API - Zero External Assets)
@@ -677,9 +684,9 @@
 
         // Fetch thoughts from Supabase or fallback to LocalStorage
         async function loadThoughts() {
-            if (supabase) {
+            if (supabaseClient) {
                 try {
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('thoughts')
                         .select('*')
                         .order('created_at', { ascending: true });
@@ -709,8 +716,8 @@
 
         // Setup real-time listener if Supabase is active
         function initRealtime() {
-            if (!supabase) return;
-            supabase
+            if (!supabaseClient) return;
+            supabaseClient
                 .channel('public:thoughts')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
                     const newItem = payload.new;
@@ -1011,9 +1018,9 @@
             saveThoughtsLocal();
 
             // Sync with Supabase if configured
-            if (supabase && !isNaN(Number(thought.id))) {
+            if (supabaseClient && !isNaN(Number(thought.id))) {
                 try {
-                    await supabase
+                    await supabaseClient
                         .from('thoughts')
                         .update({ [type]: thought[type] })
                         .eq('id', Number(thought.id));
@@ -1056,9 +1063,9 @@
             };
 
             // Save to Supabase if connected
-            if (supabase) {
+            if (supabaseClient) {
                 try {
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('thoughts')
                         .insert([
                             {
@@ -1072,7 +1079,10 @@
                         ])
                         .select();
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error("Supabase insert error details:", error);
+                        throw error;
+                    }
                     if (data && data.length > 0) {
                         newThought.id = data[0].id.toString();
                     }
