@@ -7,12 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Supabase Core Script Connection -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         :root {
+            /* 50% more luminous midnight radiance */
             --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
             --accent: #a6bcff;
             --accent-glow: rgba(166, 188, 255, 0.75);
@@ -36,6 +35,17 @@
             user-select: none;
         }
 
+        /* Ambient background canvas for constellation lines & shooting stars */
+        #sky-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
         #sky-container {
             position: absolute;
             width: 100%;
@@ -43,6 +53,7 @@
             z-index: 2;
         }
 
+        /* Top controls header */
         .top-header {
             position: absolute;
             top: 25px;
@@ -65,6 +76,44 @@
             font-weight: 600;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: rgba(24, 54, 92, 0.7);
+            border: 1px solid rgba(166, 188, 255, 0.45);
+            color: #f0f6fc;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-size: 1.15rem;
+            box-shadow: 0 0 12px rgba(166, 188, 255, 0.25);
+        }
+
+        .icon-btn:hover {
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 22px var(--accent-glow);
+            transform: scale(1.1);
+        }
+
+        .icon-btn.active {
+            background: rgba(166, 188, 255, 0.3);
+            border-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Interactive Star in Sky */
         .star {
             position: absolute;
             border-radius: 50%;
@@ -72,6 +121,17 @@
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, opacity 0.4s ease;
             animation: pulse-star 3s infinite ease-in-out;
             will-change: transform, opacity;
+        }
+
+        .star::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 32px;
+            height: 32px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
         }
 
         .star:hover {
@@ -86,6 +146,7 @@
             50% { opacity: 1; transform: scale(1.22); }
         }
 
+        /* Casting Interface Container */
         .interface {
             position: absolute;
             bottom: 40px;
@@ -103,7 +164,13 @@
             backdrop-filter: blur(20px);
             border-radius: 22px;
             padding: 22px 26px 18px;
-            box-shadow: 0 14px 48px rgba(0, 0, 0, 0.7), 0 0 25px rgba(166, 188, 255, 0.2);
+            box-shadow: 0 14px 48px rgba(0, 0, 0, 0.7), 0 0 25px rgba(166, 188, 255, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 16px 52px rgba(0, 0, 0, 0.8), 0 0 35px var(--accent-glow);
         }
 
         textarea {
@@ -118,6 +185,7 @@
             font-size: 0.98rem;
             line-height: 1.5;
             text-align: center;
+            font-weight: 400;
         }
 
         textarea::placeholder {
@@ -147,23 +215,23 @@
             text-transform: uppercase;
             font-weight: 600;
             box-shadow: 0 0 18px rgba(166, 188, 255, 0.3);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             margin-left: auto;
         }
 
-        .cast-btn:hover:not(:disabled) {
+        .cast-btn:hover {
             background: var(--accent);
             color: #010409;
             box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
-        .cast-btn:disabled {
-            border-color: #30363d;
-            color: #586069;
-            cursor: not-allowed;
-            box-shadow: none;
+        .char-count {
+            font-size: 0.75rem;
+            color: #8da2c0;
         }
 
+        /* Thought Modal Overlay */
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -178,7 +246,10 @@
             transition: opacity 0.4s ease;
         }
 
-        .overlay.active { opacity: 1; pointer-events: auto; }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         .modal {
             background: rgba(15, 32, 56, 0.92);
@@ -188,158 +259,860 @@
             max-width: 490px;
             width: 88%;
             text-align: center;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85);
-            transform: translateY(20px);
-            transition: transform 0.4s ease;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(166, 188, 255, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
 
-        .overlay.active .modal { transform: translateY(0); }
-        .modal-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; color: #f0f6fc; }
-        .close-btn { color: #8da2c0; font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
-        
-        .legal-footer {
-            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-            z-index: 10; font-size: 0.7rem; white-space: nowrap;
+        .overlay.active .modal {
+            transform: translateY(0) scale(1);
         }
-        .legal-footer a { color: #586069; text-decoration: none; margin: 0 8px; }
-        .legal-footer a:hover { color: #a6bcff; }
+
+        .modal-text {
+            font-family: 'Cinzel', serif;
+            font-size: 1.24rem;
+            line-height: 1.75;
+            margin-bottom: 32px;
+            color: #ffffff;
+            white-space: pre-wrap;
+            font-weight: 500;
+            letter-spacing: 0.6px;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+        }
+
+        /* Reaction Bar inside Modal */
+        .modal-reactions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .reaction-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            padding: 9px 20px;
+            border-radius: 22px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .reaction-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.06);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+        }
+
+        .reaction-btn.reacted {
+            background: rgba(255, 107, 107, 0.25);
+            border-color: #ff6b6b;
+            color: #ff9e9e;
+            box-shadow: 0 0 22px rgba(255, 107, 107, 0.5);
+        }
+
+        .reaction-btn .sparkle-icon {
+            font-size: 1.05rem;
+            transition: transform 0.3s ease;
+        }
+
+        .reaction-btn:active .sparkle-icon {
+            transform: scale(1.4) rotate(15deg);
+        }
+
+        .reaction-count {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .close-btn {
+            color: #a5b4fc;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            padding: 4px 12px;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(166, 188, 255, 0.6);
+        }
+
+        /* Subtle Audio helper notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 32, 56, 0.95);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 25px rgba(166, 188, 255, 0.35);
+            padding: 12px 22px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            color: #ffffff;
+            font-weight: 500;
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .top-header { padding: 0 18px; top: 18px; }
+            .header-title { font-size: 1rem; letter-spacing: 3px; }
+            .interface { bottom: 25px; }
+            .input-box { padding: 18px 20px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="top-header">
-        <div class="header-title">The Midnight Thought</div>
-    </div>
+    <!-- Dynamic 2D Canvas for Shooting Stars and Constellation Lines -->
+    <canvas id="sky-canvas"></canvas>
 
+    <!-- Interactive HTML Star Layer -->
     <div id="sky-container"></div>
 
+    <!-- Top Navigation Header -->
+    <header class="top-header">
+        <div class="header-title">The Midnight Thought</div>
+
+        <!-- Controls: Audio & Constellations -->
+        <div class="header-actions">
+            <button class="icon-btn active" id="constellationToggle" title="Toggle Constellation Lines">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="5" cy="6" r="3"></circle>
+                    <circle cx="19" cy="5" r="2"></circle>
+                    <circle cx="12" cy="19" r="3"></circle>
+                    <line x1="7.5" y1="7.5" x2="10.5" y2="16.5"></line>
+                    <line x1="17" y1="6.5" x2="13.5" y2="16.5"></line>
+                </svg>
+            </button>
+            <button class="icon-btn" id="audioToggle" title="Toggle Ambient Night Audio">
+                <span id="audioIcon">🔇</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Casting Interface -->
     <div class="interface">
         <div class="input-box">
-            <textarea id="thoughtInput" maxlength="250" placeholder="Release a quiet secret, regret, or dream..."></textarea>
+            <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the night..."></textarea>
+            
             <div class="cast-actions">
-                <button class="cast-btn" id="castBtn">Cast Into Orbit</button>
+                <span class="char-count" id="charCount">0/250</span>
+                <button class="cast-btn" id="castBtn">Cast Into the Night</button>
             </div>
         </div>
     </div>
 
+    <!-- Reading Overlay Modal -->
     <div class="overlay" id="overlay">
         <div class="modal">
-            <p class="modal-text" id="modalText"></p>
-            <span class="close-btn" id="closeBtn">return to the cosmos</span>
+            <p class="modal-text" id="modalText">A passing cloud...</p>
+
+            <div class="modal-reactions">
+                <button class="reaction-btn" id="warmthBtn" title="Send Warmth to this thought">
+                    <span class="sparkle-icon">✨</span>
+                    <span>Send Warmth</span>
+                    <span class="reaction-count" id="warmthCount">0</span>
+                </button>
+                <button class="reaction-btn" id="resonateBtn" title="I resonate with this">
+                    <span class="sparkle-icon">🤍</span>
+                    <span>Resonate</span>
+                    <span class="reaction-count" id="resonateCount">0</span>
+                </button>
+            </div>
+
+            <span class="close-btn" id="closeBtn">Return to the Stars (Esc)</span>
         </div>
     </div>
 
-    <div class="legal-footer">
-        <a href="privacy.html">Privacy Policy</a> • 
-        <a href="terms.html">Terms</a>
-    </div>
+    <!-- Subtle Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <script>
-        // 🔑 DROP YOUR SUPABASE DETAILS HERE
-        const SUPABASE_URL = 'https://gbzoyrbdflfyfisrvqum.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8';
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        /* ==========================================================================
+           SUPABASE CONFIGURATION (ENTER YOUR DETAILS HERE)
+           ========================================================================== */
+        const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co"; // <-- Line 458: Replace with your Supabase Project URL
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";          // <-- Line 459: Replace with your Supabase Anon Key
 
-        const skyContainer = document.getElementById('sky-container');
-        const thoughtInput = document.getElementById('thoughtInput');
-        const castBtn = document.getElementById('castBtn');
-        const overlay = document.getElementById('overlay');
-        const modalText = document.getElementById('modalText');
-        const closeBtn = document.getElementById('closeBtn');
+        // Initialize Supabase client if valid credentials are provided
+        const isSupabaseConfigured = SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("YOUR_PROJECT_ID") && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY";
+        const supabase = isSupabaseConfigured && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-        let starSpeedArr = [];
+        /* ==========================================================================
+           1. Audio Synthesizer (Web Audio API - Zero External Assets)
+           ========================================================================== */
+        class CelestialAudio {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.droneGain = null;
+                this.reverbGain = null;
+                this.oscillators = [];
+                // Pentatonic celestial scale frequencies (Hz)
+                this.chimeScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+            }
 
-        function checkCooldown() {
-            const lastCast = localStorage.getItem('last_cast_time');
-            if (lastCast) {
-                const diff = (Date.now() - parseInt(lastCast, 10)) / 1000;
-                if (diff < 120) {
-                    castBtn.disabled = true;
-                    castBtn.innerText = `Orbit Lock (${Math.ceil(120 - diff)}s)`;
-                    setTimeout(checkCooldown, 1000);
-                    return;
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
                 }
             }
-            castBtn.disabled = false;
-            castBtn.innerText = "Cast Into Orbit";
+
+            toggle() {
+                this.init();
+                if (this.isPlaying) {
+                    this.stopAmbient();
+                    this.isPlaying = false;
+                    return false;
+                } else {
+                    this.startAmbient();
+                    this.isPlaying = true;
+                    return true;
+                }
+            }
+
+            startAmbient() {
+                if (!this.ctx) return;
+                
+                // Master ambient gain
+                this.droneGain = this.ctx.createGain();
+                this.droneGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+                this.droneGain.gain.exponentialRampToValueAtTime(0.14, this.ctx.currentTime + 3);
+                this.droneGain.connect(this.ctx.destination);
+
+                // Warm ethereal binaural chord (D minor / F maj9 pad)
+                const baseFreqs = [73.42, 110.0, 146.83, 220.0, 261.63, 329.63];
+                this.oscillators = baseFreqs.map((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+                    osc.frequency.setValueAtTime(freq + (Math.random() * 0.4 - 0.2), this.ctx.currentTime);
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(450 + idx * 60, this.ctx.currentTime);
+
+                    gain.gain.setValueAtTime(0.18 / baseFreqs.length, this.ctx.currentTime);
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.droneGain);
+                    osc.start();
+                    return osc;
+                });
+            }
+
+            stopAmbient() {
+                if (this.droneGain) {
+                    this.droneGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 1.5);
+                    setTimeout(() => {
+                        this.oscillators.forEach(osc => osc.stop());
+                        this.oscillators = [];
+                    }, 1600);
+                }
+            }
+
+            playChime(pitchIndex = null) {
+                if (!this.isPlaying || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const freq = pitchIndex !== null 
+                        ? this.chimeScale[pitchIndex % this.chimeScale.length] 
+                        : this.chimeScale[Math.floor(Math.random() * this.chimeScale.length)];
+
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.22, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 2.6);
+                } catch(e) {}
+            }
+
+            playCastShimmer() {
+                if (!this.isPlaying || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    [0, 2, 4, 7, 9].forEach((offset, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        const freq = this.chimeScale[idx % this.chimeScale.length] * 1.5;
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+                        gain.gain.setValueAtTime(0.14, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 1.9);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 2.0);
+                    });
+                } catch(e) {}
+            }
+
+            playShootingStarSound() {
+                if (!this.isPlaying || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1500, now);
+                    osc.frequency.exponentialRampToValueAtTime(450, now + 1.2);
+
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 1.2);
+                } catch(e) {}
+            }
         }
 
-        function createMovingStar(text) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            
-            const x = Math.random() * 90 + 5;
-            let y = Math.random() * 55 + 15;
-            const size = Math.random() * 4 + 3;
-            const speed = 0.05 + Math.random() * 0.08; 
+        const audio = new CelestialAudio();
 
-            star.style.left = `${x}%`;
-            star.style.top = `${y}%`;
+        /* ==========================================================================
+           2. Data Model & Storage
+           ========================================================================== */
+        const starColors = [
+            { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.9)' },
+            { color: '#eef4ff', glow: 'rgba(215, 230, 255, 0.85)' },
+            { color: '#ffe9a8', glow: 'rgba(255, 233, 168, 0.85)' },
+            { color: '#d0e0ff', glow: 'rgba(166, 188, 255, 0.85)' },
+            { color: '#fff5ea', glow: 'rgba(255, 245, 234, 0.85)' }
+        ];
+
+        const defaultThoughts = [
+            "I wonder if you still look at the moon and think of me.",
+            "Everyone thinks I have my life figured out, but I'm completely lost.",
+            "I passed my final exam today. I wish there was someone to celebrate with.",
+            "I told her I was over it, but I still check her profile every night.",
+            "Be kind to yourself tonight. You are doing the best you can.",
+            "Left a high paying job to focus on my sanity. Scared but happy.",
+            "I missed my bus today, but I got to see a beautiful sunset because of it."
+        ].map((text, i) => ({
+            id: (i + 1).toString(),
+            text: text,
+            warmth: Math.floor(Math.random() * 60 + 25),
+            resonate: Math.floor(Math.random() * 40 + 15),
+            colorIndex: i % starColors.length,
+            x: Math.random() * 88 + 6,
+            y: Math.random() * 55 + 16
+        }));
+
+        let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
+
+        function saveThoughtsLocal() {
+            localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
+        }
+
+        // Fetch thoughts from Supabase or fallback to LocalStorage
+        async function loadThoughts() {
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('thoughts')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        thoughtsArr = data.map(item => ({
+                            id: item.id.toString(),
+                            text: item.text,
+                            warmth: item.warmth || 0,
+                            resonate: item.resonate || 0,
+                            colorIndex: item.color_index || 0,
+                            x: item.x || (Math.random() * 88 + 6),
+                            y: item.y || (Math.random() * 55 + 16)
+                        }));
+                    }
+                } catch(err) {
+                    console.warn("Supabase fetch failed, falling back to local thoughts:", err.message);
+                }
+            }
+            renderStars();
+        }
+
+        // Setup real-time listener if Supabase is active
+        function initRealtime() {
+            if (!supabase) return;
+            supabase
+                .channel('public:thoughts')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thoughts' }, (payload) => {
+                    const newItem = payload.new;
+                    const exists = thoughtsArr.some(t => t.id === newItem.id.toString());
+                    if (!exists) {
+                        const newThought = {
+                            id: newItem.id.toString(),
+                            text: newItem.text,
+                            warmth: newItem.warmth || 1,
+                            resonate: newItem.resonate || 0,
+                            colorIndex: newItem.color_index || 0,
+                            x: newItem.x || (Math.random() * 88 + 6),
+                            y: newItem.y || (Math.random() * 55 + 16)
+                        };
+                        thoughtsArr.push(newThought);
+                        createStarElement(newThought, thoughtsArr.length - 1);
+                        audio.playCastShimmer();
+                    }
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'thoughts' }, (payload) => {
+                    const updatedItem = payload.new;
+                    const idx = thoughtsArr.findIndex(t => t.id === updatedItem.id.toString());
+                    if (idx !== -1) {
+                        thoughtsArr[idx].warmth = updatedItem.warmth;
+                        thoughtsArr[idx].resonate = updatedItem.resonate;
+                        if (activeThoughtIndex === idx) {
+                            warmthCount.innerText = updatedItem.warmth;
+                            resonateCount.innerText = updatedItem.resonate;
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        /* ==========================================================================
+           3. Starfield & Constellation Canvas Engine
+           ========================================================================== */
+        const canvas = document.getElementById('sky-canvas');
+        const ctx = canvas.getContext('2d');
+        const skyContainer = document.getElementById('sky-container');
+
+        let showConstellations = true;
+        let hoveredStarIndex = null;
+        let activeThoughtIndex = null;
+        let shootingStars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            renderStars();
+        });
+        resizeCanvas();
+
+        class ShootingStar {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width * 0.85;
+                this.y = Math.random() * canvas.height * 0.4;
+                this.length = Math.random() * 95 + 60;
+                this.speed = Math.random() * 7 + 10;
+                this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1);
+                this.opacity = 1;
+                this.decay = Math.random() * 0.015 + 0.012;
+                this.active = true;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.opacity -= this.decay;
+                if (this.opacity <= 0) {
+                    this.active = false;
+                }
+            }
+
+            draw(ctx) {
+                if (!this.active) return;
+                const tailX = this.x - Math.cos(this.angle) * this.length;
+                const tailY = this.y - Math.sin(this.angle) * this.length;
+
+                const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+                grad.addColorStop(0, 'rgba(166, 188, 255, 0)');
+                grad.addColorStop(0.7, `rgba(200, 220, 255, ${this.opacity * 0.6})`);
+                grad.addColorStop(1, `rgba(255, 255, 255, ${this.opacity})`);
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(tailX, tailY);
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 2.4;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#a6bcff';
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function scheduleShootingStar() {
+            const delay = Math.random() * 6000 + 4000;
+            setTimeout(() => {
+                const sStar = new ShootingStar();
+                shootingStars.push(sStar);
+                audio.playShootingStarSound();
+                scheduleShootingStar();
+            }, delay);
+        }
+        scheduleShootingStar();
+
+        function renderStars() {
+            skyContainer.innerHTML = '';
+            thoughtsArr.forEach((thought, index) => {
+                createStarElement(thought, index);
+            });
+        }
+
+        function createStarElement(thought, index) {
+            const palette = starColors[(thought.colorIndex !== undefined ? thought.colorIndex : index) % starColors.length];
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.dataset.index = index;
+
+            if (thought.x === undefined || thought.y === undefined) {
+                thought.x = Math.random() * 88 + 6;
+                thought.y = Math.random() * 55 + 16;
+            }
+
+            const size = Math.random() * 3 + 4.5;
+            const delay = Math.random() * -5;
+
+            star.style.left = `${thought.x}%`;
+            star.style.top = `${thought.y}%`;
             star.style.width = `${size}px`;
             star.style.height = `${size}px`;
-            star.style.backgroundColor = '#ffffff';
-            star.style.boxShadow = `0 0 ${size * 3}px var(--star-glow)`;
+            star.style.backgroundColor = palette.color;
+            star.style.boxShadow = `0 0 ${size * 3.5}px ${palette.glow}, 0 0 ${size * 7}px ${palette.color}, 0 0 ${size * 12}px ${palette.glow}`;
+            star.style.animationDelay = `${delay}s`;
+
+            star.addEventListener('mouseenter', () => {
+                hoveredStarIndex = index;
+                audio.playChime(index);
+            });
+
+            star.addEventListener('mouseleave', () => {
+                hoveredStarIndex = null;
+            });
 
             star.addEventListener('click', () => {
-                modalText.innerText = text;
-                overlay.classList.add('active');
+                openThoughtModal(index);
             });
 
             skyContainer.appendChild(star);
-            starSpeedArr.push({ element: star, currentY: y, speed: speed });
         }
 
-        function animateAntigravityLoop() {
-            starSpeedArr.forEach(starObj => {
-                starObj.currentY -= starObj.speed; 
-                if (starObj.currentY < 5) {
-                    starObj.currentY = 75;
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (showConstellations) {
+                const starPoints = [];
+                const starElements = document.querySelectorAll('.star');
+
+                starElements.forEach(el => {
+                    const idx = parseInt(el.dataset.index);
+                    const rect = el.getBoundingClientRect();
+                    starPoints.push({
+                        index: idx,
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    });
+                });
+
+                const maxDistance = Math.min(canvas.width, canvas.height) * 0.28;
+
+                for (let i = 0; i < starPoints.length; i++) {
+                    for (let j = i + 1; j < starPoints.length; j++) {
+                        const p1 = starPoints[i];
+                        const p2 = starPoints[j];
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < maxDistance) {
+                            const isHoverLinked = (hoveredStarIndex === p1.index || hoveredStarIndex === p2.index);
+                            const alpha = isHoverLinked 
+                                ? (1 - dist / maxDistance) * 0.85 + 0.35 
+                                : (1 - dist / maxDistance) * 0.26;
+
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            
+                            if (isHoverLinked) {
+                                ctx.strokeStyle = `rgba(166, 188, 255, ${alpha})`;
+                                ctx.lineWidth = 2.0;
+                                ctx.shadowBlur = 14;
+                                ctx.shadowColor = '#a6bcff';
+                            } else {
+                                ctx.strokeStyle = `rgba(200, 220, 255, ${alpha})`;
+                                ctx.lineWidth = 1.0;
+                                ctx.shadowBlur = 4;
+                                ctx.shadowColor = 'rgba(166, 188, 255, 0.4)';
+                            }
+                            ctx.stroke();
+                        }
+                    }
                 }
-                starObj.element.style.top = `${starObj.currentY}%`;
-            });
-            requestAnimationFrame(animateAntigravityLoop);
-        }
-
-        async function fetchGlobalThoughts() {
-            const { data, error } = await client
-                .from('thoughts')
-                .select('content')
-                .order('created_at', { ascending: false })
-                .limit(60);
-
-            if (!error && data) {
-                skyContainer.innerHTML = '';
-                starSpeedArr = [];
-                data.forEach(t => createMovingStar(t.content));
             }
+
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const sStar = shootingStars[i];
+                sStar.update();
+                sStar.draw(ctx);
+                if (!sStar.active) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+        requestAnimationFrame(animateCanvas);
+
+        /* ==========================================================================
+           4. Modal & Reactions Handling
+           ========================================================================== */
+        const overlay = document.getElementById('overlay');
+        const modalText = document.getElementById('modalText');
+        const warmthBtn = document.getElementById('warmthBtn');
+        const warmthCount = document.getElementById('warmthCount');
+        const resonateBtn = document.getElementById('resonateBtn');
+        const resonateCount = document.getElementById('resonateCount');
+        const closeBtn = document.getElementById('closeBtn');
+
+        function openThoughtModal(index) {
+            activeThoughtIndex = index;
+            const thought = thoughtsArr[index];
+
+            modalText.innerText = `"${thought.text}"`;
+            warmthCount.innerText = thought.warmth || 0;
+            resonateCount.innerText = thought.resonate || 0;
+
+            const sessionReactions = JSON.parse(sessionStorage.getItem(`reacted_${thought.id}`) || '{}');
+            warmthBtn.classList.toggle('reacted', !!sessionReactions.warmth);
+            resonateBtn.classList.toggle('reacted', !!sessionReactions.resonate);
+
+            overlay.classList.add('active');
+            audio.playChime(index);
         }
 
-        castBtn.addEventListener('click', async () => {
-            const content = thoughtInput.value.trim();
-            if (!content) return;
+        function closeModal() {
+            overlay.classList.remove('active');
+            activeThoughtIndex = null;
+        }
 
-            castBtn.disabled = true;
-            castBtn.innerText = "Launching...";
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
 
-            const { error } = await client.from('thoughts').insert([{ content }]);
-            if (!error) {
-                createMovingStar(content);
-                thoughtInput.value = '';
-                localStorage.setItem('last_cast_time', Date.now().toString());
-                checkCooldown();
-            } else {
-                alert("Database transmission failed.");
-                castBtn.disabled = false;
-                castBtn.innerText = "Cast Into Orbit";
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                closeModal();
             }
         });
 
-        closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-        overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('active'); });
+        // Reaction Handler (Supports Supabase + LocalStorage)
+        async function handleReaction(type) {
+            if (activeThoughtIndex === null) return;
+            const thought = thoughtsArr[activeThoughtIndex];
+            const sessionKey = `reacted_${thought.id}`;
+            let sessionReactions = JSON.parse(sessionStorage.getItem(sessionKey) || '{}');
 
-        fetchGlobalThoughts();
-        checkCooldown();
-        animateAntigravityLoop();
+            const isInc = !sessionReactions[type];
+            sessionReactions[type] = isInc;
+
+            if (type === 'warmth') {
+                thought.warmth = Math.max(0, (thought.warmth || 0) + (isInc ? 1 : -1));
+                warmthBtn.classList.toggle('reacted', isInc);
+                warmthCount.innerText = thought.warmth;
+                if (isInc) {
+                    showToast("✨ Sent warmth into the night");
+                    audio.playChime(activeThoughtIndex + 2);
+                }
+            } else if (type === 'resonate') {
+                thought.resonate = Math.max(0, (thought.resonate || 0) + (isInc ? 1 : -1));
+                resonateBtn.classList.toggle('reacted', isInc);
+                resonateCount.innerText = thought.resonate;
+                if (isInc) {
+                    showToast("🤍 You are not alone in this feeling");
+                    audio.playChime(activeThoughtIndex + 4);
+                }
+            }
+
+            sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
+            saveThoughtsLocal();
+
+            // Sync with Supabase if configured
+            if (supabase && !isNaN(Number(thought.id))) {
+                try {
+                    await supabase
+                        .from('thoughts')
+                        .update({ [type]: thought[type] })
+                        .eq('id', Number(thought.id));
+                } catch(e) {
+                    console.error("Failed to update reaction on Supabase:", e);
+                }
+            }
+        }
+
+        warmthBtn.addEventListener('click', () => handleReaction('warmth'));
+        resonateBtn.addEventListener('click', () => handleReaction('resonate'));
+
+        /* ==========================================================================
+           5. Casting Interface (Supports Supabase + LocalStorage)
+           ========================================================================== */
+        const thoughtInput = document.getElementById('thoughtInput');
+        const castBtn = document.getElementById('castBtn');
+        const charCount = document.getElementById('charCount');
+
+        thoughtInput.addEventListener('input', () => {
+            charCount.innerText = `${thoughtInput.value.length}/250`;
+        });
+
+        async function castThought() {
+            const text = thoughtInput.value.trim();
+            if (!text) return;
+
+            const colorIdx = Math.floor(Math.random() * starColors.length);
+            const coordX = Math.random() * 88 + 6;
+            const coordY = Math.random() * 55 + 16;
+
+            let newThought = {
+                id: Date.now().toString(),
+                text: text,
+                warmth: 1,
+                resonate: 0,
+                colorIndex: colorIdx,
+                x: coordX,
+                y: coordY
+            };
+
+            // Save to Supabase if connected
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('thoughts')
+                        .insert([
+                            {
+                                text: text,
+                                warmth: 1,
+                                resonate: 0,
+                                color_index: colorIdx,
+                                x: coordX,
+                                y: coordY
+                            }
+                        ])
+                        .select();
+
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        newThought.id = data[0].id.toString();
+                    }
+                } catch(err) {
+                    console.warn("Supabase cast failed, falling back to local:", err.message);
+                }
+            }
+
+            thoughtsArr.push(newThought);
+            saveThoughtsLocal();
+
+            createStarElement(newThought, thoughtsArr.length - 1);
+
+            audio.playCastShimmer();
+            const sStar = new ShootingStar();
+            shootingStars.push(sStar);
+
+            thoughtInput.value = '';
+            charCount.innerText = '0/250';
+            castBtn.innerText = "Casted ✨";
+            showToast("Your thought has taken its place among the stars.");
+
+            setTimeout(() => {
+                castBtn.innerText = "Cast Into the Night";
+            }, 2200);
+        }
+
+        castBtn.addEventListener('click', castThought);
+        thoughtInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                castThought();
+            }
+        });
+
+        /* ==========================================================================
+           6. Controls
+           ========================================================================== */
+        const constellationToggle = document.getElementById('constellationToggle');
+        constellationToggle.addEventListener('click', () => {
+            showConstellations = !showConstellations;
+            constellationToggle.classList.toggle('active', showConstellations);
+            showToast(showConstellations ? "Constellations revealed" : "Constellations hidden");
+        });
+
+        const audioToggle = document.getElementById('audioToggle');
+        const audioIcon = document.getElementById('audioIcon');
+        audioToggle.addEventListener('click', () => {
+            const active = audio.toggle();
+            audioToggle.classList.toggle('active', active);
+            audioIcon.innerText = active ? '🌌' : '🔇';
+            showToast(active ? "Ambient night audio enabled" : "Audio muted");
+        });
+
+        const toast = document.getElementById('toast');
+        let toastTimeout = null;
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize App & Load Data
+        loadThoughts();
+        initRealtime();
     </script>
 </body>
 </html>
