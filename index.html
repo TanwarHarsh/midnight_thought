@@ -650,7 +650,7 @@
 
                     if (error) {
                         console.warn("Supabase load notice:", error.message);
-                    } else if (Array.isArray(data)) {
+                    } else if (Array.isArray(data) && data.length > 0) {
                         const newThoughts = data.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
                             return {
