@@ -1854,14 +1854,15 @@
 
                         const newThoughts = realThoughts.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
+                            const isChatActive = !(Number(item.color_index) === 99 || item.chat_enabled === false);
                             return {
                                 id: item.id.toString(),
                                 text: item.text,
                                 warmth: Math.max(0, item.warmth || 0),
                                 resonate: Math.max(0, item.resonate || 0),
-                                color_index: item.color_index || 0,
+                                color_index: Number(item.color_index || 0),
                                 author_key: item.author_key || null,
-                                chat_enabled: item.color_index !== 99, // color_index 99 indicates chat disabled
+                                chat_enabled: isChatActive,
                                 created_at: item.created_at || new Date().toISOString(),
                                 x: props.x,
                                 y: props.y
@@ -1879,7 +1880,7 @@
                         newThoughts.forEach(t => knownCloudThoughtIds.add(t.id));
 
                         const hasChanges = newThoughts.length !== thoughtsArr.length || 
-                                           newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate);
+                                           newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate || t.chat_enabled !== thoughtsArr[i].chat_enabled || t.color_index !== thoughtsArr[i].color_index);
 
                         if (hasChanges) {
                             thoughtsArr = newThoughts;
@@ -2372,7 +2373,8 @@
 
         function setupStarChat(thought, isMine) {
             const sId = thought.id.toString();
-            const isChatEnabled = thought.chat_enabled !== false;
+            const isChatEnabled = !(Number(thought.color_index) === 99 || thought.chat_enabled === false);
+            thought.chat_enabled = isChatEnabled;
 
             if (isMine) {
                 starChatStatus.innerHTML = `
@@ -2384,6 +2386,7 @@
                 if (toggleBtn) {
                     toggleBtn.onclick = async () => {
                         thought.chat_enabled = !thought.chat_enabled;
+                        thought.color_index = thought.chat_enabled ? 0 : 99;
                         saveThoughtsLocal();
                         setupStarChat(thought, isMine);
 
@@ -2471,6 +2474,12 @@
         async function sendStarChatMessage() {
             if (activeThoughtIndex === null || isSendingChat) return;
             const thought = thoughtsArr[activeThoughtIndex];
+            const isChatEnabled = !(Number(thought.color_index) === 99 || thought.chat_enabled === false);
+            if (!isChatEnabled) {
+                showToast("🔒 Anonymous chat is closed on this star.");
+                return;
+            }
+
             const text = starChatInput.value.trim();
             if (!text) return;
 
