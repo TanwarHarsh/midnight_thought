@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v7) — 3D Celestial Sky & Anonymous Key Vault</title>
+    <title>The Midnight Thought (v8) — 3D Celestial Sky & Cosmic Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -103,7 +103,7 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             flex-wrap: wrap;
         }
 
@@ -162,6 +162,12 @@
             color: #ffffff;
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
             transform: translateY(-1px);
+        }
+
+        .my-vault-btn.guest {
+            background: rgba(166, 188, 255, 0.12);
+            border-color: rgba(166, 188, 255, 0.4);
+            color: #d0e0ff;
         }
 
         .live-dot {
@@ -556,7 +562,7 @@
         }
 
         /* ==========================================================================
-           COSMIC VAULT & ANONYMOUS AUTH MODAL STYLES
+           COSMIC VAULT & ONBOARDING / LOGIN MODAL STYLES (v8)
            ========================================================================== */
         .vault-modal {
             max-width: 580px;
@@ -602,96 +608,148 @@
             border-radius: 10px;
         }
 
-        .key-section {
-            background: rgba(8, 22, 40, 0.8);
-            border: 1px solid rgba(0, 240, 255, 0.35);
+        /* Step cards & options */
+        .choice-card {
+            background: rgba(16, 36, 64, 0.65);
+            border: 1px solid rgba(166, 188, 255, 0.25);
             border-radius: 18px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
         }
 
-        .key-label {
-            font-size: 0.76rem;
-            color: #a5f3fc;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
+        .choice-card:hover {
+            border-color: rgba(166, 188, 255, 0.6);
+            background: rgba(16, 36, 64, 0.9);
+            box-shadow: 0 0 20px rgba(166, 188, 255, 0.15);
+        }
+
+        .choice-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            color: #ffffff;
             margin-bottom: 8px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 8px;
         }
 
-        .key-box {
+        .choice-desc {
+            font-size: 0.8rem;
+            color: #b0c4de;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 240, 255, 0.1) 100%);
+            border: 1px solid #00f0ff;
+            color: #ffffff;
+            padding: 9px 20px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00f0ff;
+            color: #010409;
+            box-shadow: 0 0 26px rgba(0, 240, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(166, 188, 255, 0.35);
+            color: #d0e0ff;
+            padding: 9px 18px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            background: #ef4444;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+
+        .key-banner {
+            background: rgba(8, 22, 40, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+        }
+
+        .key-display-box {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(166, 188, 255, 0.2);
-            border-radius: 12px;
-            padding: 10px 14px;
-            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin: 14px 0;
         }
 
         .key-text {
             font-family: 'Fira Code', monospace;
-            font-size: 0.86rem;
+            font-size: 0.92rem;
             color: #00f0ff;
             word-break: break-all;
             flex: 1;
             user-select: text;
         }
 
-        .key-btn {
-            background: rgba(0, 240, 255, 0.15);
-            border: 1px solid #00f0ff;
-            color: #ffffff;
-            padding: 6px 14px;
-            border-radius: 14px;
-            font-size: 0.74rem;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .key-btn:hover {
-            background: #00f0ff;
-            color: #010409;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-        }
-
-        .key-subtext {
-            font-size: 0.73rem;
-            color: #8da2c0;
-            line-height: 1.4;
-        }
-
-        .connect-box {
+        .connect-input-box {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
         }
 
         .connect-input {
-            flex: 1;
-            min-width: 200px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(166, 188, 255, 0.3);
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(166, 188, 255, 0.35);
             border-radius: 14px;
-            padding: 8px 14px;
+            padding: 12px 16px;
             color: #ffffff;
             font-family: 'Fira Code', monospace;
-            font-size: 0.8rem;
+            font-size: 0.88rem;
             outline: none;
+            transition: all 0.3s ease;
         }
 
         .connect-input:focus {
             border-color: #00f0ff;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
         }
 
         .my-thoughts-list {
@@ -811,9 +869,10 @@
                     <span>✨</span>
                     <span id="totalThoughtsCount">0 thoughts</span>
                 </div>
-                <button class="my-vault-btn" id="myVaultBtn" title="Open Your Secret Cosmic Identity & Messages Vault">
+                <!-- Cosmic Vault Access Button (Dynamic Guest / Logged In State) -->
+                <button class="my-vault-btn guest" id="myVaultBtn" title="Access Your Secret Cosmic Identity & Messages Vault">
                     <span>🗝️</span>
-                    <span id="myStarsCountLabel">My Stars (0)</span>
+                    <span id="vaultBtnLabel">Cosmic Vault (Guest)</span>
                 </button>
             </div>
         </div>
@@ -874,56 +933,23 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & "My Casted Thoughts" Vault Modal -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v8) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
                 <div class="vault-title">
                     <span>🗝️</span>
-                    <span>Cosmic Vault</span>
+                    <span id="vaultModalTitle">Cosmic Vault</span>
                 </div>
                 <span class="close-btn" id="vaultCloseBtn">✕ Close</span>
             </div>
 
-            <div class="vault-body">
-                <!-- Secret Cosmic Key Box -->
-                <div class="key-section">
-                    <div class="key-label">
-                        <span>Your Anonymous Cosmic Key</span>
-                        <span style="font-size: 0.68rem; color: #10b981;">● 100% Private & Unhackable</span>
-                    </div>
-                    <div class="key-box">
-                        <div class="key-text" id="displayCosmicKey">...</div>
-                        <button class="key-btn" id="copyKeyBtn">📋 Copy</button>
-                    </div>
-                    <div class="key-subtext">
-                        This variable-length cryptographic word-string is your secret passport. Save it to access all your posted stars across any laptop or mobile phone anonymously.
-                    </div>
-
-                    <!-- Connect Existing Key on another device -->
-                    <div style="margin-top: 14px; border-top: 1px dashed rgba(166, 188, 255, 0.2); padding-top: 10px;">
-                        <div style="font-size: 0.74rem; color: #d0e0ff; margin-bottom: 6px; font-weight: 500;">
-                            Switch or Connect Existing Key (Cross-Device Sync):
-                        </div>
-                        <div class="connect-box">
-                            <input type="text" class="connect-input" id="connectKeyInput" placeholder="Paste your secret cosmic key...">
-                            <button class="key-btn" id="submitConnectKeyBtn">✨ Connect Key</button>
-                            <button class="key-btn" id="generateNewKeyBtn" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25);">🎲 New</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- My Casted Thoughts List -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: #a5f3fc; font-weight: 600;">
-                        Your Casted Stars in the Sky
-                    </span>
-                    <span style="font-size: 0.75rem; color: #8da2c0;" id="vaultCountSummary">0 Stars</span>
-                </div>
-
-                <div class="my-thoughts-list" id="myThoughtsContainer">
-                    <div class="empty-vault-state">You have not cast any thoughts into the night yet.</div>
-                </div>
+            <div class="vault-body" id="vaultModalBody">
+                <!-- Dynamically rendered via JS based on state: 
+                     1. Choice Screen (Guest vs Create Vault)
+                     2. Key Generation & Safety Notice Screen
+                     3. Login / Enter Key Screen
+                     4. Active Vault Dashboard Screen -->
             </div>
         </div>
     </div>
@@ -948,7 +974,6 @@
 
         /* ==========================================================================
            UNHACKABLE VARIABLE-LENGTH WORD-STRING COSMIC KEY GENERATOR
-           Uses cryptographic random entropy + dictionary of celestial words
            ========================================================================== */
         const CELESTIAL_WORDS = [
             "ethereal", "sapphire", "obsidian", "twilight", "solitary", "infinite", "shimmering",
@@ -972,12 +997,10 @@
                 selectedWords.push(CELESTIAL_WORDS[wordIndex]);
             }
 
-            // Cryptographic random alphanumeric hash suffix
             const randomSuffix = ((array[7] % 90000) + 10000).toString(36) + (array[6] % 1000).toString();
             return selectedWords.join("-") + "-" + randomSuffix;
         }
 
-        // Fast client-side SHA-256 hash for anonymous key verification in database
         async function sha256Hex(message) {
             try {
                 const msgBuffer = new TextEncoder().encode(message.toLowerCase().trim());
@@ -985,7 +1008,6 @@
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             } catch(e) {
-                // Fallback deterministic hash
                 let h = 0;
                 for (let i = 0; i < message.length; i++) {
                     h = Math.imul(31, h) + message.charCodeAt(i) | 0;
@@ -995,36 +1017,50 @@
         }
 
         /* ==========================================================================
-           COSMIC IDENTITY STATE & THOUGHT OWNERSHIP
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v8)
+           - Active Key & Hash (null if Guest)
+           - Local session thoughts tracking
            ========================================================================== */
-        let currentCosmicKey = localStorage.getItem('midnight_cosmic_key') || '';
-        let currentKeyHash = '';
+        let activeCosmicKey = localStorage.getItem('midnight_active_cosmic_key') || null;
+        let activeKeyHash = null;
+        let newlyGeneratedKey = null;
 
-        if (!currentCosmicKey) {
-            currentCosmicKey = generateUnhackableCosmicKey();
-            localStorage.setItem('midnight_cosmic_key', currentCosmicKey);
+        if (activeCosmicKey) {
+            sha256Hex(activeCosmicKey).then(h => {
+                activeKeyHash = h;
+                updateVaultHeaderButton();
+                renderStars();
+            });
         }
-
-        // Initialize key hash
-        sha256Hex(currentCosmicKey).then(h => {
-            currentKeyHash = h;
-            refreshStarsAndVault();
-        });
 
         let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
-        let myThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_my_thoughts') || '[]'));
+        let guestThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_guest_thoughts') || '[]'));
 
-        function saveMyThought(thoughtId) {
-            if (!thoughtId) return;
-            myThoughtIds.add(thoughtId.toString());
-            localStorage.setItem('midnight_my_thoughts', JSON.stringify([...myThoughtIds]));
-            updateMyStarsCount();
+        function updateVaultHeaderButton() {
+            const btn = document.getElementById('myVaultBtn');
+            const label = document.getElementById('vaultBtnLabel');
+            if (!btn || !label) return;
+
+            if (activeCosmicKey && activeKeyHash) {
+                const myCount = thoughtsArr.filter(t => isThoughtMine(t)).length;
+                btn.className = 'my-vault-btn';
+                label.innerText = `My Vault (${myCount})`;
+            } else {
+                btn.className = 'my-vault-btn guest';
+                label.innerText = `Cosmic Vault (Guest)`;
+            }
         }
 
-        function isThoughtMine(thoughtId, authorHash = null) {
-            if (!thoughtId) return false;
-            if (myThoughtIds.has(thoughtId.toString())) return true;
-            if (authorHash && currentKeyHash && authorHash === currentKeyHash) return true;
+        function isThoughtMine(thought) {
+            if (!thought) return false;
+            // If logged in with active key, match hash or local ID
+            if (activeKeyHash && thought.author_key && thought.author_key === activeKeyHash) {
+                return true;
+            }
+            // If guest or locally cast in this session
+            if (guestThoughtIds.has(thought.id ? thought.id.toString() : '')) {
+                return true;
+            }
             return false;
         }
 
@@ -1034,8 +1070,11 @@
             localStorage.setItem('midnight_read_thoughts', JSON.stringify([...readThoughtIds]));
             
             const starEl = document.querySelector(`.star[data-id="${thoughtId}"]`);
-            if (starEl && !isThoughtMine(thoughtId)) {
-                starEl.className = 'star read';
+            if (starEl) {
+                const thought = thoughtsArr.find(t => t.id === thoughtId.toString());
+                if (thought && !isThoughtMine(thought)) {
+                    starEl.className = 'star read';
+                }
             }
         }
 
@@ -1044,7 +1083,7 @@
         }
 
         function getStarClass(thought) {
-            if (isThoughtMine(thought.id, thought.author_key)) return 'mine';
+            if (isThoughtMine(thought)) return 'mine';
             if (isThoughtRead(thought.id)) return 'read';
             return 'unread';
         }
@@ -1271,22 +1310,10 @@
             }
         }
 
-        function updateMyStarsCount() {
-            const myCount = thoughtsArr.filter(t => isThoughtMine(t.id, t.author_key)).length;
-            const labelEl = document.getElementById('myStarsCountLabel');
-            if (labelEl) {
-                labelEl.innerText = `My Stars (${myCount})`;
-            }
-            const summaryEl = document.getElementById('vaultCountSummary');
-            if (summaryEl) {
-                summaryEl.innerText = `${myCount} Star${myCount === 1 ? '' : 's'}`;
-            }
-        }
-
         async function loadThoughts(isBackground = false) {
             if (!isBackground) renderStars();
             updateTotalThoughtsCount();
-            updateMyStarsCount();
+            updateVaultHeaderButton();
 
             if (dbClient) {
                 try {
@@ -1321,8 +1348,7 @@
                             saveThoughtsLocal();
                             renderStars();
                             updateTotalThoughtsCount();
-                            updateMyStarsCount();
-                            renderVaultThoughts();
+                            updateVaultHeaderButton();
                         }
                     }
                 } catch(err) {
@@ -1334,7 +1360,6 @@
         function initRealtime() {
             if (!dbClient) return;
             try {
-                // 1. Live Thoughts sync channel
                 const thoughtsChannel = dbClient.channel('thoughts_live_channel');
                 thoughtsChannel
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'thoughts' }, () => {
@@ -1342,7 +1367,6 @@
                     })
                     .subscribe();
 
-                // 2. Live Presence / Active Users channel
                 const presenceChannel = dbClient.channel('stargazers_presence', {
                     config: {
                         presence: {
@@ -1569,12 +1593,6 @@
             skyContainer.appendChild(star);
         }
 
-        function refreshStarsAndVault() {
-            renderStars();
-            updateMyStarsCount();
-            renderVaultThoughts();
-        }
-
         function animateCanvas() {
             curRotX += (targetRotX - curRotX) * 0.08;
             curRotY += (targetRotY - curRotY) * 0.08;
@@ -1669,7 +1687,7 @@
 
             markThoughtAsRead(thought.id);
 
-            if (isThoughtMine(thought.id, thought.author_key)) {
+            if (isThoughtMine(thought)) {
                 modalBadgeContainer.innerHTML = `<span class="modal-badge mine">✨ Your Star in the Sky</span>`;
             } else {
                 modalBadgeContainer.innerHTML = '';
@@ -1734,7 +1752,6 @@
 
             sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
             saveThoughtsLocal();
-            renderVaultThoughts();
 
             if (dbClient && !isNaN(Number(thought.id))) {
                 try {
@@ -1752,21 +1769,20 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT & LOGIN LOGIC
+           COSMIC VAULT MULTI-STEP FLOW (v8)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
         const vaultCloseBtn = document.getElementById('vaultCloseBtn');
-        const displayCosmicKey = document.getElementById('displayCosmicKey');
-        const copyKeyBtn = document.getElementById('copyKeyBtn');
-        const connectKeyInput = document.getElementById('connectKeyInput');
-        const submitConnectKeyBtn = document.getElementById('submitConnectKeyBtn');
-        const generateNewKeyBtn = document.getElementById('generateNewKeyBtn');
-        const myThoughtsContainer = document.getElementById('myThoughtsContainer');
+        const vaultModalTitle = document.getElementById('vaultModalTitle');
+        const vaultModalBody = document.getElementById('vaultModalBody');
 
         function openVaultModal() {
-            displayCosmicKey.innerText = currentCosmicKey;
-            renderVaultThoughts();
+            if (activeCosmicKey && activeKeyHash) {
+                renderActiveVaultView();
+            } else {
+                renderChoiceView();
+            }
             vaultOverlay.classList.add('active');
         }
 
@@ -1780,80 +1796,241 @@
             if (e.target === vaultOverlay) closeVaultModal();
         });
 
-        copyKeyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(currentCosmicKey).then(() => {
-                showToast("📋 Cosmic Key copied to clipboard!");
-            }).catch(() => {
-                showToast("Key copied: " + currentCosmicKey);
+        // VIEW 1: Initial Choice Screen (Guest vs Create/Connect Vault)
+        function renderChoiceView() {
+            vaultModalTitle.innerText = "Cosmic Identity & Vault";
+            vaultModalBody.innerHTML = `
+                <div class="choice-card">
+                    <div class="choice-title">
+                        <span>✨</span>
+                        <span>Option 1: Create a Cosmic Vault</span>
+                    </div>
+                    <div class="choice-desc">
+                        A unique, unhackable cryptographic Cosmic Key will be forged for you. 
+                        <strong>Keep this secret phrase safe</strong> — it is your only passport to access your past thoughts, view received warmth, and reconnect your stars across laptop & mobile without ever revealing your personal identity.
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-primary" id="btnGoGenerate">🌌 Generate Cosmic Key</button>
+                        <button class="btn-secondary" id="btnGoLogin">🗝️ I Have a Key (Log In)</button>
+                    </div>
+                </div>
+
+                <div class="choice-card" style="border-style: dashed; opacity: 0.9;">
+                    <div class="choice-title" style="font-size: 0.95rem; color: #a6bcff;">
+                        <span>🌙</span>
+                        <span>Option 2: Continue as a Guest</span>
+                    </div>
+                    <div class="choice-desc">
+                        Wander the cosmos freely. You can read and cast thoughts anonymously. (Stars you cast will stay linked to this browser session only).
+                    </div>
+                    <button class="btn-secondary" id="btnStayGuest">Stay as Guest</button>
+                </div>
+            `;
+
+            document.getElementById('btnGoGenerate').addEventListener('click', renderKeyGeneratedView);
+            document.getElementById('btnGoLogin').addEventListener('click', renderLoginView);
+            document.getElementById('btnStayGuest').addEventListener('click', () => {
+                closeVaultModal();
+                showToast("🌙 Exploring as a Wandering Stargazer (Guest)");
             });
-        });
-
-        async function switchCosmicKey(newKey) {
-            if (!newKey || newKey.trim().length < 6) {
-                showToast("⚠️ Please enter a valid Cosmic Key phrase.");
-                return;
-            }
-            currentCosmicKey = newKey.trim();
-            localStorage.setItem('midnight_cosmic_key', currentCosmicKey);
-            currentKeyHash = await sha256Hex(currentCosmicKey);
-            displayCosmicKey.innerText = currentCosmicKey;
-            connectKeyInput.value = '';
-
-            refreshStarsAndVault();
-            showToast("✨ Connected with your Cosmic Identity!");
         }
 
-        submitConnectKeyBtn.addEventListener('click', () => {
-            switchCosmicKey(connectKeyInput.value);
-        });
+        // VIEW 2: Key Generated Notice & Safety Warning
+        function renderKeyGeneratedView() {
+            newlyGeneratedKey = generateUnhackableCosmicKey();
+            vaultModalTitle.innerText = "Your Secret Cosmic Key";
 
-        connectKeyInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                switchCosmicKey(connectKeyInput.value);
+            vaultModalBody.innerHTML = `
+                <div class="key-banner">
+                    <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #10b981; font-weight: 600; margin-bottom: 8px;">
+                        ● Secret Key Generated Successfully
+                    </div>
+                    <div style="font-size: 0.84rem; color: #d0e0ff; line-height: 1.5;">
+                        Here is your private, unhackable Cosmic Key. <strong>Please copy and save it securely right now</strong>. You will need to enter this key on the next step to log in and unlock your vault.
+                    </div>
+
+                    <div class="key-display-box">
+                        <div class="key-text" id="newKeyText">${newlyGeneratedKey}</div>
+                        <button class="btn-secondary" id="btnCopyGeneratedKey" style="padding: 6px 14px; font-size: 0.75rem;">📋 Copy</button>
+                    </div>
+
+                    <div style="font-size: 0.75rem; color: #fca5a5; background: rgba(239, 68, 68, 0.12); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.3); margin-bottom: 16px;">
+                        ⚠️ <strong>Important Notice:</strong> Because this platform is 100% anonymous, we store zero personal info or emails. If you lose this key, your thoughts cannot be recovered!
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <button class="btn-primary" id="btnProceedToLogin">🚀 Proceed to Log In with Key →</button>
+                        <button class="btn-secondary" id="btnRegenerate" style="font-size: 0.74rem;">🎲 Generate Another</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('btnCopyGeneratedKey').addEventListener('click', () => {
+                navigator.clipboard.writeText(newlyGeneratedKey).then(() => {
+                    showToast("📋 Cosmic Key copied to clipboard!");
+                }).catch(() => {
+                    showToast("Key copied: " + newlyGeneratedKey);
+                });
+            });
+
+            document.getElementById('btnRegenerate').addEventListener('click', renderKeyGeneratedView);
+
+            document.getElementById('btnProceedToLogin').addEventListener('click', () => {
+                renderLoginView(newlyGeneratedKey);
+            });
+        }
+
+        // VIEW 3: Login Page (Enter Key to Access Account)
+        function renderLoginView(prefilledKey = '') {
+            vaultModalTitle.innerText = "Unlock Your Cosmic Vault";
+
+            vaultModalBody.innerHTML = `
+                <div class="key-banner">
+                    <div style="font-size: 0.95rem; font-family: 'Cinzel', serif; color: #ffffff; margin-bottom: 6px;">
+                        Enter Your Secret Cosmic Key
+                    </div>
+                    <div style="font-size: 0.8rem; color: #b0c4de; line-height: 1.5;">
+                        Paste your word-string key below to sign into your anonymous vault and retrieve all your stars across this device.
+                    </div>
+
+                    <div class="connect-input-box">
+                        <input type="text" class="connect-input" id="loginKeyInput" placeholder="e.g. ethereal-sapphire-whisper-zenith-492" value="${prefilledKey || ''}">
+                        <button class="btn-primary" id="btnSubmitLogin" style="width: 100%; padding: 11px;">✨ Unlock Vault & Sign In</button>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.75rem;">
+                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackToChoice">← Back to Options</span>
+                        <span style="color: #00f0ff; cursor: pointer;" id="btnGoGenFromLogin">Need a new key? Generate ✦</span>
+                    </div>
+                </div>
+            `;
+
+            const inputEl = document.getElementById('loginKeyInput');
+            const submitBtn = document.getElementById('btnSubmitLogin');
+
+            async function doLogin() {
+                const key = inputEl.value.trim();
+                if (!key || key.length < 6) {
+                    showToast("⚠️ Please enter a valid Cosmic Key phrase.");
+                    return;
+                }
+
+                activeCosmicKey = key;
+                localStorage.setItem('midnight_active_cosmic_key', activeCosmicKey);
+                activeKeyHash = await sha256Hex(activeCosmicKey);
+
+                updateVaultHeaderButton();
+                renderStars();
+                renderActiveVaultView();
+                showToast("✨ Welcome back! Your Cosmic Vault is unlocked.");
             }
-        });
 
-        generateNewKeyBtn.addEventListener('click', () => {
-            const newKey = generateUnhackableCosmicKey();
-            switchCosmicKey(newKey);
-        });
+            submitBtn.addEventListener('click', doLogin);
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') doLogin();
+            });
 
-        function renderVaultThoughts() {
+            document.getElementById('btnBackToChoice').addEventListener('click', renderChoiceView);
+            document.getElementById('btnGoGenFromLogin').addEventListener('click', renderKeyGeneratedView);
+        }
+
+        // VIEW 4: Active Logged In Vault Dashboard (View Messages & Stats)
+        function renderActiveVaultView() {
+            vaultModalTitle.innerText = "My Cosmic Sanctuary";
+
             const myThoughts = thoughtsArr
                 .map((t, idx) => ({ ...t, originalIndex: idx }))
-                .filter(t => isThoughtMine(t.id, t.author_key));
+                .filter(t => isThoughtMine(t));
 
+            const totalWarmth = myThoughts.reduce((acc, t) => acc + (t.warmth || 0), 0);
+            const totalResonate = myThoughts.reduce((acc, t) => acc + (t.resonate || 0), 0);
+
+            let listHtml = '';
             if (myThoughts.length === 0) {
-                myThoughtsContainer.innerHTML = `<div class="empty-vault-state">You have not cast any thoughts with this key yet. Cast a secret into the night to watch it shine here!</div>`;
-                return;
-            }
-
-            myThoughtsContainer.innerHTML = '';
-            myThoughts.reverse().forEach(thought => {
-                const card = document.createElement('div');
-                card.className = 'my-thought-card';
-                card.innerHTML = `
-                    <div class="my-thought-quote">"${thought.text}"</div>
-                    <div class="my-thought-meta">
-                        <span>🕒 ${formatThoughtTime(thought.created_at)}</span>
-                        <div class="my-thought-stats">
-                            <span>✨ ${thought.warmth || 0}</span>
-                            <span>🤍 ${thought.resonate || 0}</span>
+                listHtml = `<div class="empty-vault-state">You have not cast any thoughts with this key yet. Cast a secret into the night and it will shine here!</div>`;
+            } else {
+                listHtml = myThoughts.reverse().map(thought => `
+                    <div class="my-thought-card" data-idx="${thought.originalIndex}">
+                        <div class="my-thought-quote">"${thought.text}"</div>
+                        <div class="my-thought-meta">
+                            <span>🕒 ${formatThoughtTime(thought.created_at)}</span>
+                            <div class="my-thought-stats">
+                                <span>✨ ${thought.warmth || 0}</span>
+                                <span>🤍 ${thought.resonate || 0}</span>
+                            </div>
                         </div>
                     </div>
-                `;
+                `).join('');
+            }
 
-                card.addEventListener('click', () => {
-                    closeVaultModal();
-                    openThoughtModal(thought.originalIndex);
+            vaultModalBody.innerHTML = `
+                <!-- Key Banner -->
+                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 16px 20px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; text-transform: uppercase; color: #a5f3fc; font-weight: 600; margin-bottom: 8px;">
+                        <span>● Active Cosmic Key</span>
+                        <button class="btn-danger" id="btnLogoutKey">🚪 Log Out / Switch</button>
+                    </div>
+                    <div class="key-display-box" style="margin: 6px 0 8px;">
+                        <div class="key-text">${activeCosmicKey}</div>
+                        <button class="btn-secondary" id="btnCopyActiveKey" style="padding: 5px 12px; font-size: 0.72rem;">📋 Copy</button>
+                    </div>
+                    <div style="font-size: 0.72rem; color: #8da2c0;">
+                        Logged in securely across all devices. Use this key to reconnect anywhere.
+                    </div>
+                </div>
+
+                <!-- Stats summary -->
+                <div style="display: flex; gap: 12px; margin-bottom: 18px;">
+                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #00f0ff;">${myThoughts.length}</div>
+                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Stars Cast</div>
+                    </div>
+                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffd166;">✨ ${totalWarmth}</div>
+                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Warmth Received</div>
+                    </div>
+                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffffff;">🤍 ${totalResonate}</div>
+                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Resonated</div>
+                    </div>
+                </div>
+
+                <!-- Messages List -->
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #a5f3fc; font-weight: 600; margin-bottom: 10px;">
+                    Your Casted Stars (${myThoughts.length})
+                </div>
+                <div class="my-thoughts-list">${listHtml}</div>
+            `;
+
+            document.getElementById('btnCopyActiveKey').addEventListener('click', () => {
+                navigator.clipboard.writeText(activeCosmicKey).then(() => {
+                    showToast("📋 Cosmic Key copied!");
                 });
+            });
 
-                myThoughtsContainer.appendChild(card);
+            document.getElementById('btnLogoutKey').addEventListener('click', () => {
+                activeCosmicKey = null;
+                activeKeyHash = null;
+                localStorage.removeItem('midnight_active_cosmic_key');
+                updateVaultHeaderButton();
+                renderStars();
+                renderChoiceView();
+                showToast("🚪 Logged out. You are now in Guest Mode.");
+            });
+
+            document.querySelectorAll('.my-thought-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const idx = parseInt(card.dataset.idx);
+                    closeVaultModal();
+                    openThoughtModal(idx);
+                });
             });
         }
 
         /* ==========================================================================
-           CASTING INTERFACE
+           CASTING INTERFACE (v8)
+           - Attaches activeKeyHash if logged in
+           - Tracks locally if in Guest mode
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1879,20 +2056,23 @@
                 warmth: 1,
                 resonate: 0,
                 color_index: 0,
-                author_key: currentKeyHash,
+                author_key: activeKeyHash || null,
                 created_at: nowIso,
                 x: coordX,
                 y: coordY
             };
 
-            saveMyThought(tempId);
+            // If in guest mode, track in guest thoughts
+            if (!activeKeyHash) {
+                guestThoughtIds.add(tempId);
+                localStorage.setItem('midnight_guest_thoughts', JSON.stringify([...guestThoughtIds]));
+            }
 
             thoughtsArr.push(newThought);
             saveThoughtsLocal();
             createStarElement(newThought, thoughtsArr.length - 1);
             updateTotalThoughtsCount();
-            updateMyStarsCount();
-            renderVaultThoughts();
+            updateVaultHeaderButton();
 
             audio.playCastShimmer();
             const sStar = new ShootingStar();
@@ -1917,7 +2097,7 @@
                                 warmth: 1,
                                 resonate: 0,
                                 color_index: 0,
-                                author_key: currentKeyHash,
+                                author_key: activeKeyHash || null,
                                 x: coordX,
                                 y: coordY
                             }
@@ -1925,7 +2105,7 @@
                         .select();
 
                     if (error) {
-                        console.warn("Supabase insert with author_key notice, fallback retry:", error.message);
+                        console.warn("Supabase insert notice, fallback retry:", error.message);
                         const retryRes = await dbClient
                             .from('thoughts')
                             .insert([
@@ -1945,9 +2125,11 @@
                             if (retryRes.data[0].created_at) {
                                 newThought.created_at = retryRes.data[0].created_at;
                             }
-                            saveMyThought(cloudId);
+                            if (!activeKeyHash) {
+                                guestThoughtIds.add(cloudId);
+                                localStorage.setItem('midnight_guest_thoughts', JSON.stringify([...guestThoughtIds]));
+                            }
                             saveThoughtsLocal();
-                            renderVaultThoughts();
                         }
                     } else if (data && data.length > 0) {
                         const cloudId = data[0].id.toString();
@@ -1955,9 +2137,11 @@
                         if (data[0].created_at) {
                             newThought.created_at = data[0].created_at;
                         }
-                        saveMyThought(cloudId);
+                        if (!activeKeyHash) {
+                            guestThoughtIds.add(cloudId);
+                            localStorage.setItem('midnight_guest_thoughts', JSON.stringify([...guestThoughtIds]));
+                        }
                         saveThoughtsLocal();
-                        renderVaultThoughts();
                     }
                 } catch(err) {
                     console.warn("Supabase network notice:", err.message);
