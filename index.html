@@ -1285,6 +1285,262 @@
             transform: translateY(0);
         }
 
+        /* ==========================================================================
+           LOUD COSMIC ALERT BANNER & NOTIFICATION SYSTEM
+           ========================================================================== */
+        .loud-cosmic-alert {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-140%);
+            background: linear-gradient(135deg, rgba(16, 36, 64, 0.98) 0%, rgba(8, 22, 40, 0.98) 100%);
+            border: 2px solid #00ff66;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 255, 102, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 3000;
+            max-width: 90%;
+            width: 480px;
+            backdrop-filter: blur(16px);
+            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loud-cosmic-alert.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loud-alert-icon {
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: alertPulse 1.5s infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #00ff66); }
+            50% { transform: scale(1.15); filter: drop-shadow(0 0 12px #00ff66); }
+        }
+
+        .loud-alert-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .loud-alert-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .loud-alert-body {
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+
+        .loud-alert-btn {
+            background: #00ff66;
+            color: #010409;
+            border: none;
+            border-radius: 14px;
+            padding: 7px 14px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .loud-alert-btn:hover {
+            background: #5eead4;
+            box-shadow: 0 0 16px rgba(0, 255, 102, 0.6);
+            transform: scale(1.04);
+        }
+
+        .loud-alert-close {
+            background: none;
+            border: none;
+            color: #8da2c0;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.2s;
+        }
+
+        .loud-alert-close:hover {
+            color: #ffffff;
+        }
+
+        .notif-btn {
+            background: rgba(15, 32, 56, 0.85);
+            border: 1px solid rgba(166, 188, 255, 0.3);
+            color: #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .notif-btn:hover {
+            border-color: #ffd000;
+            background: rgba(24, 54, 92, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 208, 0, 0.3);
+        }
+
+        .notif-badge-pill {
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .notif-modal {
+            max-width: 520px;
+            width: 90%;
+            max-height: 82vh;
+            padding: 24px 24px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(166, 188, 255, 0.2);
+        }
+
+        .notif-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            color: #ffd000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin: 6px 0;
+            flex: 1;
+        }
+
+        .notif-card {
+            background: rgba(16, 36, 64, 0.6);
+            border: 1px solid rgba(166, 188, 255, 0.2);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .notif-card:hover {
+            border-color: #00ff66;
+            background: rgba(16, 36, 64, 0.9);
+            box-shadow: 0 0 16px rgba(0, 255, 102, 0.2);
+            transform: translateX(3px);
+        }
+
+        .notif-card.unread {
+            border-color: rgba(255, 208, 0, 0.55);
+            background: rgba(255, 208, 0, 0.09);
+        }
+
+        .notif-card-icon {
+            font-size: 1.3rem;
+        }
+
+        .notif-card-body {
+            flex: 1;
+        }
+
+        .notif-card-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .notif-card-text {
+            font-size: 0.74rem;
+            color: #cbd5e1;
+            line-height: 1.35;
+            margin-bottom: 6px;
+        }
+
+        .notif-card-time {
+            font-size: 0.66rem;
+            color: #8da2c0;
+        }
+
+        .notif-card-action {
+            align-self: center;
+            background: rgba(0, 255, 102, 0.2);
+            border: 1px solid #00ff66;
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .notif-card-action:hover {
+            background: #00ff66;
+            color: #010409;
+        }
+
+        .empty-notif-state {
+            text-align: center;
+            padding: 34px 10px;
+            color: #8da2c0;
+            font-style: italic;
+            font-size: 0.86rem;
+        }
+
         /* Responsive Breakpoints */
         @media (max-width: 820px) {
             .top-header { top: 18px; }
@@ -1348,11 +1604,16 @@
         </div>
     </header>
 
-    <!-- 2. Bottom Left Controls: User Name / Cosmic Vault Button -->
+    <!-- 2. Bottom Left Controls: User Name / Cosmic Vault Button & Notifications Button -->
     <div class="bottom-left-controls">
         <button class="my-vault-btn guest" id="myVaultBtn" title="Access Your Secret Cosmic Identity & Messages Vault">
             <span>🗝️</span>
             <span id="vaultBtnLabel">Cosmic Vault (Guest)</span>
+        </button>
+        <button class="notif-btn" id="notifBtn" title="Celestial Notifications">
+            <span>🔔</span>
+            <span id="notifBtnLabel">Notifications</span>
+            <span class="notif-badge-pill" id="notifBadge" style="display: none;">0</span>
         </button>
     </div>
 
@@ -1462,6 +1723,39 @@
                 <!-- Dynamically rendered via JS -->
             </div>
         </div>
+    </div>
+
+    <!-- Celestial Notifications Modal / Page -->
+    <div class="overlay" id="notifOverlay">
+        <div class="modal notif-modal">
+            <div class="notif-header">
+                <div class="notif-title">
+                    <span>🔔</span>
+                    <span>Celestial Notifications</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="chat-toggle-btn" id="clearNotifsBtn" style="font-size: 0.74rem;">Clear All</button>
+                    <span class="close-btn" id="notifCloseBtn" style="cursor: pointer;">✕</span>
+                </div>
+            </div>
+
+            <div class="notif-list" id="notifList">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <span class="close-btn" id="notifBackBtn" style="margin-top: 10px;">Return to the Cosmos (Esc)</span>
+        </div>
+    </div>
+
+    <!-- Loud, Highly-Visible Dropdown Alert Banner -->
+    <div class="loud-cosmic-alert" id="loudCosmicAlert">
+        <div class="loud-alert-icon" id="loudAlertIcon">🔔</div>
+        <div class="loud-alert-content">
+            <div class="loud-alert-title" id="loudAlertTitle">Chat Request Received!</div>
+            <div class="loud-alert-body" id="loudAlertBody">A stargazer requested to chat on your star.</div>
+        </div>
+        <button class="loud-alert-btn" id="loudAlertActionBtn">View ✨</button>
+        <button class="loud-alert-close" id="loudAlertCloseBtn">✕</button>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -2028,9 +2322,149 @@
 
         let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
         let starChatRequests = JSON.parse(localStorage.getItem('midnight_chat_requests')) || {};
+        let notificationsArr = JSON.parse(localStorage.getItem('midnight_notifications')) || [];
 
         function saveThoughtsLocal() {
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
+        }
+
+        function saveNotificationsLocal() {
+            localStorage.setItem('midnight_notifications', JSON.stringify(notificationsArr.slice(0, 60)));
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            const unread = notificationsArr.filter(n => !n.is_read).length;
+            if (unread > 0) {
+                badge.innerText = unread > 99 ? '99+' : unread;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        let loudAlertTimeout = null;
+        function showLoudCosmicAlert({ icon, title, body, btnText, onAction }) {
+            const alertEl = document.getElementById('loudCosmicAlert');
+            const iconEl = document.getElementById('loudAlertIcon');
+            const titleEl = document.getElementById('loudAlertTitle');
+            const bodyEl = document.getElementById('loudAlertBody');
+            const actionBtn = document.getElementById('loudAlertActionBtn');
+            const closeBtn = document.getElementById('loudAlertCloseBtn');
+
+            if (!alertEl) return;
+            if (iconEl) iconEl.innerText = icon || '🔔';
+            if (titleEl) titleEl.innerText = title || 'Celestial Notification';
+            if (bodyEl) bodyEl.innerText = body || '';
+
+            if (actionBtn) {
+                actionBtn.innerText = btnText || 'View ✨';
+                actionBtn.onclick = () => {
+                    alertEl.classList.remove('show');
+                    if (onAction) onAction();
+                };
+            }
+
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    alertEl.classList.remove('show');
+                };
+            }
+
+            audio.playChime(3);
+            alertEl.classList.add('show');
+
+            if (loudAlertTimeout) clearTimeout(loudAlertTimeout);
+            loudAlertTimeout = setTimeout(() => {
+                alertEl.classList.remove('show');
+            }, 8000);
+        }
+
+        function addCelestialNotification({ id, type, title, body, starId, time }) {
+            if (!id) id = 'notif_' + Date.now().toString() + '_' + Math.random().toString(36).substring(2, 6);
+            const existing = notificationsArr.find(n => n.id === id);
+            if (existing) return false;
+
+            notificationsArr.unshift({
+                id: id,
+                type: type || 'general',
+                title: title,
+                body: body,
+                starId: starId ? starId.toString() : null,
+                time: time || new Date().toISOString(),
+                is_read: false
+            });
+
+            saveNotificationsLocal();
+            updateNotificationBadge();
+            return true;
+        }
+
+        function openNotificationsModal() {
+            notificationsArr.forEach(n => n.is_read = true);
+            saveNotificationsLocal();
+            updateNotificationBadge();
+            renderNotificationsList();
+            const overlay = document.getElementById('notifOverlay');
+            if (overlay) overlay.classList.add('active');
+        }
+
+        function closeNotificationsModal() {
+            const overlay = document.getElementById('notifOverlay');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        function renderNotificationsList() {
+            const listEl = document.getElementById('notifList');
+            if (!listEl) return;
+
+            if (notificationsArr.length === 0) {
+                listEl.innerHTML = `<div class="empty-notif-state">🌌 The celestial night is quiet. No notifications yet.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = notificationsArr.map(n => {
+                let icon = '🔔';
+                let actionBtnText = 'View Star ✨';
+                if (n.type === 'chat_request') {
+                    icon = '📨';
+                    actionBtnText = 'Open Star 🔓';
+                } else if (n.type === 'chat_accepted') {
+                    icon = '🔓';
+                    actionBtnText = 'Join Chat 💬';
+                } else if (n.type === 'reply') {
+                    icon = '💬';
+                    actionBtnText = 'View Whisper 💬';
+                }
+
+                return `
+                    <div class="notif-card" data-starid="${n.starId || ''}">
+                        <div class="notif-card-icon">${icon}</div>
+                        <div class="notif-card-body">
+                            <div class="notif-card-title">${escapeHtml(n.title)}</div>
+                            <div class="notif-card-text">${escapeHtml(n.body)}</div>
+                            <div class="notif-card-time">${formatThoughtTime(n.time)}</div>
+                        </div>
+                        ${n.starId ? `<button class="notif-card-action" data-starid="${n.starId}">${actionBtnText}</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            listEl.querySelectorAll('.notif-card, .notif-card-action').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const sId = el.dataset.starid;
+                    if (sId) {
+                        closeNotificationsModal();
+                        const idx = thoughtsArr.findIndex(t => t.id.toString() === sId);
+                        if (idx !== -1) {
+                            openThoughtModal(idx);
+                        } else {
+                            showToast("Star located in cosmos view.");
+                        }
+                    }
+                });
+            });
         }
 
         function updateTotalThoughtsCount() {
@@ -2045,6 +2479,7 @@
             if (!isBackground) renderStars();
             updateTotalThoughtsCount();
             updateVaultHeaderButton();
+            updateNotificationBadge();
 
             if (dbClient) {
                 try {
@@ -2118,20 +2553,68 @@
                             };
                         });
 
-                        // Check if any star where the user requested chat has been accepted/opened
+                        // 1. Check for incoming chat requests for star creators
+                        newThoughts.forEach(t => {
+                            const sId = t.id.toString();
+                            if (isThoughtMine(t) && (reqCounts[sId] > 0 || starChatRequests[sId] > 0)) {
+                                const reqCount = Math.max(reqCounts[sId] || 0, starChatRequests[sId] || 0);
+                                const notifId = 'req_' + sId + '_' + reqCount;
+                                const isNew = addCelestialNotification({
+                                    id: notifId,
+                                    type: 'chat_request',
+                                    title: 'Chat Request Received 📨',
+                                    body: `${reqCount} Stargazer${reqCount > 1 ? 's' : ''} requested to open chat on your star "${t.text.substring(0, 30)}..."`,
+                                    starId: sId,
+                                    time: new Date().toISOString()
+                                });
+
+                                if (isNew && !t.chat_enabled) {
+                                    showLoudCosmicAlert({
+                                        icon: '🔔',
+                                        title: 'Chat Request Received!',
+                                        body: `A stargazer requested to chat on your star: "${t.text.substring(0, 30)}..."`,
+                                        btnText: 'Open Star 🔓',
+                                        onAction: () => {
+                                            const idx = thoughtsArr.findIndex(item => item.id.toString() === sId);
+                                            if (idx !== -1) openThoughtModal(idx);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        // 2. Check if any star where the user requested chat has been accepted/opened
                         newThoughts.forEach(t => {
                             const sId = t.id.toString();
                             const myReqs = JSON.parse(localStorage.getItem('my_chat_requests') || '[]');
                             const hasRequested = Boolean(sessionStorage.getItem('requested_chat_' + sId) || myReqs.includes(sId));
-                            const alreadyNotified = Boolean(sessionStorage.getItem('notified_accepted_' + sId));
+                            const notifId = 'accepted_' + sId;
 
-                            if (hasRequested && t.chat_enabled && !alreadyNotified && !isThoughtMine(t)) {
-                                sessionStorage.setItem('notified_accepted_' + sId, 'true');
-                                showToast("🔓 The creator accepted your request & opened chat on their star!");
-                                audio.playChime(3);
+                            if (hasRequested && t.chat_enabled && !isThoughtMine(t)) {
+                                const isNew = addCelestialNotification({
+                                    id: notifId,
+                                    type: 'chat_accepted',
+                                    title: 'Chat Request Accepted! 🔓',
+                                    body: `The creator opened chat on the star: "${t.text.substring(0, 32)}..."`,
+                                    starId: sId,
+                                    time: new Date().toISOString()
+                                });
 
-                                if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === sId) {
-                                    setupStarChat(t, false);
+                                if (isNew) {
+                                    showLoudCosmicAlert({
+                                        icon: '🔓',
+                                        title: 'Chat Request Accepted!',
+                                        body: `The creator opened chat on "${t.text.substring(0, 30)}..."`,
+                                        btnText: 'Join Chat ✨',
+                                        onAction: () => {
+                                            const idx = thoughtsArr.findIndex(item => item.id.toString() === sId);
+                                            if (idx !== -1) openThoughtModal(idx);
+                                        }
+                                    });
+
+                                    if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === sId) {
+                                        setupStarChat(t, false);
+                                    }
                                 }
                             }
                         });
@@ -2985,10 +3468,38 @@
             if (e.target === overlay) closeModal();
         });
 
+        // Notifications Modal Listeners
+        const notifBtn = document.getElementById('notifBtn');
+        const notifCloseBtn = document.getElementById('notifCloseBtn');
+        const notifBackBtn = document.getElementById('notifBackBtn');
+        const notifOverlay = document.getElementById('notifOverlay');
+        const clearNotifsBtn = document.getElementById('clearNotifsBtn');
+
+        if (notifBtn) notifBtn.addEventListener('click', openNotificationsModal);
+        if (notifCloseBtn) notifCloseBtn.addEventListener('click', closeNotificationsModal);
+        if (notifBackBtn) notifBackBtn.addEventListener('click', closeNotificationsModal);
+        if (notifOverlay) {
+            notifOverlay.addEventListener('click', (e) => {
+                if (e.target === notifOverlay) closeNotificationsModal();
+            });
+        }
+        if (clearNotifsBtn) {
+            clearNotifsBtn.addEventListener('click', () => {
+                notificationsArr = [];
+                saveNotificationsLocal();
+                updateNotificationBadge();
+                renderNotificationsList();
+                showToast("All notifications cleared.");
+            });
+        }
+
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (overlay.classList.contains('active')) closeModal();
                 if (vaultOverlay.classList.contains('active')) closeVaultModal();
+                if (notifOverlay && notifOverlay.classList.contains('active')) closeNotificationsModal();
+                const loudAlertEl = document.getElementById('loudCosmicAlert');
+                if (loudAlertEl) loudAlertEl.classList.remove('show');
             }
         });
 
