@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v9) — 3D Celestial Sky & Cosmic Vault</title>
+    <title>The Midnight Thought (v10) — 3D Celestial Sky & Cosmic Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -562,7 +562,7 @@
         }
 
         /* ==========================================================================
-           COSMIC VAULT MODAL STYLES (v9)
+           COSMIC VAULT MODAL STYLES (v10)
            ========================================================================== */
         .vault-modal {
             max-width: 580px;
@@ -860,7 +860,7 @@
         <div class="header-left">
             <div class="header-title">The Midnight Thought</div>
             <div class="stats-group">
-                <div class="active-users-badge" id="activeUsersBadge" title="Live stargazers currently connected">
+                <div class="active-users-badge" id="activeUsersBadge" title="Live unique stargazers currently connected">
                     <span class="live-dot"></span>
                     <span id="activeUsersCount">1 online</span>
                 </div>
@@ -868,7 +868,6 @@
                     <span>✨</span>
                     <span id="totalThoughtsCount">0 thoughts</span>
                 </div>
-                <!-- Cosmic Vault Access Button (Dynamic Guest / Logged In State) -->
                 <button class="my-vault-btn guest" id="myVaultBtn" title="Access Your Secret Cosmic Identity & Messages Vault">
                     <span>🗝️</span>
                     <span id="vaultBtnLabel">Cosmic Vault (Guest)</span>
@@ -932,7 +931,7 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & Vault Multi-Step Modal (v9) -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v10) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
@@ -944,11 +943,7 @@
             </div>
 
             <div class="vault-body" id="vaultModalBody">
-                <!-- Dynamically rendered via JS:
-                     1. Choice Screen (Guest vs Create Vault)
-                     2. Key Generation & Safety Notice Screen (Shows key to copy once)
-                     3. Login / Enter Key Screen
-                     4. Active Vault Dashboard (Secret key completely hidden) -->
+                <!-- Dynamically rendered via JS -->
             </div>
         </div>
     </div>
@@ -987,7 +982,6 @@
             const array = new Uint32Array(8);
             window.crypto.getRandomValues(array);
 
-            // Variable length word phrase (4 to 6 words)
             const wordCount = 4 + (array[0] % 3);
             const selectedWords = [];
 
@@ -1016,7 +1010,7 @@
         }
 
         /* ==========================================================================
-           AUTHENTICATION & VAULT STATE MANAGEMENT (v9)
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v10)
            ========================================================================== */
         let activeCosmicKey = localStorage.getItem('midnight_active_cosmic_key') || null;
         let activeKeyHash = null;
@@ -1027,6 +1021,7 @@
                 activeKeyHash = h;
                 updateVaultHeaderButton();
                 renderStars();
+                trackCurrentPresence();
             });
         }
 
@@ -1283,7 +1278,6 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            // Star size +10%
             const baseSize = (s3 * 2.5 + 4.5) * 1.10;
             const size = Number(baseSize.toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
@@ -1352,6 +1346,38 @@
             }
         }
 
+        /* ==========================================================================
+           UNIQUE ACCOUNT PRESENCE TRACKER (FIX FOR MULTI-BROWSER COUNT IN v10)
+           - Users on same Cosmic Key across Edge/Chrome share identical unique presence key
+           - Deduplicated into 1 online count
+           ========================================================================== */
+        let presenceChannel = null;
+
+        function getPresenceUniqueKey() {
+            if (activeKeyHash) {
+                return 'account_' + activeKeyHash.substring(0, 24);
+            }
+            let guestId = localStorage.getItem('midnight_guest_device_id');
+            if (!guestId) {
+                guestId = 'guest_' + Math.random().toString(36).substring(2, 12);
+                localStorage.setItem('midnight_guest_device_id', guestId);
+            }
+            return guestId;
+        }
+
+        async function trackCurrentPresence() {
+            if (!presenceChannel) return;
+            try {
+                const uniqueKey = getPresenceUniqueKey();
+                await presenceChannel.track({
+                    uid: uniqueKey,
+                    online_at: new Date().toISOString()
+                });
+            } catch(e) {
+                console.warn("Presence track error:", e);
+            }
+        }
+
         function initRealtime() {
             if (!dbClient) return;
             try {
@@ -1362,17 +1388,29 @@
                     })
                     .subscribe();
 
-                const presenceChannel = dbClient.channel('stargazers_presence', {
+                presenceChannel = dbClient.channel('stargazers_presence', {
                     config: {
                         presence: {
-                            key: 'user_' + Math.random().toString(36).substring(2, 9)
+                            key: getPresenceUniqueKey()
                         }
                     }
                 });
 
                 function updateOnlineCount() {
                     const state = presenceChannel.presenceState();
-                    const count = Object.keys(state).length || 1;
+                    // Deduplicate by presence key and track data
+                    const uniqueUserKeys = new Set();
+                    for (const key in state) {
+                        if (Array.isArray(state[key])) {
+                            state[key].forEach(p => {
+                                uniqueUserKeys.add(p.uid || key);
+                            });
+                        } else {
+                            uniqueUserKeys.add(key);
+                        }
+                    }
+
+                    const count = Math.max(1, uniqueUserKeys.size);
                     const countEl = document.getElementById('activeUsersCount');
                     if (countEl) {
                         countEl.innerText = count === 1 ? '1 stargazer online' : `${count} stargazers online`;
@@ -1385,7 +1423,7 @@
                     .on('presence', { event: 'leave' }, updateOnlineCount)
                     .subscribe(async (status) => {
                         if (status === 'SUBSCRIBED') {
-                            await presenceChannel.track({ online_at: new Date().toISOString() });
+                            await trackCurrentPresence();
                         }
                     });
 
@@ -1400,7 +1438,7 @@
 
         /* ==========================================================================
            3D CELESTIAL CANVAS & VIEWPORT
-           ========================================================================= */
+           ========================================================================== */
         const canvas = document.getElementById('sky-canvas');
         const ctx = canvas.getContext('2d');
         const skyContainer = document.getElementById('sky-container');
@@ -1763,7 +1801,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT MULTI-STEP FLOW (v9 - SECRET KEY COMPLETELY HIDDEN)
+           COSMIC VAULT MULTI-STEP FLOW (v10)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
@@ -1916,6 +1954,7 @@
                 updateVaultHeaderButton();
                 renderStars();
                 renderActiveVaultView();
+                trackCurrentPresence();
                 showToast("✨ Welcome back! Your Cosmic Vault is unlocked.");
             }
 
@@ -2004,6 +2043,7 @@
                 updateVaultHeaderButton();
                 renderStars();
                 renderChoiceView();
+                trackCurrentPresence();
                 showToast("🚪 Logged out. You are now in Guest Mode.");
             });
 
