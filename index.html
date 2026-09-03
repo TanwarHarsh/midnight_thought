@@ -467,7 +467,8 @@
         .cast-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            position: relative;
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid rgba(166, 188, 255, 0.18);
@@ -477,7 +478,7 @@
             background: linear-gradient(135deg, rgba(166, 188, 255, 0.3) 0%, rgba(166, 188, 255, 0.1) 100%);
             border: 1px solid var(--accent);
             color: #ffffff;
-            padding: 9px 24px;
+            padding: 9px 28px;
             border-radius: 24px;
             cursor: pointer;
             font-family: inherit;
@@ -487,7 +488,7 @@
             font-weight: 600;
             box-shadow: 0 0 16px rgba(166, 188, 255, 0.25);
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            margin-left: auto;
+            margin: 0 auto;
         }
 
         .cast-btn:hover {
@@ -498,6 +499,8 @@
         }
 
         .char-count {
+            position: absolute;
+            left: 4px;
             font-size: 0.75rem;
             color: #8da2c0;
         }
@@ -968,22 +971,15 @@
             <div class="stats-group">
                 <div class="active-users-badge" id="activeUsersBadge" title="Live unique stargazers currently connected">
                     <span class="live-dot"></span>
-                    <span id="activeUsersCount">1 online</span>
+                    <span id="activeUsersCount">1 Stargazer Online</span>
                 </div>
-                <div class="total-thoughts-badge" id="totalThoughtsBadge" title="Total thoughts in the sky">
+                <div class="total-thoughts-badge" id="totalThoughtsBadge" title="Total stars in the cosmos">
                     <span>✨</span>
-                    <span id="totalThoughtsCount">0 thoughts</span>
+                    <span id="totalThoughtsCount">0 Stars</span>
                 </div>
             </div>
         </div>
     </header>
-
-    <!-- 3D Navigation Guide & Color Legend -->
-    <div class="hint-drag" id="hintDrag">
-        <span class="legend-item"><span class="legend-dot dot-unread"></span>Unread</span>
-        <span class="legend-item"><span class="legend-dot dot-read"></span>Read</span>
-        <span class="legend-item"><span class="legend-dot dot-mine"></span>Your Star</span>
-    </div>
 
     <!-- 2. Bottom Left Controls: User Name / Cosmic Vault Button -->
     <div class="bottom-left-controls">
@@ -996,10 +992,10 @@
     <!-- Center Cast Thought Bar -->
     <div class="interface">
         <div class="input-box" id="castBoxContainer">
-            <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the night..."></textarea>
+            <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the cosmos..."></textarea>
             <div class="cast-actions">
                 <span class="char-count" id="charCount">0/250</span>
-                <button class="cast-btn" id="castBtn">Cast Into the Night</button>
+                <button class="cast-btn" id="castBtn">Cast Into the Cosmos</button>
             </div>
         </div>
     </div>
@@ -1321,10 +1317,10 @@
            EXACT TIMESTAMP FORMATTER
            ========================================================================== */
         function formatThoughtTime(isoStr) {
-            if (!isoStr) return "Cast into the night";
+            if (!isoStr) return "Cast into the cosmos";
             try {
                 const date = new Date(isoStr);
-                if (isNaN(date.getTime())) return "Cast into the night";
+                if (isNaN(date.getTime())) return "Cast into the cosmos";
 
                 const timeStr = date.toLocaleTimeString([], { 
                     hour: 'numeric', 
@@ -1341,7 +1337,7 @@
 
                 return `${timeStr} • ${dateStr}`;
             } catch(e) {
-                return "Cast into the night";
+                return "Cast into the cosmos";
             }
         }
 
@@ -1574,7 +1570,7 @@
             const el = document.getElementById('totalThoughtsCount');
             if (el) {
                 const count = thoughtsArr.length;
-                el.innerText = count === 1 ? '1 thought' : `${count} thoughts`;
+                el.innerText = count === 1 ? '1 Star' : `${count} Stars`;
             }
         }
 
@@ -1722,7 +1718,7 @@
                     const count = Math.max(1, uniqueUserKeys.size);
                     const countEl = document.getElementById('activeUsersCount');
                     if (countEl) {
-                        countEl.innerText = count === 1 ? '1 stargazer online' : `${count} stargazers online`;
+                        countEl.innerText = count === 1 ? '1 Stargazer Online' : `${count} Stargazers Online`;
                     }
                 }
 
@@ -2138,7 +2134,7 @@
                 warmthBtn.classList.toggle('reacted', isInc);
                 warmthCount.innerText = thought.warmth;
                 if (isInc) {
-                    showToast("✨ Sent warmth into the night");
+                    showToast("✨ Sent warmth into the cosmos");
                     audio.playChime(activeThoughtIndex + 2);
                 }
             } else if (type === 'resonate') {
@@ -2687,11 +2683,11 @@
 
                 updateTotalThoughtsCount();
                 updateVaultHeaderButton();
-                showToast("Your star has taken its place in the sky.");
+                showToast("Your star has taken its place in the cosmos.");
             });
 
             setTimeout(() => {
-                castBtn.innerText = "Cast Into the Night";
+                castBtn.innerText = "Cast Into the Cosmos";
             }, 2200);
 
             if (dbClient) {
