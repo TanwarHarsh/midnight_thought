@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v11) — 3D Celestial Sky & Anonymous Vault</title>
+    <title>The Midnight Thought (v12) — 3D Celestial Sky & Ascending Stars</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,13 +12,19 @@
         :root {
             --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
             --accent: #a6bcff;
-            --accent-glow: rgba(166, 188, 255, 0.75);
+            --accent-glow: rgba(166, 188, 255, 0.95);
+            
+            /* High-Intensity Celestial Colors (+25% intensity) */
             --star-white: #ffffff;
-            --star-white-glow: rgba(255, 255, 255, 0.95);
-            --star-yellow: #ffd166;
-            --star-yellow-glow: rgba(255, 209, 102, 0.95);
-            --star-mine: #00f0ff;
-            --star-mine-glow: rgba(0, 240, 255, 0.95);
+            --star-white-glow: rgba(255, 255, 255, 1);
+            
+            /* Bright Yellow for Read Stars */
+            --star-yellow: #ffee00;
+            --star-yellow-glow: rgba(255, 238, 0, 1);
+            
+            /* Bright Green for Your Star */
+            --star-mine: #00ff66;
+            --star-mine-glow: rgba(0, 255, 102, 1);
         }
 
         * {
@@ -112,7 +118,7 @@
             font-size: 1.2rem;
             letter-spacing: 6px;
             color: #ffffff;
-            text-shadow: 0 0 16px rgba(166, 188, 255, 0.7), 0 0 32px rgba(166, 188, 255, 0.35);
+            text-shadow: 0 0 16px rgba(166, 188, 255, 0.8), 0 0 32px rgba(166, 188, 255, 0.4);
             text-transform: uppercase;
             font-weight: 600;
         }
@@ -143,24 +149,24 @@
 
         .total-thoughts-badge {
             color: #ffe8a3;
-            border-color: rgba(255, 214, 102, 0.4);
-            box-shadow: 0 0 14px rgba(255, 214, 102, 0.15);
+            border-color: rgba(255, 238, 0, 0.5);
+            box-shadow: 0 0 16px rgba(255, 238, 0, 0.25);
             cursor: default;
         }
 
         .my-vault-btn {
-            background: rgba(0, 240, 255, 0.12);
-            border-color: rgba(0, 240, 255, 0.5);
-            color: #a5f3fc;
-            box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 255, 102, 0.12);
+            border-color: rgba(0, 255, 102, 0.6);
+            color: #bbf7d0;
+            box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
             font-weight: 600;
         }
 
         .my-vault-btn:hover {
-            background: rgba(0, 240, 255, 0.25);
+            background: rgba(0, 255, 102, 0.25);
             border-color: var(--star-mine);
             color: #ffffff;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
+            box-shadow: 0 0 24px rgba(0, 255, 102, 0.6);
             transform: translateY(-1px);
         }
 
@@ -174,8 +180,8 @@
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 10px #10b981, 0 0 18px #10b981;
+            background: #00ff66;
+            box-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66;
             animation: pulse-dot 2s infinite ease-in-out;
         }
 
@@ -221,7 +227,7 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* 3D Interactive Star in Sky (+10% Size Increase & Color System) */
+        /* 3D Interactive Star in Sky (+20% Size Increase & High Intensity Colors) */
         .star {
             position: absolute;
             border-radius: 50%;
@@ -238,45 +244,103 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             transform: translate(-50%, -50%);
             border-radius: 50%;
         }
 
-        /* 1. UNREAD STARS: Pure Celestial White */
+        /* 1. UNREAD STARS: Pure Celestial Radiant White (+25% intensity) */
         .star.unread {
             background-color: var(--star-white) !important;
-            box-shadow: 0 0 16px var(--star-white-glow), 0 0 32px var(--star-white), 0 0 48px var(--star-white-glow);
+            box-shadow: 0 0 18px var(--star-white-glow), 0 0 38px var(--star-white), 0 0 60px rgba(255, 255, 255, 0.95);
         }
 
-        /* 2. READ STARS: Warm Golden Amber Yellow */
+        /* 2. READ STARS: Bright Solar Yellow (+25% intensity) */
         .star.read {
             background-color: var(--star-yellow) !important;
-            box-shadow: 0 0 16px var(--star-yellow-glow), 0 0 32px var(--star-yellow), 0 0 50px rgba(255, 183, 3, 0.8);
+            box-shadow: 0 0 20px var(--star-yellow-glow), 0 0 42px var(--star-yellow), 0 0 65px rgba(255, 238, 0, 0.9);
         }
 
-        /* 3. USER'S OWN POSTED STARS: Radiant Electric Cyan */
+        /* 3. YOUR POSTED STARS: Radiant Bright Emerald Green (+25% intensity) */
         .star.mine {
             background-color: var(--star-mine) !important;
-            box-shadow: 0 0 18px var(--star-mine-glow), 0 0 36px var(--star-mine), 0 0 54px rgba(0, 240, 255, 0.9);
+            box-shadow: 0 0 22px var(--star-mine-glow), 0 0 46px var(--star-mine), 0 0 70px rgba(0, 255, 102, 0.95);
             animation: pulse-mine-star 2.6s infinite ease-in-out;
+        }
+
+        /* 4. NEWLY ARRIVED STAR FEATURED HIGHLIGHT (Beams / Halo for remote new stars) */
+        .star.featured-new {
+            animation: featured-beacon 1.2s infinite ease-in-out !important;
+            z-index: 40 !important;
+        }
+
+        .star.featured-new::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid #ffee00;
+            box-shadow: 0 0 25px #ffee00;
+            animation: ripple-beacon 1.4s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
+            pointer-events: none;
+        }
+
+        @keyframes featured-beacon {
+            0%, 100% { transform: scale(1.1); filter: brightness(1.8); }
+            50% { transform: scale(1.6); filter: brightness(2.4); }
+        }
+
+        @keyframes ripple-beacon {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
         }
 
         .star:hover {
             transform: scale(2.6) !important;
             z-index: 50 !important;
-            filter: brightness(1.6);
+            filter: brightness(1.7);
         }
 
         @keyframes pulse-star {
-            0%, 100% { opacity: 0.7; transform: scale(0.93); }
+            0%, 100% { opacity: 0.75; transform: scale(0.93); }
             50% { opacity: 1; transform: scale(1.24); }
         }
 
         @keyframes pulse-mine-star {
-            0%, 100% { opacity: 0.85; transform: scale(0.96); box-shadow: 0 0 16px var(--star-mine-glow), 0 0 32px var(--star-mine); }
-            50% { opacity: 1; transform: scale(1.30); box-shadow: 0 0 24px var(--star-mine-glow), 0 0 46px var(--star-mine), 0 0 60px rgba(0, 240, 255, 0.95); }
+            0%, 100% { opacity: 0.88; transform: scale(0.96); box-shadow: 0 0 20px var(--star-mine-glow), 0 0 40px var(--star-mine); }
+            50% { opacity: 1; transform: scale(1.30); box-shadow: 0 0 28px var(--star-mine-glow), 0 0 56px var(--star-mine), 0 0 80px rgba(0, 255, 102, 1); }
+        }
+
+        /* Ascending Launching Star Animation Element */
+        .ascending-star {
+            position: fixed;
+            border-radius: 50%;
+            background-color: var(--star-mine);
+            box-shadow: 0 0 30px var(--star-mine-glow), 0 0 60px var(--star-mine), 0 0 90px rgba(0, 255, 102, 1);
+            pointer-events: none;
+            z-index: 999;
+            transform: translate(-50%, -50%);
+            transition: all 1.1s cubic-bezier(0.12, 0.8, 0.32, 1);
+        }
+
+        .ascending-star-trail {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            background: rgba(0, 255, 102, 0.6);
+            box-shadow: 0 0 15px #00ff66;
+            animation: trail-fade 0.6s forwards ease-out;
+            z-index: 998;
+        }
+
+        @keyframes trail-fade {
+            0% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
         }
 
         /* 3D Navigation Guide Tip & Legend */
@@ -288,35 +352,36 @@
             font-size: 0.72rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(166, 188, 255, 0.65);
+            color: rgba(166, 188, 255, 0.75);
             pointer-events: none;
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(15, 32, 56, 0.4);
-            padding: 5px 16px;
+            gap: 14px;
+            background: rgba(15, 32, 56, 0.55);
+            padding: 6px 18px;
             border-radius: 20px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(166, 188, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(166, 188, 255, 0.25);
         }
 
         .legend-item {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.68rem;
+            gap: 6px;
+            font-size: 0.70rem;
+            font-weight: 500;
         }
 
         .legend-dot {
-            width: 8px;
-            height: 8px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
         }
 
-        .dot-unread { background: #ffffff; box-shadow: 0 0 6px #fff; }
-        .dot-read { background: #ffd166; box-shadow: 0 0 6px #ffd166; }
-        .dot-mine { background: #00f0ff; box-shadow: 0 0 6px #00f0ff; }
+        .dot-unread { background: #ffffff; box-shadow: 0 0 8px #fff; }
+        .dot-read { background: #ffee00; box-shadow: 0 0 8px #ffee00; }
+        .dot-mine { background: #00ff66; box-shadow: 0 0 8px #00ff66; }
 
         /* Casting Interface */
         .interface {
@@ -383,8 +448,8 @@
         }
 
         .cast-btn {
-            background: linear-gradient(135deg, rgba(166, 188, 255, 0.3) 0%, rgba(166, 188, 255, 0.1) 100%);
-            border: 1px solid var(--accent);
+            background: linear-gradient(135deg, rgba(0, 255, 102, 0.25) 0%, rgba(0, 255, 102, 0.08) 100%);
+            border: 1px solid #00ff66;
             color: #ffffff;
             padding: 9px 26px;
             border-radius: 24px;
@@ -394,15 +459,15 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 600;
-            box-shadow: 0 0 18px rgba(166, 188, 255, 0.3);
+            box-shadow: 0 0 18px rgba(0, 255, 102, 0.3);
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             margin-left: auto;
         }
 
         .cast-btn:hover {
-            background: var(--accent);
+            background: #00ff66;
             color: #010409;
-            box-shadow: 0 0 30px var(--accent-glow);
+            box-shadow: 0 0 32px rgba(0, 255, 102, 0.8);
             transform: translateY(-2px);
         }
 
@@ -461,10 +526,10 @@
         }
 
         .modal-badge.mine {
-            background: rgba(0, 240, 255, 0.15);
-            border: 1px solid #00f0ff;
-            color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            background: rgba(0, 255, 102, 0.15);
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.35);
         }
 
         .modal-text {
@@ -562,7 +627,7 @@
         }
 
         /* ==========================================================================
-           COSMIC VAULT MODAL & FORM STYLES (v11)
+           COSMIC VAULT MODAL & FORM STYLES (v12)
            ========================================================================== */
         .vault-modal {
             max-width: 580px;
@@ -641,8 +706,8 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 240, 255, 0.1) 100%);
-            border: 1px solid #00f0ff;
+            background: linear-gradient(135deg, rgba(0, 255, 102, 0.3) 0%, rgba(0, 255, 102, 0.1) 100%);
+            border: 1px solid #00ff66;
             color: #ffffff;
             padding: 9px 20px;
             border-radius: 20px;
@@ -651,14 +716,14 @@
             text-transform: uppercase;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+            box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
             transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
-            background: #00f0ff;
+            background: #00ff66;
             color: #010409;
-            box-shadow: 0 0 26px rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 28px rgba(0, 255, 102, 0.7);
             transform: translateY(-2px);
         }
 
@@ -699,11 +764,11 @@
 
         .form-card {
             background: rgba(8, 22, 40, 0.9);
-            border: 1px solid rgba(0, 240, 255, 0.35);
+            border: 1px solid rgba(0, 255, 102, 0.35);
             border-radius: 18px;
             padding: 22px;
             margin-bottom: 18px;
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
         }
 
         .form-group {
@@ -718,7 +783,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #a5f3fc;
+            color: #bbf7d0;
             font-weight: 600;
         }
 
@@ -736,8 +801,8 @@
         }
 
         .form-input:focus {
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+            border-color: #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.35);
         }
 
         .form-error {
@@ -758,7 +823,7 @@
             align-items: center;
             gap: 10px;
             background: rgba(0, 0, 0, 0.65);
-            border: 1px solid rgba(0, 240, 255, 0.35);
+            border: 1px solid rgba(0, 255, 102, 0.35);
             border-radius: 14px;
             padding: 12px 16px;
             margin: 14px 0;
@@ -767,7 +832,7 @@
         .key-text {
             font-family: 'Fira Code', monospace;
             font-size: 0.92rem;
-            color: #00f0ff;
+            color: #00ff66;
             word-break: break-all;
             flex: 1;
             user-select: text;
@@ -790,9 +855,9 @@
         }
 
         .my-thought-card:hover {
-            border-color: #00f0ff;
+            border-color: #00ff66;
             background: rgba(16, 36, 64, 0.85);
-            box-shadow: 0 0 18px rgba(0, 240, 255, 0.25);
+            box-shadow: 0 0 18px rgba(0, 255, 102, 0.25);
             transform: translateX(4px);
         }
 
@@ -913,7 +978,7 @@
     </header>
 
     <div class="interface">
-        <div class="input-box">
+        <div class="input-box" id="castBoxContainer">
             <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the night..."></textarea>
             <div class="cast-actions">
                 <span class="char-count" id="charCount">0/250</span>
@@ -953,7 +1018,7 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & Vault Multi-Step Modal (v11) -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v12) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
@@ -965,13 +1030,7 @@
             </div>
 
             <div class="vault-body" id="vaultModalBody">
-                <!-- Dynamically rendered via JS:
-                     1. Choice View (Create Account vs Log In vs Guest)
-                     2. Create Account View (Username + Password)
-                     3. Recovery Key Notice View (Generated Secret Reset Key)
-                     4. Log In View (Username + Password)
-                     5. Forgot Password View (Username + Recovery Key + New Password)
-                     6. Active Vault Dashboard View -->
+                <!-- Dynamically rendered via JS -->
             </div>
         </div>
     </div>
@@ -1038,7 +1097,7 @@
         }
 
         /* ==========================================================================
-           AUTHENTICATION & VAULT STATE MANAGEMENT (v11)
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v12)
            - Active User (Username + KeyHash)
            - Persistent Login in localStorage
            - Universal Cross-Browser Cloud Account Registry in Supabase
@@ -1057,6 +1116,7 @@
 
         let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
         let guestThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_guest_thoughts') || '[]'));
+        let knownCloudThoughtIds = new Set();
 
         function getLocalAccounts() {
             return JSON.parse(localStorage.getItem('midnight_cosmic_accounts') || '{}');
@@ -1197,10 +1257,8 @@
         function isThoughtMine(thought) {
             if (!thought) return false;
             if (activeKeyHash) {
-                // When logged into an account, ONLY thoughts cast with this account's key are mine
                 return Boolean(thought.author_key && thought.author_key === activeKeyHash);
             } else {
-                // When in Guest mode, only thoughts cast in this guest session are marked as mine
                 return guestThoughtIds.has(thought.id ? thought.id.toString() : '');
             }
         }
@@ -1351,6 +1409,46 @@
                 } catch(e) {}
             }
 
+            playCastAscendSound() {
+                if (!this.isPlaying || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(980, now + 1.0);
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.16, now + 0.5);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 1.1);
+                } catch(e) {}
+            }
+
+            playNewStarArrivedSound() {
+                if (!this.isPlaying || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        gain.gain.setValueAtTime(0.12, now + idx * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.1 + 1.8);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + idx * 0.1);
+                        osc.stop(now + idx * 0.1 + 1.9);
+                    });
+                } catch(e) {}
+            }
+
             playCastShimmer() {
                 if (!this.isPlaying || !this.ctx) return;
                 try {
@@ -1396,17 +1494,17 @@
         const audio = new CelestialAudio();
 
         /* ==========================================================================
-           DATA MODEL & INITIAL STARS
+           DATA MODEL & INITIAL STARS (+20% Size Increase & Default Zero Reactions)
            ========================================================================== */
         const nowMs = Date.now();
         const defaultThoughts = [
-            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 42, resonate: 28, x: 22.5, y: 26.0, created_at: new Date(nowMs - 3600000 * 3).toISOString() },
-            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 56, resonate: 89, x: 48.0, y: 21.5, created_at: new Date(nowMs - 3600000 * 7).toISOString() },
-            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 94, resonate: 31, x: 75.5, y: 29.0, created_at: new Date(nowMs - 3600000 * 12).toISOString() },
-            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 37, resonate: 64, x: 33.0, y: 49.0, created_at: new Date(nowMs - 3600000 * 18).toISOString() },
-            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 168, resonate: 112, x: 62.5, y: 53.0, created_at: new Date(nowMs - 3600000 * 26).toISOString() },
-            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 83, resonate: 72, x: 83.0, y: 44.5, created_at: new Date(nowMs - 3600000 * 34).toISOString() },
-            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 65, resonate: 49, x: 15.5, y: 59.0, created_at: new Date(nowMs - 3600000 * 48).toISOString() }
+            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 0, resonate: 0, x: 22.5, y: 26.0, created_at: new Date(nowMs - 3600000 * 3).toISOString() },
+            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 0, resonate: 0, x: 48.0, y: 21.5, created_at: new Date(nowMs - 3600000 * 7).toISOString() },
+            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 0, resonate: 0, x: 75.5, y: 29.0, created_at: new Date(nowMs - 3600000 * 12).toISOString() },
+            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 0, resonate: 0, x: 33.0, y: 49.0, created_at: new Date(nowMs - 3600000 * 18).toISOString() },
+            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 0, resonate: 0, x: 62.5, y: 53.0, created_at: new Date(nowMs - 3600000 * 26).toISOString() },
+            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 0, resonate: 0, x: 83.0, y: 44.5, created_at: new Date(nowMs - 3600000 * 34).toISOString() },
+            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 0, resonate: 0, x: 15.5, y: 59.0, created_at: new Date(nowMs - 3600000 * 48).toISOString() }
         ];
 
         function getDeterministicProps(thought, index) {
@@ -1429,7 +1527,8 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            const baseSize = (s3 * 2.5 + 4.5) * 1.10;
+            /* 20% size increase over previous base size */
+            const baseSize = (s3 * 2.5 + 4.5) * 1.32;
             const size = Number(baseSize.toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
 
@@ -1479,8 +1578,8 @@
                             return {
                                 id: item.id.toString(),
                                 text: item.text,
-                                warmth: item.warmth || 0,
-                                resonate: item.resonate || 0,
+                                warmth: Math.max(0, item.warmth || 0),
+                                resonate: Math.max(0, item.resonate || 0),
                                 color_index: item.color_index || 0,
                                 author_key: item.author_key || null,
                                 created_at: item.created_at || new Date().toISOString(),
@@ -1488,6 +1587,18 @@
                                 y: props.y
                             };
                         });
+
+                        // Check for new incoming stars from other stargazers to feature them
+                        if (isBackground && knownCloudThoughtIds.size > 0) {
+                            newThoughts.forEach(t => {
+                                if (!knownCloudThoughtIds.has(t.id) && !isThoughtMine(t)) {
+                                    featureNewIncomingStar(t);
+                                }
+                            });
+                        }
+
+                        // Update known IDs
+                        newThoughts.forEach(t => knownCloudThoughtIds.add(t.id));
 
                         const hasChanges = newThoughts.length !== thoughtsArr.length || 
                                            newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate);
@@ -1504,6 +1615,22 @@
                     console.warn("Supabase sync notice:", err.message);
                 }
             }
+        }
+
+        // Feature new incoming stars from other users with a radiant beacon moment
+        function featureNewIncomingStar(thought) {
+            showToast("✨ A new star has just appeared in the celestial sky!");
+            audio.playNewStarArrivedSound();
+
+            setTimeout(() => {
+                const starEl = document.querySelector(`.star[data-id="${thought.id}"]`);
+                if (starEl) {
+                    starEl.classList.add('featured-new');
+                    setTimeout(() => {
+                        starEl.classList.remove('featured-new');
+                    }, 5000);
+                }
+            }, 600);
         }
 
         /* ==========================================================================
@@ -1590,7 +1717,7 @@
 
             setInterval(() => {
                 loadThoughts(true);
-            }, 5000);
+            }, 4500);
         }
 
         /* ==========================================================================
@@ -1780,6 +1907,71 @@
             });
 
             skyContainer.appendChild(star);
+            return star;
+        }
+
+        /* ==========================================================================
+           ASCENDING STAR TRAJECTORY ANIMATION (v12)
+           Animates a star starting from the cast bar up into the 3D sky at medium-fast speed
+           ========================================================================== */
+        function animateAscendingStarToSky(targetXPercent, targetYPercent, targetSize, onComplete) {
+            const castBox = document.getElementById('castBoxContainer') || document.getElementById('castBtn');
+            const castRect = castBox.getBoundingClientRect();
+            
+            const startScreenX = castRect.left + castRect.width / 2;
+            const startScreenY = castRect.top + castRect.height / 2;
+
+            const targetScreenX = (window.innerWidth * targetXPercent) / 100;
+            const targetScreenY = (window.innerHeight * targetYPercent) / 100;
+
+            const flyingStar = document.createElement('div');
+            flyingStar.className = 'ascending-star';
+            
+            // Ascending star is noticeably larger while travelling (24px)
+            const travelingSize = 24;
+            flyingStar.style.width = `${travelingSize}px`;
+            flyingStar.style.height = `${travelingSize}px`;
+            flyingStar.style.left = `${startScreenX}px`;
+            flyingStar.style.top = `${startScreenY}px`;
+            flyingStar.style.transform = 'translate(-50%, -50%) scale(0.6)';
+            flyingStar.style.opacity = '0.7';
+
+            document.body.appendChild(flyingStar);
+            audio.playCastAscendSound();
+
+            // Trail particle spawner
+            const trailInterval = setInterval(() => {
+                const curRect = flyingStar.getBoundingClientRect();
+                const trail = document.createElement('div');
+                trail.className = 'ascending-star-trail';
+                trail.style.left = `${curRect.left + curRect.width / 2}px`;
+                trail.style.top = `${curRect.top + curRect.height / 2}px`;
+                trail.style.width = `${travelingSize * 0.7}px`;
+                trail.style.height = `${travelingSize * 0.7}px`;
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 600);
+            }, 60);
+
+            // Medium-fast ascend curve (~1.1s)
+            requestAnimationFrame(() => {
+                flyingStar.style.left = `${targetScreenX}px`;
+                flyingStar.style.top = `${targetScreenY}px`;
+                flyingStar.style.transform = 'translate(-50%, -50%) scale(1.4)';
+                flyingStar.style.opacity = '1';
+            });
+
+            setTimeout(() => {
+                clearInterval(trailInterval);
+                // Arrival ripple effect
+                flyingStar.style.transform = `translate(-50%, -50%) scale(2.2)`;
+                flyingStar.style.opacity = '0';
+                audio.playCastShimmer();
+
+                setTimeout(() => {
+                    flyingStar.remove();
+                    if (typeof onComplete === 'function') onComplete();
+                }, 300);
+            }, 1100);
         }
 
         function animateCanvas() {
@@ -1958,7 +2150,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT USERNAME & PASSWORD AUTHENTICATION FLOW (v11)
+           COSMIC VAULT USERNAME & PASSWORD AUTHENTICATION FLOW (v12)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
@@ -2001,14 +2193,14 @@
                 </div>
 
                 <div class="choice-card">
-                    <div class="choice-title" style="color: #a5f3fc;">
+                    <div class="choice-title" style="color: #bbf7d0;">
                         <span>🗝️</span>
                         <span>Option 2: Log In to Existing Vault</span>
                     </div>
                     <div class="choice-desc">
                         Already have an account? Sign in with your unique username and password. You'll stay logged in across visits!
                     </div>
-                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00f0ff; color: #ffffff;">🗝️ Log In with Username</button>
+                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00ff66; color: #ffffff;">🗝️ Log In with Username</button>
                 </div>
 
                 <div class="choice-card" style="border-style: dashed; opacity: 0.9;">
@@ -2057,7 +2249,7 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
                         <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromReg">← Back to Options</span>
-                        <span style="color: #00f0ff; cursor: pointer;" id="btnGoLoginFromReg">Already have account? Log in ✦</span>
+                        <span style="color: #00ff66; cursor: pointer;" id="btnGoLoginFromReg">Already have account? Log in ✦</span>
                     </div>
                 </div>
             `;
@@ -2191,7 +2383,7 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
                         <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromLogin">← Back to Options</span>
-                        <span style="color: #ffd166; cursor: pointer;" id="btnGoForgot">Forgot Password? (Reset Key) ✦</span>
+                        <span style="color: #ffee00; cursor: pointer;" id="btnGoForgot">Forgot Password? (Reset Key) ✦</span>
                     </div>
                 </div>
             `;
@@ -2372,11 +2564,11 @@
 
             vaultModalBody.innerHTML = `
                 <!-- Vault Status Banner -->
-                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 255, 102, 0.35); border-radius: 18px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 1.1rem;">🔒</span>
                         <div>
-                            <div style="font-size: 0.82rem; color: #a5f3fc; font-weight: 600; letter-spacing: 0.5px;">
+                            <div style="font-size: 0.82rem; color: #bbf7d0; font-weight: 600; letter-spacing: 0.5px;">
                                 Logged in as: <strong>${activeUsername}</strong>
                             </div>
                             <div style="font-size: 0.72rem; color: #8da2c0;">
@@ -2390,11 +2582,11 @@
                 <!-- Stats summary -->
                 <div style="display: flex; gap: 12px; margin-bottom: 18px;">
                     <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #00f0ff;">${myThoughts.length}</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #00ff66;">${myThoughts.length}</div>
                         <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Stars Cast</div>
                     </div>
                     <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffd166;">✨ ${totalWarmth}</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffee00;">✨ ${totalWarmth}</div>
                         <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Warmth Received</div>
                     </div>
                     <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
@@ -2404,7 +2596,7 @@
                 </div>
 
                 <!-- Messages List -->
-                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #a5f3fc; font-weight: 600; margin-bottom: 10px;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #bbf7d0; font-weight: 600; margin-bottom: 10px;">
                     Your Casted Stars (${myThoughts.length})
                 </div>
                 <div class="my-thoughts-list">${listHtml}</div>
@@ -2431,7 +2623,7 @@
         }
 
         /* ==========================================================================
-           CASTING INTERFACE (v11)
+           CASTING INTERFACE WITH ASCENDING STAR TRAJECTORY (v12)
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -2451,10 +2643,11 @@
             const tempId = "local_" + Date.now().toString();
             const nowIso = new Date().toISOString();
 
+            // By default send warmth and resonate count start at zero
             let newThought = {
                 id: tempId,
                 text: text,
-                warmth: 1,
+                warmth: 0,
                 resonate: 0,
                 color_index: 0,
                 author_key: activeKeyHash || null,
@@ -2470,18 +2663,23 @@
 
             thoughtsArr.push(newThought);
             saveThoughtsLocal();
-            createStarElement(newThought, thoughtsArr.length - 1);
-            updateTotalThoughtsCount();
-            updateVaultHeaderButton();
-
-            audio.playCastShimmer();
-            const sStar = new ShootingStar();
-            shootingStars.push(sStar);
-
+            
             thoughtInput.value = '';
             charCount.innerText = '0/250';
-            castBtn.innerText = "Casted ✨";
-            showToast("Your thought has taken its place among the stars.");
+            castBtn.innerText = "Ascending ✨";
+
+            // Trigger Launch Trajectory Animation from Cast Bar to Sky
+            animateAscendingStarToSky(coordX, coordY, 24, () => {
+                const newStarEl = createStarElement(newThought, thoughtsArr.length - 1);
+                newStarEl.style.transform = 'scale(2.2)';
+                setTimeout(() => {
+                    newStarEl.style.transform = '';
+                }, 400);
+
+                updateTotalThoughtsCount();
+                updateVaultHeaderButton();
+                showToast("Your star has taken its place in the sky.");
+            });
 
             setTimeout(() => {
                 castBtn.innerText = "Cast Into the Night";
@@ -2494,7 +2692,7 @@
                         .insert([
                             {
                                 text: text,
-                                warmth: 1,
+                                warmth: 0,
                                 resonate: 0,
                                 color_index: 0,
                                 author_key: activeKeyHash || null,
@@ -2511,7 +2709,7 @@
                             .insert([
                                 {
                                     text: text,
-                                    warmth: 1,
+                                    warmth: 0,
                                     resonate: 0,
                                     color_index: 0,
                                     x: coordX,
@@ -2522,6 +2720,7 @@
                         if (retryRes.data && retryRes.data.length > 0) {
                             const cloudId = retryRes.data[0].id.toString();
                             newThought.id = cloudId;
+                            knownCloudThoughtIds.add(cloudId);
                             if (retryRes.data[0].created_at) {
                                 newThought.created_at = retryRes.data[0].created_at;
                             }
@@ -2534,6 +2733,7 @@
                     } else if (data && data.length > 0) {
                         const cloudId = data[0].id.toString();
                         newThought.id = cloudId;
+                        knownCloudThoughtIds.add(cloudId);
                         if (data[0].created_at) {
                             newThought.created_at = data[0].created_at;
                         }
