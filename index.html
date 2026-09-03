@@ -851,6 +851,84 @@
             word-break: break-word;
         }
 
+        .chat-closed-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 10px;
+            text-align: center;
+            margin: auto 0;
+            gap: 10px;
+        }
+
+        .request-chat-btn {
+            background: linear-gradient(135deg, rgba(166, 188, 255, 0.25) 0%, rgba(166, 188, 255, 0.1) 100%);
+            border: 1px solid var(--accent);
+            color: #ffffff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.80rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(166, 188, 255, 0.25);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .request-chat-btn:hover {
+            background: var(--accent);
+            color: #010409;
+            box-shadow: 0 0 24px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .req-count-pill {
+            background: rgba(0, 255, 102, 0.3);
+            border: 1px solid #00ff66;
+            color: #a7f3d0;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 0.70rem;
+            font-weight: 700;
+        }
+
+        .chat-req-sent-badge {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 255, 102, 0.12);
+            border: 1px solid rgba(0, 255, 102, 0.45);
+            color: #6ee7b7;
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 0.76rem;
+            font-weight: 500;
+            box-shadow: 0 0 14px rgba(0, 255, 102, 0.2);
+        }
+
+        .req-count-tag {
+            font-size: 0.68rem;
+            color: #a7f3d0;
+            opacity: 0.85;
+        }
+
+        .creator-req-notice {
+            background: rgba(16, 36, 64, 0.8);
+            border: 1px solid rgba(255, 208, 0, 0.45);
+            border-radius: 14px;
+            padding: 12px 18px;
+            box-shadow: 0 0 18px rgba(255, 208, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
         .chat-empty-hint {
             text-align: center;
             color: #8da2c0;
@@ -1949,6 +2027,7 @@
         }
 
         let thoughtsArr = JSON.parse(localStorage.getItem('midnight_thought_data')) || defaultThoughts;
+        let starChatRequests = JSON.parse(localStorage.getItem('midnight_chat_requests')) || {};
 
         function saveThoughtsLocal() {
             localStorage.setItem('midnight_thought_data', JSON.stringify(thoughtsArr));
@@ -1977,8 +2056,9 @@
                     if (error) {
                         console.warn("Supabase load notice:", error.message);
                     } else if (Array.isArray(data) && data.length > 0) {
-                        // Process star chat messages from background
+                        // Process star chat messages and requests from background
                         const chatByStar = {};
+                        const reqCounts = {};
                         data.forEach(item => {
                             if (item.text && item.text.startsWith('__STAR_CHAT__:')) {
                                 try {
@@ -1992,8 +2072,21 @@
                                         });
                                     }
                                 } catch(e) {}
+                            } else if (item.text && item.text.startsWith('__CHAT_REQ__:')) {
+                                try {
+                                    const reqObj = JSON.parse(item.text.substring(13));
+                                    if (reqObj && reqObj.star_id) {
+                                        const sId = reqObj.star_id.toString();
+                                        reqCounts[sId] = (reqCounts[sId] || 0) + 1;
+                                    }
+                                } catch(e) {}
                             }
                         });
+
+                        for (const sId in reqCounts) {
+                            starChatRequests[sId] = Math.max(starChatRequests[sId] || 0, reqCounts[sId]);
+                        }
+                        localStorage.setItem('midnight_chat_requests', JSON.stringify(starChatRequests));
 
                         for (const sId in chatByStar) {
                             mergeStarChatMessages(sId, chatByStar[sId]);
@@ -2001,8 +2094,8 @@
 
                         const realThoughts = data.filter(item => {
                             if (!item.text) return false;
-                            if (item.text.startsWith('__SYS_ACC__:') || item.text.startsWith('__STAR_CHAT__:')) return false;
-                            if (item.author_key && (item.author_key === 'sys_account_record' || item.author_key.startsWith('sys_acc_') || item.author_key.startsWith('chat_star_'))) return false;
+                            if (item.text.startsWith('__SYS_ACC__:') || item.text.startsWith('__STAR_CHAT__:') || item.text.startsWith('__CHAT_REQ__:')) return false;
+                            if (item.author_key && (item.author_key === 'sys_account_record' || item.author_key.startsWith('sys_acc_') || item.author_key.startsWith('chat_star_') || item.author_key.startsWith('chat_req_'))) return false;
                             if (item.warmth !== undefined && Number(item.warmth) < 0) return false;
                             return true;
                         });
@@ -2023,6 +2116,24 @@
                                 x: props.x,
                                 y: props.y
                             };
+                        });
+
+                        // Check if any star where the user requested chat has been accepted/opened
+                        newThoughts.forEach(t => {
+                            const sId = t.id.toString();
+                            const myReqs = JSON.parse(localStorage.getItem('my_chat_requests') || '[]');
+                            const hasRequested = Boolean(sessionStorage.getItem('requested_chat_' + sId) || myReqs.includes(sId));
+                            const alreadyNotified = Boolean(sessionStorage.getItem('notified_accepted_' + sId));
+
+                            if (hasRequested && t.chat_enabled && !alreadyNotified && !isThoughtMine(t)) {
+                                sessionStorage.setItem('notified_accepted_' + sId, 'true');
+                                showToast("🔓 The creator accepted your request & opened chat on their star!");
+                                audio.playChime(3);
+
+                                if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === sId) {
+                                    setupStarChat(t, false);
+                                }
+                            }
                         });
 
                         if (isBackground && knownCloudThoughtIds.size > 0) {
@@ -2565,9 +2676,104 @@
             const modalEl = document.querySelector('.overlay .modal');
             if (!isChatEnabled) {
                 if (modalEl) modalEl.classList.remove('has-conversation');
-                starChatMessages.innerHTML = `<div class="chat-empty-hint">🔒 Anonymous chat is closed on this star.</div>`;
                 starChatInputRow.style.display = 'none';
                 if (chatReplyBanner) chatReplyBanner.style.display = 'none';
+
+                const reqCount = starChatRequests[sId] || 0;
+                const hasRequested = Boolean(sessionStorage.getItem('requested_chat_' + sId));
+
+                if (isMine) {
+                    starChatMessages.innerHTML = `
+                        <div class="chat-closed-box">
+                            <div class="chat-empty-hint">🔒 Anonymous chat is currently closed on your star.</div>
+                            ${reqCount > 0 ? `
+                                <div class="creator-req-notice">
+                                    <div style="color: #ffd000; font-size: 0.78rem; font-weight: 600;">
+                                        🔔 <strong>${reqCount} Stargazer${reqCount > 1 ? 's' : ''}</strong> requested to chat on this star!
+                                    </div>
+                                    <button class="request-chat-btn" id="creatorAcceptReqBtn" style="border-color: #00ff66; background: rgba(0, 255, 102, 0.2);">
+                                        <span>🔓 Accept & Open Chat Now</span>
+                                    </button>
+                                </div>
+                            ` : `
+                                <button class="request-chat-btn" id="creatorQuickOpenBtn">
+                                    <span>🔓 Open Anonymous Chat</span>
+                                </button>
+                            `}
+                        </div>
+                    `;
+                    const acceptBtn = document.getElementById('creatorAcceptReqBtn') || document.getElementById('creatorQuickOpenBtn');
+                    if (acceptBtn) {
+                        acceptBtn.onclick = async () => {
+                            thought.chat_enabled = true;
+                            thought.color_index = 1;
+                            saveThoughtsLocal();
+                            setupStarChat(thought, isMine);
+
+                            if (dbClient && !isNaN(Number(thought.id))) {
+                                try {
+                                    await dbClient
+                                        .from('thoughts')
+                                        .update({ color_index: 1 })
+                                        .eq('id', Number(thought.id));
+                                } catch(e) {}
+                            }
+                            showToast("🔓 Star chat is now open for all stargazers!");
+                        };
+                    }
+                } else {
+                    starChatMessages.innerHTML = `
+                        <div class="chat-closed-box">
+                            <div class="chat-empty-hint">🔒 Anonymous chat is closed on this star.</div>
+                            ${hasRequested ? `
+                                <div class="chat-req-sent-badge">
+                                    <span>📨 Chat request sent to star creator</span>
+                                    ${reqCount > 1 ? `<span class="req-count-tag">${reqCount} Stargazers requested</span>` : ''}
+                                </div>
+                            ` : `
+                                <button class="request-chat-btn" id="requestChatBtn" title="Ask the star creator to enable anonymous chat">
+                                    <span>✨ Request to Open Chat</span>
+                                    ${reqCount > 0 ? `<span class="req-count-pill">${reqCount}</span>` : ''}
+                                </button>
+                            `}
+                        </div>
+                    `;
+
+                    const reqBtn = document.getElementById('requestChatBtn');
+                    if (reqBtn) {
+                        reqBtn.onclick = async () => {
+                            sessionStorage.setItem('requested_chat_' + sId, 'true');
+                            const myReqs = JSON.parse(localStorage.getItem('my_chat_requests') || '[]');
+                            if (!myReqs.includes(sId)) {
+                                myReqs.push(sId);
+                                localStorage.setItem('my_chat_requests', JSON.stringify(myReqs));
+                            }
+                            starChatRequests[sId] = (starChatRequests[sId] || 0) + 1;
+                            localStorage.setItem('midnight_chat_requests', JSON.stringify(starChatRequests));
+                            setupStarChat(thought, isMine);
+                            showToast("✨ Chat request sent to the star creator!");
+                            audio.playChime(activeThoughtIndex + 2);
+
+                            if (dbClient) {
+                                try {
+                                    await dbClient
+                                        .from('thoughts')
+                                        .insert([{
+                                            text: '__CHAT_REQ__:' + JSON.stringify({ star_id: sId, time: new Date().toISOString() }),
+                                            warmth: -3,
+                                            resonate: 0,
+                                            color_index: 0,
+                                            author_key: 'chat_req_' + sId,
+                                            x: -999,
+                                            y: -999
+                                        }]);
+                                } catch(e) {
+                                    console.warn("Chat request cloud send notice:", e);
+                                }
+                            }
+                        };
+                    }
+                }
                 return;
             }
 
