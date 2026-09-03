@@ -1312,6 +1312,61 @@
         let knownCloudThoughtIds = new Set();
         let starChatCache = JSON.parse(localStorage.getItem('midnight_star_chats') || '{}');
 
+        // Sanitize initial cache to remove any duplicates
+        function sanitizeStarChatCache() {
+            for (const sId in starChatCache) {
+                const arr = starChatCache[sId];
+                if (Array.isArray(arr)) {
+                    const seen = new Set();
+                    const clean = [];
+                    arr.forEach(m => {
+                        const key = (m.uid || '') + '_' + (m.text || '').trim() + '_' + (m.sender || '');
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            clean.push(m);
+                        }
+                    });
+                    starChatCache[sId] = clean;
+                }
+            }
+            localStorage.setItem('midnight_star_chats', JSON.stringify(starChatCache));
+        }
+        sanitizeStarChatCache();
+
+        function mergeStarChatMessages(starId, newMessages) {
+            if (!starId || !Array.isArray(newMessages)) return;
+            const sId = starId.toString();
+            const existing = starChatCache[sId] || [];
+            const msgMap = new Map();
+
+            function getMsgKey(m) {
+                if (m.uid) return 'uid_' + m.uid;
+                if (m.id && !m.id.toString().startsWith('c_') && !m.id.toString().startsWith('local_')) return 'id_' + m.id;
+                return 'content_' + (m.sender || '') + '_' + (m.text || '').trim();
+            }
+
+            existing.forEach(m => {
+                msgMap.set(getMsgKey(m), m);
+            });
+
+            newMessages.forEach(m => {
+                const key = getMsgKey(m);
+                if (msgMap.has(key)) {
+                    msgMap.set(key, { ...msgMap.get(key), ...m });
+                } else {
+                    msgMap.set(key, m);
+                }
+            });
+
+            const merged = Array.from(msgMap.values()).sort((a, b) => new Date(a.time || 0).getTime() - new Date(b.time || 0).getTime());
+            starChatCache[sId] = merged;
+            localStorage.setItem('midnight_star_chats', JSON.stringify(starChatCache));
+
+            if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === sId) {
+                renderStarChatMessages(sId);
+            }
+        }
+
         function getLocalAccounts() {
             return JSON.parse(localStorage.getItem('midnight_cosmic_accounts') || '{}');
         }
@@ -1768,27 +1823,26 @@
                         console.warn("Supabase load notice:", error.message);
                     } else if (Array.isArray(data) && data.length > 0) {
                         // Process star chat messages from background
+                        const chatByStar = {};
                         data.forEach(item => {
                             if (item.text && item.text.startsWith('__STAR_CHAT__:')) {
                                 try {
                                     const chatObj = JSON.parse(item.text.substring(14));
                                     if (chatObj && chatObj.star_id) {
                                         const sId = chatObj.star_id.toString();
-                                        if (!starChatCache[sId]) starChatCache[sId] = [];
-                                        if (!starChatCache[sId].some(m => m.id === item.id.toString())) {
-                                            starChatCache[sId].push({
-                                                id: item.id.toString(),
-                                                ...chatObj
-                                            });
-                                            localStorage.setItem('midnight_star_chats', JSON.stringify(starChatCache));
-                                            if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === sId) {
-                                                renderStarChatMessages(sId);
-                                            }
-                                        }
+                                        if (!chatByStar[sId]) chatByStar[sId] = [];
+                                        chatByStar[sId].push({
+                                            id: item.id.toString(),
+                                            ...chatObj
+                                        });
                                     }
                                 } catch(e) {}
                             }
                         });
+
+                        for (const sId in chatByStar) {
+                            mergeStarChatMessages(sId, chatByStar[sId]);
+                        }
 
                         const realThoughts = data.filter(item => {
                             if (!item.text) return false;
@@ -2326,21 +2380,24 @@
                         ${isChatEnabled ? '🔒 Close Chat' : '🔓 Open Chat'}
                     </button>
                 `;
-                document.getElementById('toggleStarChatBtn').addEventListener('click', async () => {
-                    thought.chat_enabled = !isChatEnabled;
-                    saveThoughtsLocal();
-                    setupStarChat(thought, isMine);
+                const toggleBtn = document.getElementById('toggleStarChatBtn');
+                if (toggleBtn) {
+                    toggleBtn.onclick = async () => {
+                        thought.chat_enabled = !thought.chat_enabled;
+                        saveThoughtsLocal();
+                        setupStarChat(thought, isMine);
 
-                    if (dbClient && !isNaN(Number(thought.id))) {
-                        try {
-                            await dbClient
-                                .from('thoughts')
-                                .update({ color_index: thought.chat_enabled ? 0 : 99 })
-                                .eq('id', Number(thought.id));
-                        } catch(e) {}
-                    }
-                    showToast(thought.chat_enabled ? "🔓 Star chat opened" : "🔒 Star chat closed");
-                });
+                        if (dbClient && !isNaN(Number(thought.id))) {
+                            try {
+                                await dbClient
+                                    .from('thoughts')
+                                    .update({ color_index: thought.chat_enabled ? 0 : 99 })
+                                    .eq('id', Number(thought.id));
+                            } catch(e) {}
+                        }
+                        showToast(thought.chat_enabled ? "🔓 Star chat opened" : "🔒 Star chat closed");
+                    };
+                }
             } else {
                 starChatStatus.innerHTML = '';
             }
@@ -2367,7 +2424,7 @@
             const starAuthorKey = currentThought ? currentThought.author_key : null;
 
             starChatMessages.innerHTML = msgs.map(m => {
-                const isCreator = (starAuthorKey && m.sender_key && starAuthorKey === m.sender_key);
+                const isCreator = Boolean(starAuthorKey && m.sender_key && starAuthorKey === m.sender_key);
                 return `
                     <div class="chat-msg-bubble ${isCreator ? 'creator' : ''}">
                         <div class="chat-msg-author ${isCreator ? 'creator' : ''}">
@@ -2383,7 +2440,7 @@
         }
 
         async function fetchCloudStarChat(starId) {
-            if (!dbClient) return;
+            if (!dbClient || !starId) return;
             try {
                 const { data, error } = await dbClient
                     .from('thoughts')
@@ -2402,24 +2459,22 @@
                         return null;
                     }).filter(Boolean);
 
-                    starChatCache[starId] = parsedMsgs;
-                    localStorage.setItem('midnight_star_chats', JSON.stringify(starChatCache));
-
-                    if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex] && thoughtsArr[activeThoughtIndex].id.toString() === starId) {
-                        renderStarChatMessages(starId);
-                    }
+                    mergeStarChatMessages(starId, parsedMsgs);
                 }
             } catch(e) {
                 console.warn("fetchCloudStarChat notice:", e);
             }
         }
 
+        let isSendingChat = false;
+
         async function sendStarChatMessage() {
-            if (activeThoughtIndex === null) return;
+            if (activeThoughtIndex === null || isSendingChat) return;
             const thought = thoughtsArr[activeThoughtIndex];
             const text = starChatInput.value.trim();
             if (!text) return;
 
+            isSendingChat = true;
             const sId = thought.id.toString();
             starChatInput.value = '';
 
@@ -2431,10 +2486,10 @@
             }
 
             const nowIso = new Date().toISOString();
-            const localMsgId = "c_" + Date.now().toString();
+            const uniqueUid = "msg_" + Date.now().toString() + "_" + Math.random().toString(36).substring(2, 7);
 
             const msgObj = {
-                id: localMsgId,
+                uid: uniqueUid,
                 star_id: sId,
                 sender: senderName,
                 sender_key: activeKeyHash || null,
@@ -2442,11 +2497,7 @@
                 time: nowIso
             };
 
-            if (!starChatCache[sId]) starChatCache[sId] = [];
-            starChatCache[sId].push(msgObj);
-            localStorage.setItem('midnight_star_chats', JSON.stringify(starChatCache));
-
-            renderStarChatMessages(sId);
+            mergeStarChatMessages(sId, [msgObj]);
             audio.playChime(activeThoughtIndex + 3);
 
             if (dbClient) {
@@ -2466,12 +2517,13 @@
                     console.warn("Cloud star chat send notice:", e);
                 }
             }
+            isSendingChat = false;
         }
 
-        starChatSendBtn.addEventListener('click', sendStarChatMessage);
-        starChatInput.addEventListener('keydown', (e) => {
+        starChatSendBtn.onclick = sendStarChatMessage;
+        starChatInput.onkeydown = (e) => {
             if (e.key === 'Enter') sendStarChatMessage();
-        });
+        };
 
         function escapeHtml(str) {
             if (!str) return '';
