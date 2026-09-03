@@ -693,10 +693,118 @@
             color: #6ee7b7;
         }
 
+        .chat-msg-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .chat-msg-time {
             font-size: 0.65rem;
             color: #8da2c0;
             font-weight: normal;
+        }
+
+        .chat-reply-trigger {
+            background: none;
+            border: none;
+            color: #a6bcff;
+            font-size: 0.68rem;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: all 0.2s ease;
+            padding: 0 4px;
+        }
+
+        .chat-reply-trigger:hover {
+            color: #00ff66;
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .chat-msg-quoted {
+            background: rgba(0, 0, 0, 0.35);
+            border-left: 2px solid #00ff66;
+            border-radius: 4px 8px 8px 4px;
+            padding: 4px 8px;
+            margin-bottom: 6px;
+            font-size: 0.70rem;
+            color: #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .quoted-author {
+            color: #6ee7b7;
+            font-weight: 600;
+            font-size: 0.66rem;
+        }
+
+        .quoted-text {
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            font-style: italic;
+        }
+
+        .chat-reply-banner {
+            background: rgba(16, 36, 64, 0.85);
+            border: 1px solid rgba(0, 255, 102, 0.4);
+            border-radius: 10px;
+            padding: 5px 10px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            animation: fadeInBanner 0.22s ease;
+        }
+
+        @keyframes fadeInBanner {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reply-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow: hidden;
+            color: #d0e0ff;
+        }
+
+        .reply-indicator {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-indicator strong {
+            color: #00ff66;
+        }
+
+        .reply-preview-text {
+            color: #8da2c0;
+            font-style: italic;
+        }
+
+        .reply-cancel-btn {
+            background: none;
+            border: none;
+            color: #fca5a5;
+            cursor: pointer;
+            font-size: 0.80rem;
+            padding: 0 4px;
+            margin-left: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .reply-cancel-btn:hover {
+            color: #ef4444;
         }
 
         .chat-msg-text {
@@ -1202,6 +1310,14 @@
                 
                 <div class="star-chat-messages" id="starChatMessages">
                     <div class="chat-empty-hint">Loading celestial whispers...</div>
+                </div>
+
+                <!-- Reply Target Banner (Instagram style) -->
+                <div class="chat-reply-banner" id="chatReplyBanner" style="display: none;">
+                    <div class="reply-banner-content">
+                        <span class="reply-indicator">Replying to <strong id="replyToUser">@Stargazer</strong> <span id="replyToPreview" class="reply-preview-text"></span></span>
+                    </div>
+                    <button class="reply-cancel-btn" id="cancelReplyBtn" title="Cancel Reply">✕</button>
                 </div>
 
                 <div class="chat-input-row" id="starChatInputRow">
@@ -2416,6 +2532,34 @@
             fetchCloudStarChat(sId);
         }
 
+        let activeReplyTarget = null;
+        const chatReplyBanner = document.getElementById('chatReplyBanner');
+        const replyToUser = document.getElementById('replyToUser');
+        const replyToPreview = document.getElementById('replyToPreview');
+        const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+
+        function startReplyingTo(targetUid, sender, text) {
+            activeReplyTarget = { uid: targetUid, sender: sender, text: text };
+            if (chatReplyBanner && replyToUser && replyToPreview) {
+                replyToUser.innerText = '@' + sender;
+                const snippet = text.length > 30 ? `"${text.substring(0, 30)}..."` : `"${text}"`;
+                replyToPreview.innerText = snippet;
+                chatReplyBanner.style.display = 'flex';
+            }
+            starChatInput.placeholder = `Reply to @${sender}...`;
+            starChatInput.focus();
+        }
+
+        function cancelReplying() {
+            activeReplyTarget = null;
+            if (chatReplyBanner) chatReplyBanner.style.display = 'none';
+            if (starChatInput) starChatInput.placeholder = "Whisper anonymously into this star...";
+        }
+
+        if (cancelReplyBtn) {
+            cancelReplyBtn.onclick = cancelReplying;
+        }
+
         function renderStarChatMessages(starId) {
             const msgs = starChatCache[starId] || [];
             if (msgs.length === 0) {
@@ -2428,11 +2572,22 @@
 
             starChatMessages.innerHTML = msgs.map(m => {
                 const isCreator = Boolean(starAuthorKey && m.sender_key && starAuthorKey === m.sender_key);
+                const replyHtml = m.reply_to ? `
+                    <div class="chat-msg-quoted">
+                        <span class="quoted-author">↳ Replying to @${escapeHtml(m.reply_to.sender || 'Stargazer')}:</span>
+                        <span class="quoted-text">"${escapeHtml(m.reply_to.text || '')}"</span>
+                    </div>
+                ` : '';
+
                 return `
                     <div class="chat-msg-bubble ${isCreator ? 'creator' : ''}">
+                        ${replyHtml}
                         <div class="chat-msg-author ${isCreator ? 'creator' : ''}">
                             <span>${isCreator ? '👑 ' : ''}${escapeHtml(m.sender || 'Anonymous Stargazer')}</span>
-                            <span class="chat-msg-time">${formatChatTime(m.time)}</span>
+                            <div class="chat-msg-meta">
+                                <span class="chat-msg-time">${formatChatTime(m.time)}</span>
+                                <button class="chat-reply-trigger" data-uid="${m.uid || m.id}" data-sender="${escapeHtml(m.sender || 'Stargazer')}" data-text="${escapeHtml(m.text)}">Reply</button>
+                            </div>
                         </div>
                         <div class="chat-msg-text">${escapeHtml(m.text)}</div>
                     </div>
@@ -2441,6 +2596,16 @@
 
             starChatMessages.scrollTop = starChatMessages.scrollHeight;
         }
+
+        starChatMessages.onclick = (e) => {
+            const btn = e.target.closest('.chat-reply-trigger');
+            if (btn) {
+                const uid = btn.dataset.uid;
+                const sender = btn.dataset.sender;
+                const text = btn.dataset.text;
+                startReplyingTo(uid, sender, text);
+            }
+        };
 
         async function fetchCloudStarChat(starId) {
             if (!dbClient || !starId) return;
@@ -2497,15 +2662,23 @@
             const nowIso = new Date().toISOString();
             const uniqueUid = "msg_" + Date.now().toString() + "_" + Math.random().toString(36).substring(2, 7);
 
+            const replyData = activeReplyTarget ? {
+                uid: activeReplyTarget.uid,
+                sender: activeReplyTarget.sender,
+                text: activeReplyTarget.text
+            } : null;
+
             const msgObj = {
                 uid: uniqueUid,
                 star_id: sId,
                 sender: senderName,
                 sender_key: activeKeyHash || null,
                 text: text,
-                time: nowIso
+                time: nowIso,
+                reply_to: replyData
             };
 
+            cancelReplying();
             mergeStarChatMessages(sId, [msgObj]);
             audio.playChime(activeThoughtIndex + 3);
 
@@ -2540,6 +2713,7 @@
         }
 
         function closeModal() {
+            cancelReplying();
             overlay.classList.remove('active');
             activeThoughtIndex = null;
         }
