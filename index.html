@@ -3,28 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v12) — 3D Celestial Sky & Ascending Stars</title>
+    <title>The Midnight Thought (v13) — Cosmic Constellations & Anonymous Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-glow: radial-gradient(circle at 50% 35%, #18365c 0%, #0a192e 50%, #010409 100%);
-            --accent: #a6bcff;
-            --accent-glow: rgba(166, 188, 255, 0.95);
+            /* Crisp & Vivid Celestial Palette */
+            --bg-deep: #030712;
+            --accent: #818cf8;
+            --accent-light: #c7d2fe;
+            --accent-glow: rgba(129, 140, 248, 0.45);
             
-            /* High-Intensity Celestial Colors (+25% intensity) */
+            /* Sharp, Razor-Bright Star Colors (Zero Muddy Screen Blur) */
             --star-white: #ffffff;
-            --star-white-glow: rgba(255, 255, 255, 1);
+            --star-white-glow: rgba(255, 255, 255, 0.85);
             
-            /* Bright Yellow for Read Stars */
-            --star-yellow: #ffee00;
-            --star-yellow-glow: rgba(255, 238, 0, 1);
+            --star-yellow: #ffdf00;
+            --star-yellow-glow: rgba(255, 223, 0, 0.85);
             
-            /* Bright Green for Your Star */
-            --star-mine: #00ff66;
-            --star-mine-glow: rgba(0, 255, 102, 1);
+            --star-green: #00ff88;
+            --star-green-glow: rgba(0, 255, 136, 0.85);
+            
+            /* Glassmorphism surfaces */
+            --glass-bg: rgba(15, 23, 42, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-border-hover: rgba(129, 140, 248, 0.4);
+            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.15) inset;
         }
 
         * {
@@ -37,12 +43,27 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #010409;
-            background-image: var(--bg-glow);
+            background: #030712;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #f0f6fc;
+            color: #f8fafc;
             user-select: none;
             touch-action: none;
+        }
+
+        /* Rich Atmospheric Nebula & Micro-Stars Background */
+        .cosmic-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% 20%, rgba(30, 27, 75, 0.5) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(15, 23, 42, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 20% 70%, rgba(12, 74, 110, 0.25) 0%, transparent 55%),
+                linear-gradient(180deg, #030712 0%, #080d1a 50%, #02040a 100%);
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* 3D Celestial Viewport */
@@ -52,7 +73,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            perspective: 1200px;
+            perspective: 1400px;
             perspective-origin: 50% 50%;
             overflow: hidden;
             cursor: grab;
@@ -92,13 +113,13 @@
             pointer-events: auto;
         }
 
-        /* Top controls header */
+        /* Top Header & Modern Floating HUD */
         .top-header {
             position: absolute;
-            top: 25px;
+            top: 24px;
             left: 0;
             width: 100%;
-            padding: 0 35px;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -109,18 +130,20 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
             flex-wrap: wrap;
         }
 
         .header-title {
             font-family: 'Cinzel', Georgia, serif;
-            font-size: 1.2rem;
-            letter-spacing: 6px;
-            color: #ffffff;
-            text-shadow: 0 0 16px rgba(166, 188, 255, 0.8), 0 0 32px rgba(166, 188, 255, 0.4);
+            font-size: 1.25rem;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 60%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(129, 140, 248, 0.3));
         }
 
         .stats-group {
@@ -129,116 +152,124 @@
             gap: 10px;
         }
 
-        .active-users-badge, .total-thoughts-badge, .my-vault-btn {
+        .hud-badge, .my-vault-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(16, 36, 64, 0.65);
-            border: 1px solid rgba(166, 188, 255, 0.35);
-            backdrop-filter: blur(12px);
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 0.76rem;
-            color: #d0e0ff;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 14px rgba(166, 188, 255, 0.15);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 6px 15px;
+            border-radius: 24px;
+            font-size: 0.78rem;
+            color: #e2e8f0;
+            letter-spacing: 0.4px;
+            font-weight: 500;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: default;
             text-decoration: none;
         }
 
         .total-thoughts-badge {
-            color: #ffe8a3;
-            border-color: rgba(255, 238, 0, 0.5);
-            box-shadow: 0 0 16px rgba(255, 238, 0, 0.25);
-            cursor: default;
+            color: #fef08a;
+            border-color: rgba(254, 240, 138, 0.25);
         }
 
         .my-vault-btn {
-            background: rgba(0, 255, 102, 0.12);
-            border-color: rgba(0, 255, 102, 0.6);
-            color: #bbf7d0;
-            box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
+            background: rgba(0, 255, 136, 0.08);
+            border-color: rgba(0, 255, 136, 0.35);
+            color: #6ee7b7;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .my-vault-btn:hover {
-            background: rgba(0, 255, 102, 0.25);
-            border-color: var(--star-mine);
+            background: rgba(0, 255, 136, 0.18);
+            border-color: var(--star-green);
             color: #ffffff;
-            box-shadow: 0 0 24px rgba(0, 255, 102, 0.6);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.35), var(--glass-shadow);
             transform: translateY(-1px);
         }
 
         .my-vault-btn.guest {
-            background: rgba(166, 188, 255, 0.12);
-            border-color: rgba(166, 188, 255, 0.4);
-            color: #d0e0ff;
+            background: rgba(129, 140, 248, 0.08);
+            border-color: rgba(129, 140, 248, 0.3);
+            color: #cbd5e1;
+        }
+
+        .my-vault-btn.guest:hover {
+            background: rgba(129, 140, 248, 0.18);
+            border-color: var(--accent);
+            color: #ffffff;
         }
 
         .live-dot {
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #00ff66;
-            box-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66;
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
             animation: pulse-dot 2s infinite ease-in-out;
         }
 
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.45; transform: scale(0.8); }
+            50% { opacity: 0.4; transform: scale(0.85); }
         }
 
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .icon-btn {
-            background: rgba(24, 54, 92, 0.7);
-            border: 1px solid rgba(166, 188, 255, 0.45);
-            color: #f0f6fc;
-            width: 42px;
-            height: 42px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #cbd5e1;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            backdrop-filter: blur(12px);
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            font-size: 1.15rem;
-            box-shadow: 0 0 12px rgba(166, 188, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 1.1rem;
+            box-shadow: var(--glass-shadow);
         }
 
         .icon-btn:hover {
             border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 22px var(--accent-glow);
-            transform: scale(1.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px var(--accent-glow), var(--glass-shadow);
         }
 
         .icon-btn.active {
-            background: rgba(166, 188, 255, 0.3);
+            background: rgba(129, 140, 248, 0.22);
             border-color: var(--accent);
             color: #ffffff;
-            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* 3D Interactive Star in Sky (+20% Size Increase & High Intensity Colors) */
+        /* ==========================================================================
+           CRISP, RAZOR-SHARP STAR RENDERING (No Screen Blurring)
+           ========================================================================== */
         .star {
             position: absolute;
             border-radius: 50%;
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, background-color 0.4s ease;
-            animation: pulse-star 3.2s infinite ease-in-out;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+            animation: pulse-star 3.4s infinite ease-in-out;
             will-change: transform, opacity;
             pointer-events: auto;
         }
 
-        /* Hit-box extension for easy tapping on mobile/desktop */
+        /* Large comfortable click / touch radius */
         .star::after {
             content: '';
             position: absolute;
@@ -250,29 +281,29 @@
             border-radius: 50%;
         }
 
-        /* 1. UNREAD STARS: Pure Celestial Radiant White (+25% intensity) */
+        /* 1. UNREAD STARS: Pure Diamond Crisp White */
         .star.unread {
-            background-color: var(--star-white) !important;
-            box-shadow: 0 0 18px var(--star-white-glow), 0 0 38px var(--star-white), 0 0 60px rgba(255, 255, 255, 0.95);
+            background: radial-gradient(circle, #ffffff 45%, #e2e8f0 100%) !important;
+            box-shadow: 0 0 8px 1px var(--star-white-glow), 0 0 18px 2px rgba(255, 255, 255, 0.45);
         }
 
-        /* 2. READ STARS: Bright Solar Yellow (+25% intensity) */
+        /* 2. READ STARS: Pure Solar Bright Yellow */
         .star.read {
-            background-color: var(--star-yellow) !important;
-            box-shadow: 0 0 20px var(--star-yellow-glow), 0 0 42px var(--star-yellow), 0 0 65px rgba(255, 238, 0, 0.9);
+            background: radial-gradient(circle, #ffffff 20%, #ffdf00 65%, #eab308 100%) !important;
+            box-shadow: 0 0 10px 1px var(--star-yellow-glow), 0 0 20px 2px rgba(255, 223, 0, 0.45);
         }
 
-        /* 3. YOUR POSTED STARS: Radiant Bright Emerald Green (+25% intensity) */
+        /* 3. YOUR STARS: Radiant Vivid Emerald Green */
         .star.mine {
-            background-color: var(--star-mine) !important;
-            box-shadow: 0 0 22px var(--star-mine-glow), 0 0 46px var(--star-mine), 0 0 70px rgba(0, 255, 102, 0.95);
-            animation: pulse-mine-star 2.6s infinite ease-in-out;
+            background: radial-gradient(circle, #ffffff 20%, #00ff88 65%, #059669 100%) !important;
+            box-shadow: 0 0 12px 2px var(--star-green-glow), 0 0 24px 3px rgba(0, 255, 136, 0.5);
+            animation: pulse-mine-star 2.8s infinite ease-in-out;
         }
 
-        /* 4. NEWLY ARRIVED STAR FEATURED HIGHLIGHT (Beams / Halo for remote new stars) */
+        /* 4. FEATURED NEW STAR HIGHLIGHT (Clean Pulsing Aura) */
         .star.featured-new {
-            animation: featured-beacon 1.2s infinite ease-in-out !important;
-            z-index: 40 !important;
+            animation: featured-beacon 1.4s infinite ease-in-out !important;
+            z-index: 45 !important;
         }
 
         .star.featured-new::before {
@@ -280,48 +311,47 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            border: 2px solid #ffee00;
-            box-shadow: 0 0 25px #ffee00;
-            animation: ripple-beacon 1.4s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
+            border: 1.5px solid #ffdf00;
+            animation: clean-ripple 1.4s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
             pointer-events: none;
         }
 
         @keyframes featured-beacon {
-            0%, 100% { transform: scale(1.1); filter: brightness(1.8); }
-            50% { transform: scale(1.6); filter: brightness(2.4); }
+            0%, 100% { transform: scale(1.15); filter: drop-shadow(0 0 12px #ffdf00); }
+            50% { transform: scale(1.6); filter: drop-shadow(0 0 20px #ffdf00); }
         }
 
-        @keyframes ripple-beacon {
+        @keyframes clean-ripple {
             0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
         }
 
         .star:hover {
-            transform: scale(2.6) !important;
+            transform: scale(2.4) !important;
             z-index: 50 !important;
-            filter: brightness(1.7);
+            filter: brightness(1.4) drop-shadow(0 0 12px currentColor);
         }
 
         @keyframes pulse-star {
-            0%, 100% { opacity: 0.75; transform: scale(0.93); }
-            50% { opacity: 1; transform: scale(1.24); }
+            0%, 100% { opacity: 0.82; transform: scale(0.96); }
+            50% { opacity: 1; transform: scale(1.18); }
         }
 
         @keyframes pulse-mine-star {
-            0%, 100% { opacity: 0.88; transform: scale(0.96); box-shadow: 0 0 20px var(--star-mine-glow), 0 0 40px var(--star-mine); }
-            50% { opacity: 1; transform: scale(1.30); box-shadow: 0 0 28px var(--star-mine-glow), 0 0 56px var(--star-mine), 0 0 80px rgba(0, 255, 102, 1); }
+            0%, 100% { opacity: 0.9; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.8)); }
         }
 
-        /* Ascending Launching Star Animation Element */
+        /* Ascending Launching Comet Star */
         .ascending-star {
             position: fixed;
             border-radius: 50%;
-            background-color: var(--star-mine);
-            box-shadow: 0 0 30px var(--star-mine-glow), 0 0 60px var(--star-mine), 0 0 90px rgba(0, 255, 102, 1);
+            background: radial-gradient(circle, #ffffff 30%, #00ff88 70%, #059669 100%);
+            box-shadow: 0 0 16px 3px var(--star-green-glow), 0 0 32px 6px rgba(0, 255, 136, 0.4);
             pointer-events: none;
             z-index: 999;
             transform: translate(-50%, -50%);
@@ -332,15 +362,14 @@
             position: fixed;
             pointer-events: none;
             border-radius: 50%;
-            background: rgba(0, 255, 102, 0.6);
-            box-shadow: 0 0 15px #00ff66;
-            animation: trail-fade 0.6s forwards ease-out;
+            background: radial-gradient(circle, #00ff88 40%, transparent 80%);
+            animation: trail-fade 0.5s forwards ease-out;
             z-index: 998;
         }
 
         @keyframes trail-fade {
-            0% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.1); }
         }
 
         /* 3D Navigation Guide Tip & Legend */
@@ -352,17 +381,19 @@
             font-size: 0.72rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(166, 188, 255, 0.75);
+            color: #94a3b8;
             pointer-events: none;
             z-index: 10;
             display: flex;
             align-items: center;
             gap: 14px;
-            background: rgba(15, 32, 56, 0.55);
+            background: rgba(15, 23, 42, 0.65);
             padding: 6px 18px;
             border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(166, 188, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
         }
 
         .legend-item {
@@ -374,43 +405,45 @@
         }
 
         .legend-dot {
-            width: 9px;
-            height: 9px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
 
-        .dot-unread { background: #ffffff; box-shadow: 0 0 8px #fff; }
-        .dot-read { background: #ffee00; box-shadow: 0 0 8px #ffee00; }
-        .dot-mine { background: #00ff66; box-shadow: 0 0 8px #00ff66; }
+        .dot-unread { background: #ffffff; box-shadow: 0 0 6px #fff; }
+        .dot-read { background: #ffdf00; box-shadow: 0 0 6px #ffdf00; }
+        .dot-mine { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
 
-        /* Casting Interface */
+        /* Sleek Glassmorphic Casting Interface */
         .interface {
             position: absolute;
-            bottom: 40px;
+            bottom: 38px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
             width: 90%;
-            max-width: 520px;
+            max-width: 540px;
             text-align: center;
             pointer-events: auto;
         }
 
         .input-box {
-            background: rgba(15, 32, 56, 0.75);
-            border: 1px solid rgba(166, 188, 255, 0.4);
-            backdrop-filter: blur(20px);
-            border-radius: 22px;
-            padding: 20px 24px 16px;
-            box-shadow: 0 14px 48px rgba(0, 0, 0, 0.7), 0 0 25px rgba(166, 188, 255, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
+            padding: 18px 22px 14px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             box-sizing: border-box;
             overflow: hidden;
         }
 
         .input-box:focus-within {
-            border-color: var(--accent);
-            box-shadow: 0 16px 52px rgba(0, 0, 0, 0.8), 0 0 35px var(--accent-glow);
+            border-color: rgba(129, 140, 248, 0.6);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(129, 140, 248, 0.25), 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            transform: translateY(-2px);
         }
 
         textarea {
@@ -418,7 +451,7 @@
             max-width: 100%;
             box-sizing: border-box;
             display: block;
-            height: 68px;
+            height: 64px;
             background: transparent;
             border: none;
             outline: none;
@@ -429,12 +462,12 @@
             line-height: 1.5;
             text-align: center;
             font-weight: 400;
-            padding: 6px 10px;
+            padding: 4px 8px;
             overflow-y: auto;
         }
 
         textarea::placeholder {
-            color: #8da2c0;
+            color: #64748b;
             font-style: italic;
         }
 
@@ -444,51 +477,51 @@
             justify-content: space-between;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px solid rgba(166, 188, 255, 0.15);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .cast-btn {
-            background: linear-gradient(135deg, rgba(0, 255, 102, 0.25) 0%, rgba(0, 255, 102, 0.08) 100%);
-            border: 1px solid #00ff66;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            padding: 9px 26px;
-            border-radius: 24px;
+            padding: 9px 24px;
+            border-radius: 20px;
             cursor: pointer;
             font-family: inherit;
             font-size: 0.82rem;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             font-weight: 600;
-            box-shadow: 0 0 18px rgba(0, 255, 102, 0.3);
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             margin-left: auto;
         }
 
         .cast-btn:hover {
-            background: #00ff66;
-            color: #010409;
-            box-shadow: 0 0 32px rgba(0, 255, 102, 0.8);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 6px 22px rgba(16, 185, 129, 0.6);
+            transform: translateY(-1px);
         }
 
         .char-count {
             font-size: 0.75rem;
-            color: #8da2c0;
+            color: #64748b;
         }
 
         /* Modal Overlay */
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(1, 4, 9, 0.82);
-            backdrop-filter: blur(10px);
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 200;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.3s ease;
         }
 
         .overlay.active {
@@ -497,16 +530,16 @@
         }
 
         .modal {
-            background: rgba(15, 32, 56, 0.94);
-            border: 1px solid rgba(166, 188, 255, 0.35);
-            padding: 38px 36px 30px;
-            border-radius: 26px;
-            max-width: 490px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--glass-border);
+            padding: 36px 34px 28px;
+            border-radius: 24px;
+            max-width: 480px;
             width: 88%;
             text-align: center;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(166, 188, 255, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2);
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            transform: translateY(20px) scale(0.96);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
         }
 
@@ -526,22 +559,21 @@
         }
 
         .modal-badge.mine {
-            background: rgba(0, 255, 102, 0.15);
-            border: 1px solid #00ff66;
-            color: #00ff66;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.35);
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid #00ff88;
+            color: #6ee7b7;
+            box-shadow: 0 0 14px rgba(0, 255, 136, 0.2);
         }
 
         .modal-text {
             font-family: 'Cinzel', Georgia, serif;
-            font-size: 1.24rem;
-            line-height: 1.75;
+            font-size: 1.25rem;
+            line-height: 1.7;
             margin-bottom: 18px;
             color: #ffffff;
             white-space: pre-wrap;
-            font-weight: 500;
-            letter-spacing: 0.6px;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         /* Message Exact Timestamp Styling */
@@ -551,57 +583,50 @@
             justify-content: center;
             gap: 6px;
             font-size: 0.78rem;
-            color: #a6bcff;
-            opacity: 0.85;
-            margin-bottom: 24px;
-            letter-spacing: 0.5px;
-        }
-
-        .modal-timestamp svg {
-            opacity: 0.75;
+            color: #94a3b8;
+            margin-bottom: 22px;
+            letter-spacing: 0.4px;
         }
 
         .modal-reactions {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 22px;
         }
 
         .reaction-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: #e2e8f0;
-            padding: 9px 20px;
-            border-radius: 22px;
+            padding: 9px 18px;
+            border-radius: 20px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .reaction-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: scale(1.06);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
         }
 
         .reaction-btn.reacted {
-            background: rgba(255, 107, 107, 0.25);
-            border-color: #ff6b6b;
-            color: #ff9e9e;
-            box-shadow: 0 0 22px rgba(255, 107, 107, 0.5);
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #f87171;
+            color: #fca5a5;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
         }
 
         .reaction-btn .sparkle-icon {
-            font-size: 1.05rem;
-            transition: transform 0.3s ease;
+            font-size: 1rem;
         }
 
         .reaction-count {
@@ -610,52 +635,52 @@
         }
 
         .close-btn {
-            color: #a5b4fc;
+            color: #94a3b8;
             font-size: 0.8rem;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: color 0.2s ease;
             display: inline-block;
             padding: 4px 12px;
         }
 
         .close-btn:hover {
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(166, 188, 255, 0.6);
         }
 
         /* ==========================================================================
-           COSMIC VAULT MODAL & FORM STYLES (v12)
+           COSMIC VAULT MODAL & FORM STYLES (v13)
            ========================================================================== */
         .vault-modal {
-            max-width: 580px;
+            max-width: 560px;
             width: 92%;
             text-align: left;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            padding: 32px 30px 26px;
+            padding: 30px 28px 24px;
         }
 
         .vault-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(166, 188, 255, 0.2);
-            padding-bottom: 16px;
-            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .vault-title {
             font-family: 'Cinzel', Georgia, serif;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: #ffffff;
             display: flex;
             align-items: center;
             gap: 10px;
             letter-spacing: 2px;
+            font-weight: 700;
         }
 
         .vault-body {
@@ -669,45 +694,46 @@
         }
 
         .vault-body::-webkit-scrollbar-thumb {
-            background: rgba(166, 188, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
         }
 
         .choice-card {
-            background: rgba(16, 36, 64, 0.65);
-            border: 1px solid rgba(166, 188, 255, 0.25);
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--glass-border);
             border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
+            padding: 18px;
+            margin-bottom: 14px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .choice-card:hover {
-            border-color: rgba(166, 188, 255, 0.6);
-            background: rgba(16, 36, 64, 0.9);
-            box-shadow: 0 0 20px rgba(166, 188, 255, 0.15);
+            border-color: rgba(129, 140, 248, 0.4);
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-2px);
         }
 
         .choice-title {
             font-family: 'Cinzel', serif;
             font-size: 1.05rem;
             color: #ffffff;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
         }
 
         .choice-desc {
-            font-size: 0.8rem;
-            color: #b0c4de;
+            font-size: 0.82rem;
+            color: #94a3b8;
             line-height: 1.5;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, rgba(0, 255, 102, 0.3) 0%, rgba(0, 255, 102, 0.1) 100%);
-            border: 1px solid #00ff66;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
             padding: 9px 20px;
             border-radius: 20px;
@@ -716,42 +742,41 @@
             text-transform: uppercase;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: all 0.25s ease;
         }
 
         .btn-primary:hover {
-            background: #00ff66;
-            color: #010409;
-            box-shadow: 0 0 28px rgba(0, 255, 102, 0.7);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
         }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(166, 188, 255, 0.35);
-            color: #d0e0ff;
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
             padding: 9px 18px;
             border-radius: 20px;
             font-size: 0.82rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.14);
             border-color: #ffffff;
             color: #ffffff;
         }
 
         .btn-danger {
             background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.5);
+            border: 1px solid rgba(239, 68, 68, 0.4);
             color: #fca5a5;
             padding: 6px 14px;
             border-radius: 14px;
-            font-size: 0.74rem;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -759,16 +784,14 @@
         .btn-danger:hover {
             background: #ef4444;
             color: #ffffff;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
         }
 
         .form-card {
-            background: rgba(8, 22, 40, 0.9);
-            border: 1px solid rgba(0, 255, 102, 0.35);
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(129, 140, 248, 0.3);
             border-radius: 18px;
-            padding: 22px;
-            margin-bottom: 18px;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
+            padding: 20px;
+            margin-bottom: 16px;
         }
 
         .form-group {
@@ -780,29 +803,29 @@
         }
 
         .form-label {
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #bbf7d0;
+            color: #c7d2fe;
             font-weight: 600;
         }
 
         .form-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px solid rgba(166, 188, 255, 0.35);
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 10px 14px;
             color: #ffffff;
             font-family: inherit;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             outline: none;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
         }
 
         .form-input:focus {
-            border-color: #00ff66;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.35);
+            border-color: var(--accent);
+            box-shadow: 0 0 14px rgba(129, 140, 248, 0.3);
         }
 
         .form-error {
@@ -810,7 +833,7 @@
             font-size: 0.76rem;
             color: #fca5a5;
             background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.4);
+            border: 1px solid rgba(239, 68, 68, 0.35);
             border-radius: 12px;
             padding: 10px 14px;
             margin-bottom: 14px;
@@ -822,8 +845,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.65);
-            border: 1px solid rgba(0, 255, 102, 0.35);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(0, 255, 136, 0.35);
             border-radius: 14px;
             padding: 12px 16px;
             margin: 14px 0;
@@ -831,8 +854,8 @@
 
         .key-text {
             font-family: 'Fira Code', monospace;
-            font-size: 0.92rem;
-            color: #00ff66;
+            font-size: 0.9rem;
+            color: #00ff88;
             word-break: break-all;
             flex: 1;
             user-select: text;
@@ -841,24 +864,23 @@
         .my-thoughts-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             margin-top: 12px;
         }
 
         .my-thought-card {
-            background: rgba(16, 36, 64, 0.55);
-            border: 1px solid rgba(166, 188, 255, 0.2);
+            background: rgba(30, 41, 59, 0.45);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 14px 18px;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             cursor: pointer;
         }
 
         .my-thought-card:hover {
-            border-color: #00ff66;
-            background: rgba(16, 36, 64, 0.85);
-            box-shadow: 0 0 18px rgba(0, 255, 102, 0.25);
-            transform: translateX(4px);
+            border-color: #00ff88;
+            background: rgba(30, 41, 59, 0.75);
+            transform: translateX(3px);
         }
 
         .my-thought-quote {
@@ -874,19 +896,19 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.74rem;
-            color: #8da2c0;
+            color: #94a3b8;
         }
 
         .my-thought-stats {
             display: flex;
             gap: 12px;
-            color: #d0e0ff;
+            color: #e2e8f0;
         }
 
         .empty-vault-state {
             text-align: center;
             padding: 30px 10px;
-            color: #8da2c0;
+            color: #64748b;
             font-style: italic;
             font-size: 0.88rem;
         }
@@ -895,15 +917,16 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(15, 32, 56, 0.95);
+            background: rgba(15, 23, 42, 0.95);
             border: 1px solid var(--accent);
-            box-shadow: 0 0 25px rgba(166, 188, 255, 0.35);
-            padding: 12px 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            padding: 12px 20px;
             border-radius: 14px;
             font-size: 0.82rem;
             color: #ffffff;
             font-weight: 500;
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 1000;
             opacity: 0;
             transform: translateY(10px);
@@ -917,16 +940,19 @@
         }
 
         @media (max-width: 600px) {
-            .top-header { padding: 0 18px; top: 18px; }
+            .top-header { padding: 0 16px; top: 16px; }
             .header-title { font-size: 1rem; letter-spacing: 3px; }
-            .interface { bottom: 25px; }
-            .input-box { padding: 18px 20px; }
+            .interface { bottom: 20px; }
+            .input-box { padding: 16px 18px; }
             .hint-drag { top: 75px; font-size: 0.65rem; }
-            .vault-modal { padding: 24px 20px 20px; }
+            .vault-modal { padding: 22px 18px 18px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- Atmospheric Deep Sky Backdrop -->
+    <div class="cosmic-backdrop"></div>
 
     <!-- 3D Celestial Viewport for Pan / Tilt Rotation -->
     <div id="viewport-3d">
@@ -947,11 +973,11 @@
         <div class="header-left">
             <div class="header-title">The Midnight Thought</div>
             <div class="stats-group">
-                <div class="active-users-badge" id="activeUsersBadge" title="Live unique stargazers currently connected">
+                <div class="hud-badge" id="activeUsersBadge" title="Live unique stargazers currently connected">
                     <span class="live-dot"></span>
                     <span id="activeUsersCount">1 online</span>
                 </div>
-                <div class="total-thoughts-badge" id="totalThoughtsBadge" title="Total thoughts in the sky">
+                <div class="hud-badge total-thoughts-badge" id="totalThoughtsBadge" title="Total thoughts in the sky">
                     <span>✨</span>
                     <span id="totalThoughtsCount">0 thoughts</span>
                 </div>
@@ -963,7 +989,7 @@
         </div>
         <div class="header-actions">
             <button class="icon-btn active" id="constellationToggle" title="Toggle Constellation Lines">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="5" cy="6" r="3"></circle>
                     <circle cx="19" cy="5" r="2"></circle>
                     <circle cx="12" cy="19" r="3"></circle>
@@ -1018,7 +1044,7 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & Vault Multi-Step Modal (v12) -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v13) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
@@ -1097,10 +1123,7 @@
         }
 
         /* ==========================================================================
-           AUTHENTICATION & VAULT STATE MANAGEMENT (v12)
-           - Active User (Username + KeyHash)
-           - Persistent Login in localStorage
-           - Universal Cross-Browser Cloud Account Registry in Supabase
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v13)
            ========================================================================== */
         let activeUsername = localStorage.getItem('midnight_active_username') || null;
         let activeKeyHash = null;
@@ -1354,7 +1377,7 @@
                 if (!this.ctx) return;
                 this.droneGain = this.ctx.createGain();
                 this.droneGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
-                this.droneGain.gain.exponentialRampToValueAtTime(0.14, this.ctx.currentTime + 3);
+                this.droneGain.gain.exponentialRampToValueAtTime(0.12, this.ctx.currentTime + 3);
                 this.droneGain.connect(this.ctx.destination);
 
                 const baseFreqs = [73.42, 110.0, 146.83, 220.0, 261.63, 329.63];
@@ -1368,7 +1391,7 @@
                     filter.type = 'lowpass';
                     filter.frequency.setValueAtTime(450 + idx * 60, this.ctx.currentTime);
 
-                    gain.gain.setValueAtTime(0.18 / baseFreqs.length, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.16 / baseFreqs.length, this.ctx.currentTime);
                     osc.connect(filter);
                     filter.connect(gain);
                     gain.connect(this.droneGain);
@@ -1399,13 +1422,13 @@
                     const gain = this.ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, now);
-                    gain.gain.setValueAtTime(0.22, now);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
+                    gain.gain.setValueAtTime(0.20, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
 
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
                     osc.start(now);
-                    osc.stop(now + 2.6);
+                    osc.stop(now + 2.5);
                 } catch(e) {}
             }
 
@@ -1419,7 +1442,7 @@
                     osc.frequency.setValueAtTime(320, now);
                     osc.frequency.exponentialRampToValueAtTime(980, now + 1.0);
                     gain.gain.setValueAtTime(0.01, now);
-                    gain.gain.linearRampToValueAtTime(0.16, now + 0.5);
+                    gain.gain.linearRampToValueAtTime(0.15, now + 0.5);
                     gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
 
                     osc.connect(gain);
@@ -1494,7 +1517,7 @@
         const audio = new CelestialAudio();
 
         /* ==========================================================================
-           DATA MODEL & INITIAL STARS (+20% Size Increase & Default Zero Reactions)
+           DATA MODEL & INITIAL STARS
            ========================================================================== */
         const nowMs = Date.now();
         const defaultThoughts = [
@@ -1527,7 +1550,6 @@
                 ? Number(thought.y) 
                 : Number((s2 * 50 + 18).toFixed(2));
 
-            /* 20% size increase over previous base size */
             const baseSize = (s3 * 2.5 + 4.5) * 1.32;
             const size = Number(baseSize.toFixed(1));
             const delay = Number((-(s4 * 5)).toFixed(2));
@@ -1564,7 +1586,6 @@
                     if (error) {
                         console.warn("Supabase load notice:", error.message);
                     } else if (Array.isArray(data) && data.length > 0) {
-                        // Filter out internal system account records
                         const realThoughts = data.filter(item => {
                             if (!item.text) return false;
                             if (item.text.startsWith('__SYS_ACC__:')) return false;
@@ -1588,7 +1609,6 @@
                             };
                         });
 
-                        // Check for new incoming stars from other stargazers to feature them
                         if (isBackground && knownCloudThoughtIds.size > 0) {
                             newThoughts.forEach(t => {
                                 if (!knownCloudThoughtIds.has(t.id) && !isThoughtMine(t)) {
@@ -1597,7 +1617,6 @@
                             });
                         }
 
-                        // Update known IDs
                         newThoughts.forEach(t => knownCloudThoughtIds.add(t.id));
 
                         const hasChanges = newThoughts.length !== thoughtsArr.length || 
@@ -1617,7 +1636,6 @@
             }
         }
 
-        // Feature new incoming stars from other users with a radiant beacon moment
         function featureNewIncomingStar(thought) {
             showToast("✨ A new star has just appeared in the celestial sky!");
             audio.playNewStarArrivedSound();
@@ -1840,8 +1858,8 @@
                 const tailY = this.y - Math.sin(this.angle) * this.length;
 
                 const grad = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
-                grad.addColorStop(0, 'rgba(166, 188, 255, 0)');
-                grad.addColorStop(0.7, `rgba(200, 220, 255, ${this.opacity * 0.6})`);
+                grad.addColorStop(0, 'rgba(129, 140, 248, 0)');
+                grad.addColorStop(0.7, `rgba(199, 210, 254, ${this.opacity * 0.6})`);
                 grad.addColorStop(1, `rgba(255, 255, 255, ${this.opacity})`);
 
                 ctx.save();
@@ -1849,9 +1867,9 @@
                 ctx.moveTo(tailX, tailY);
                 ctx.lineTo(this.x, this.y);
                 ctx.strokeStyle = grad;
-                ctx.lineWidth = 2.4;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#a6bcff';
+                ctx.lineWidth = 2.2;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#818cf8';
                 ctx.stroke();
                 ctx.restore();
             }
@@ -1911,8 +1929,7 @@
         }
 
         /* ==========================================================================
-           ASCENDING STAR TRAJECTORY ANIMATION (v12)
-           Animates a star starting from the cast bar up into the 3D sky at medium-fast speed
+           ASCENDING STAR TRAJECTORY ANIMATION (v13)
            ========================================================================== */
         function animateAscendingStarToSky(targetXPercent, targetYPercent, targetSize, onComplete) {
             const castBox = document.getElementById('castBoxContainer') || document.getElementById('castBtn');
@@ -1927,50 +1944,46 @@
             const flyingStar = document.createElement('div');
             flyingStar.className = 'ascending-star';
             
-            // Ascending star is noticeably larger while travelling (24px)
-            const travelingSize = 24;
+            const travelingSize = 22;
             flyingStar.style.width = `${travelingSize}px`;
             flyingStar.style.height = `${travelingSize}px`;
             flyingStar.style.left = `${startScreenX}px`;
             flyingStar.style.top = `${startScreenY}px`;
             flyingStar.style.transform = 'translate(-50%, -50%) scale(0.6)';
-            flyingStar.style.opacity = '0.7';
+            flyingStar.style.opacity = '0.75';
 
             document.body.appendChild(flyingStar);
             audio.playCastAscendSound();
 
-            // Trail particle spawner
             const trailInterval = setInterval(() => {
                 const curRect = flyingStar.getBoundingClientRect();
                 const trail = document.createElement('div');
                 trail.className = 'ascending-star-trail';
                 trail.style.left = `${curRect.left + curRect.width / 2}px`;
                 trail.style.top = `${curRect.top + curRect.height / 2}px`;
-                trail.style.width = `${travelingSize * 0.7}px`;
-                trail.style.height = `${travelingSize * 0.7}px`;
+                trail.style.width = `${travelingSize * 0.65}px`;
+                trail.style.height = `${travelingSize * 0.65}px`;
                 document.body.appendChild(trail);
-                setTimeout(() => trail.remove(), 600);
-            }, 60);
+                setTimeout(() => trail.remove(), 500);
+            }, 55);
 
-            // Medium-fast ascend curve (~1.1s)
             requestAnimationFrame(() => {
                 flyingStar.style.left = `${targetScreenX}px`;
                 flyingStar.style.top = `${targetScreenY}px`;
-                flyingStar.style.transform = 'translate(-50%, -50%) scale(1.4)';
+                flyingStar.style.transform = 'translate(-50%, -50%) scale(1.35)';
                 flyingStar.style.opacity = '1';
             });
 
             setTimeout(() => {
                 clearInterval(trailInterval);
-                // Arrival ripple effect
-                flyingStar.style.transform = `translate(-50%, -50%) scale(2.2)`;
+                flyingStar.style.transform = `translate(-50%, -50%) scale(2.0)`;
                 flyingStar.style.opacity = '0';
                 audio.playCastShimmer();
 
                 setTimeout(() => {
                     flyingStar.remove();
                     if (typeof onComplete === 'function') onComplete();
-                }, 300);
+                }, 280);
             }, 1100);
         }
 
@@ -2012,23 +2025,23 @@
                         if (dist < maxDistance) {
                             const isHoverLinked = (hoveredStarIndex === p1.index || hoveredStarIndex === p2.index);
                             const alpha = isHoverLinked 
-                                ? (1 - dist / maxDistance) * 0.85 + 0.35 
-                                : (1 - dist / maxDistance) * 0.26;
+                                ? (1 - dist / maxDistance) * 0.75 + 0.35 
+                                : (1 - dist / maxDistance) * 0.20;
 
                             ctx.beginPath();
                             ctx.moveTo(p1.x, p1.y);
                             ctx.lineTo(p2.x, p2.y);
                             
                             if (isHoverLinked) {
-                                ctx.strokeStyle = `rgba(166, 188, 255, ${alpha})`;
-                                ctx.lineWidth = 2.0;
-                                ctx.shadowBlur = 14;
-                                ctx.shadowColor = '#a6bcff';
+                                ctx.strokeStyle = `rgba(129, 140, 248, ${alpha})`;
+                                ctx.lineWidth = 1.6;
+                                ctx.shadowBlur = 8;
+                                ctx.shadowColor = '#818cf8';
                             } else {
-                                ctx.strokeStyle = `rgba(200, 220, 255, ${alpha})`;
-                                ctx.lineWidth = 1.0;
-                                ctx.shadowBlur = 4;
-                                ctx.shadowColor = 'rgba(166, 188, 255, 0.4)';
+                                ctx.strokeStyle = `rgba(148, 163, 184, ${alpha})`;
+                                ctx.lineWidth = 0.8;
+                                ctx.shadowBlur = 2;
+                                ctx.shadowColor = 'rgba(148, 163, 184, 0.3)';
                             }
                             ctx.stroke();
                         }
@@ -2150,7 +2163,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT USERNAME & PASSWORD AUTHENTICATION FLOW (v12)
+           COSMIC VAULT USERNAME & PASSWORD AUTHENTICATION FLOW (v13)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
@@ -2193,18 +2206,18 @@
                 </div>
 
                 <div class="choice-card">
-                    <div class="choice-title" style="color: #bbf7d0;">
+                    <div class="choice-title" style="color: #6ee7b7;">
                         <span>🗝️</span>
                         <span>Option 2: Log In to Existing Vault</span>
                     </div>
                     <div class="choice-desc">
                         Already have an account? Sign in with your unique username and password. You'll stay logged in across visits!
                     </div>
-                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00ff66; color: #ffffff;">🗝️ Log In with Username</button>
+                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00ff88; color: #ffffff;">🗝️ Log In with Username</button>
                 </div>
 
                 <div class="choice-card" style="border-style: dashed; opacity: 0.9;">
-                    <div class="choice-title" style="font-size: 0.95rem; color: #a6bcff;">
+                    <div class="choice-title" style="font-size: 0.95rem; color: #cbd5e1;">
                         <span>🌙</span>
                         <span>Option 3: Continue as a Guest</span>
                     </div>
@@ -2229,7 +2242,7 @@
 
             vaultModalBody.innerHTML = `
                 <div class="form-card">
-                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
                         Choose a unique celestial username and password. No email or personal data is ever required.
                     </div>
 
@@ -2245,11 +2258,11 @@
                         <input type="password" class="form-input" id="regPassword" placeholder="Enter password (min 4 characters)">
                     </div>
 
-                    <button class="btn-primary" id="btnSubmitRegister" style="width: 100%; padding: 12px; margin-top: 6px;">🌌 Create Vault & Get Recovery Key</button>
+                    <button class="btn-primary" id="btnSubmitRegister" style="width: 100%; padding: 11px; margin-top: 6px;">🌌 Create Vault & Get Recovery Key</button>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
-                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromReg">← Back to Options</span>
-                        <span style="color: #00ff66; cursor: pointer;" id="btnGoLoginFromReg">Already have account? Log in ✦</span>
+                        <span style="color: #94a3b8; cursor: pointer; text-decoration: underline;" id="btnBackFromReg">← Back to Options</span>
+                        <span style="color: #00ff88; cursor: pointer;" id="btnGoLoginFromReg">Already have account? Log in ✦</span>
                     </div>
                 </div>
             `;
@@ -2282,7 +2295,6 @@
                     return;
                 }
 
-                // Check Uniqueness
                 submitBtn.innerText = "Verifying cosmos...";
                 const taken = await isUsernameTaken(username);
                 if (taken) {
@@ -2292,15 +2304,11 @@
                     return;
                 }
 
-                // Generate Secret Recovery Key
                 const recoveryKey = generateUnhackableRecoveryKey();
                 const passHash = await sha256Hex(username.toLowerCase() + ":" + password);
                 const recHash = await sha256Hex(recoveryKey);
 
-                // Save to Cloud & Local Storage
                 await saveCloudAccount(username, passHash, recHash);
-
-                // Show Recovery Key Notice View
                 renderRecoveryNoticeView(username, recoveryKey);
             }
 
@@ -2319,7 +2327,7 @@
                     <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #10b981; font-weight: 600; margin-bottom: 8px;">
                         ● Account Created for "${username}"
                     </div>
-                    <div style="font-size: 0.84rem; color: #d0e0ff; line-height: 1.5;">
+                    <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5;">
                         Here is your private, unhackable <strong>Secret Recovery Key</strong>. <strong>Please copy and save it securely right now</strong>. If you ever forget your password, this phrase is the ONLY way to reset it without an email.
                     </div>
 
@@ -2332,7 +2340,7 @@
                         ⚠️ <strong>Important Notice:</strong> Midnight Thought is 100% anonymous. We do not store your email. If you lose your password and this recovery key, access cannot be recovered!
                     </div>
 
-                    <button class="btn-primary" id="btnEnterVaultNow" style="width: 100%; padding: 12px;">✨ Enter Your Cosmic Vault →</button>
+                    <button class="btn-primary" id="btnEnterVaultNow" style="width: 100%; padding: 11px;">✨ Enter Your Cosmic Vault →</button>
                 </div>
             `;
 
@@ -2363,7 +2371,7 @@
 
             vaultModalBody.innerHTML = `
                 <div class="form-card">
-                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
                         Enter your unique username and password to access your vault and stars.
                     </div>
 
@@ -2379,11 +2387,11 @@
                         <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password">
                     </div>
 
-                    <button class="btn-primary" id="btnSubmitLogin" style="width: 100%; padding: 12px; margin-top: 6px;">🔑 Log In to Vault</button>
+                    <button class="btn-primary" id="btnSubmitLogin" style="width: 100%; padding: 11px; margin-top: 6px;">🔑 Log In to Vault</button>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
-                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromLogin">← Back to Options</span>
-                        <span style="color: #ffee00; cursor: pointer;" id="btnGoForgot">Forgot Password? (Reset Key) ✦</span>
+                        <span style="color: #94a3b8; cursor: pointer; text-decoration: underline;" id="btnBackFromLogin">← Back to Options</span>
+                        <span style="color: #ffdf00; cursor: pointer;" id="btnGoForgot">Forgot Password? (Reset Key) ✦</span>
                     </div>
                 </div>
             `;
@@ -2418,10 +2426,8 @@
                     return;
                 }
 
-                // Cache locally
                 saveLocalAccount(username, inputPassHash, cloudAcc.r || '');
 
-                // Successful login
                 activeUsername = username;
                 localStorage.setItem('midnight_active_username', activeUsername);
                 activeKeyHash = await sha256Hex("user:" + uname);
@@ -2445,7 +2451,7 @@
 
             vaultModalBody.innerHTML = `
                 <div class="form-card">
-                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
                         Enter your username and the secret <strong>Recovery Key</strong> you saved during registration to set a new password.
                     </div>
 
@@ -2466,10 +2472,10 @@
                         <input type="password" class="form-input" id="resetNewPassword" placeholder="Enter new password (min 4 characters)">
                     </div>
 
-                    <button class="btn-primary" id="btnSubmitReset" style="width: 100%; padding: 12px; margin-top: 6px;">🔄 Reset Password & Log In</button>
+                    <button class="btn-primary" id="btnSubmitReset" style="width: 100%; padding: 11px; margin-top: 6px;">🔄 Reset Password & Log In</button>
 
                     <div style="display: flex; justify-content: flex-start; align-items: center; margin-top: 14px; font-size: 0.75rem;">
-                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromReset">← Back to Log In</span>
+                        <span style="color: #94a3b8; cursor: pointer; text-decoration: underline;" id="btnBackFromReset">← Back to Log In</span>
                     </div>
                 </div>
             `;
@@ -2513,10 +2519,8 @@
                     return;
                 }
 
-                // Update in cloud and local
                 await updateCloudPassword(cloudAcc.id, username, newPassHash, recHash);
 
-                // Log in
                 activeUsername = username;
                 localStorage.setItem('midnight_active_username', activeUsername);
                 activeKeyHash = await sha256Hex("user:" + uname);
@@ -2564,14 +2568,14 @@
 
             vaultModalBody.innerHTML = `
                 <!-- Vault Status Banner -->
-                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 255, 102, 0.35); border-radius: 18px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 18px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 1.1rem;">🔒</span>
                         <div>
-                            <div style="font-size: 0.82rem; color: #bbf7d0; font-weight: 600; letter-spacing: 0.5px;">
+                            <div style="font-size: 0.84rem; color: #6ee7b7; font-weight: 600; letter-spacing: 0.4px;">
                                 Logged in as: <strong>${activeUsername}</strong>
                             </div>
-                            <div style="font-size: 0.72rem; color: #8da2c0;">
+                            <div style="font-size: 0.72rem; color: #94a3b8;">
                                 Anonymous Identity Encrypted & Active
                             </div>
                         </div>
@@ -2580,23 +2584,23 @@
                 </div>
 
                 <!-- Stats summary -->
-                <div style="display: flex; gap: 12px; margin-bottom: 18px;">
-                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #00ff66;">${myThoughts.length}</div>
-                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Stars Cast</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                    <div style="flex: 1; background: rgba(30, 41, 59, 0.5); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #00ff88;">${myThoughts.length}</div>
+                        <div style="font-size: 0.70rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Stars Cast</div>
                     </div>
-                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffee00;">✨ ${totalWarmth}</div>
-                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Warmth Received</div>
+                    <div style="flex: 1; background: rgba(30, 41, 59, 0.5); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #ffdf00;">✨ ${totalWarmth}</div>
+                        <div style="font-size: 0.70rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Warmth Received</div>
                     </div>
-                    <div style="flex: 1; background: rgba(16, 36, 64, 0.6); border: 1px solid rgba(166, 188, 255, 0.2); border-radius: 14px; padding: 12px; text-align: center;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: #ffffff;">🤍 ${totalResonate}</div>
-                        <div style="font-size: 0.72rem; color: #8da2c0; text-transform: uppercase; letter-spacing: 1px;">Resonated</div>
+                    <div style="flex: 1; background: rgba(30, 41, 59, 0.5); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; text-align: center;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #ffffff;">🤍 ${totalResonate}</div>
+                        <div style="font-size: 0.70rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Resonated</div>
                     </div>
                 </div>
 
                 <!-- Messages List -->
-                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #bbf7d0; font-weight: 600; margin-bottom: 10px;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #6ee7b7; font-weight: 600; margin-bottom: 10px;">
                     Your Casted Stars (${myThoughts.length})
                 </div>
                 <div class="my-thoughts-list">${listHtml}</div>
@@ -2623,7 +2627,7 @@
         }
 
         /* ==========================================================================
-           CASTING INTERFACE WITH ASCENDING STAR TRAJECTORY (v12)
+           CASTING INTERFACE WITH ASCENDING COMET TRAJECTORY (v13)
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -2643,7 +2647,6 @@
             const tempId = "local_" + Date.now().toString();
             const nowIso = new Date().toISOString();
 
-            // By default send warmth and resonate count start at zero
             let newThought = {
                 id: tempId,
                 text: text,
@@ -2668,13 +2671,12 @@
             charCount.innerText = '0/250';
             castBtn.innerText = "Ascending ✨";
 
-            // Trigger Launch Trajectory Animation from Cast Bar to Sky
-            animateAscendingStarToSky(coordX, coordY, 24, () => {
+            animateAscendingStarToSky(coordX, coordY, 22, () => {
                 const newStarEl = createStarElement(newThought, thoughtsArr.length - 1);
                 newStarEl.style.transform = 'scale(2.2)';
                 setTimeout(() => {
                     newStarEl.style.transform = '';
-                }, 400);
+                }, 350);
 
                 updateTotalThoughtsCount();
                 updateVaultHeaderButton();
@@ -2683,7 +2685,7 @@
 
             setTimeout(() => {
                 castBtn.innerText = "Cast Into the Night";
-            }, 2200);
+            }, 2000);
 
             if (dbClient) {
                 try {
