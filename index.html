@@ -411,12 +411,12 @@
         /* Casting Interface */
         .interface {
             position: absolute;
-            bottom: 35px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
             width: 90%;
-            max-width: 530px;
+            max-width: 480px;
             text-align: center;
             pointer-events: auto;
         }
@@ -425,8 +425,8 @@
             background: rgba(15, 32, 56, 0.85);
             border: 1px solid rgba(166, 188, 255, 0.4);
             backdrop-filter: blur(20px);
-            border-radius: 22px;
-            padding: 18px 22px 14px;
+            border-radius: 20px;
+            padding: 14px 20px 10px;
             box-shadow: 0 16px 50px rgba(0, 0, 0, 0.75), 0 0 20px rgba(166, 188, 255, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.2);
             transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
             box-sizing: border-box;
@@ -439,23 +439,28 @@
             transform: translateY(-2px);
         }
 
+        .textarea-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
         textarea {
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
             display: block;
-            height: 64px;
+            height: 52px;
             background: transparent;
             border: none;
             outline: none;
             color: #ffffff;
             resize: none;
             font-family: inherit;
-            font-size: 0.98rem;
-            line-height: 1.5;
+            font-size: 0.92rem;
+            line-height: 1.45;
             text-align: center;
             font-weight: 400;
-            padding: 4px 8px;
+            padding: 2px 6px;
             overflow-y: auto;
         }
 
@@ -464,26 +469,36 @@
             font-style: italic;
         }
 
+        .char-count {
+            position: absolute;
+            bottom: -3px;
+            right: 4px;
+            font-size: 0.68rem;
+            color: #8da2c0;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
         .cast-actions {
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(166, 188, 255, 0.18);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(166, 188, 255, 0.16);
+            width: 100%;
         }
 
         .cast-btn {
             background: linear-gradient(135deg, rgba(166, 188, 255, 0.3) 0%, rgba(166, 188, 255, 0.1) 100%);
             border: 1px solid var(--accent);
             color: #ffffff;
-            padding: 9px 28px;
-            border-radius: 24px;
+            padding: 8px 24px;
+            border-radius: 22px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 0.82rem;
-            letter-spacing: 2px;
+            font-size: 0.80rem;
+            letter-spacing: 1.8px;
             text-transform: uppercase;
             font-weight: 600;
             box-shadow: 0 0 16px rgba(166, 188, 255, 0.25);
@@ -496,13 +511,6 @@
             color: #010409;
             box-shadow: 0 0 28px var(--accent-glow);
             transform: translateY(-2px);
-        }
-
-        .char-count {
-            position: absolute;
-            left: 4px;
-            font-size: 0.75rem;
-            color: #8da2c0;
         }
 
         /* Modal Overlay */
@@ -943,14 +951,33 @@
         }
 
         @media (max-width: 820px) {
-            .top-header { top: 16px; }
-            .header-title { font-size: 1.1rem; letter-spacing: 4px; }
-            .hint-drag { top: 95px; font-size: 0.65rem; }
-            .interface { bottom: 85px; }
-            .input-box { padding: 14px 18px; }
-            .bottom-left-controls { bottom: 20px; left: 18px; }
-            .bottom-right-controls { bottom: 20px; right: 18px; }
+            .top-header { top: 18px; }
+            .header-title { font-size: 1.15rem; letter-spacing: 4px; }
+            .interface { bottom: 24px; width: 85%; max-width: 440px; }
+            .input-box { padding: 12px 18px 10px; border-radius: 18px; }
+            textarea { height: 48px; font-size: 0.90rem; }
+            .bottom-left-controls { bottom: 24px; left: 20px; }
+            .bottom-right-controls { bottom: 24px; right: 20px; }
             .vault-modal { padding: 24px 20px 20px; }
+        }
+
+        @media (max-width: 540px) {
+            .top-header { top: 12px; }
+            .header-center-group { gap: 6px; }
+            .header-title { font-size: 1.05rem; letter-spacing: 3px; }
+            .stats-group { gap: 6px; }
+            .active-users-badge, .total-thoughts-badge { padding: 4px 10px; font-size: 0.70rem; gap: 5px; }
+            .bottom-left-controls { bottom: 12px; left: 14px; }
+            .bottom-right-controls { bottom: 12px; right: 14px; gap: 8px; }
+            .my-vault-btn { padding: 5px 12px; font-size: 0.72rem; }
+            .icon-btn { width: 36px; height: 36px; font-size: 0.95rem; }
+            .interface { bottom: 58px; width: calc(100% - 28px); max-width: 380px; }
+            .input-box { padding: 10px 14px 8px; border-radius: 16px; }
+            textarea { height: 42px; font-size: 0.84rem; padding: 2px 4px; }
+            .char-count { font-size: 0.65rem; bottom: -2px; right: 2px; }
+            .cast-actions { margin-top: 6px; padding-top: 6px; }
+            .cast-btn { padding: 7px 18px; font-size: 0.74rem; letter-spacing: 1px; }
+            .vault-modal { padding: 20px 16px 16px; }
         }
     </style>
 </head>
@@ -992,9 +1019,11 @@
     <!-- Center Cast Thought Bar -->
     <div class="interface">
         <div class="input-box" id="castBoxContainer">
-            <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the cosmos..."></textarea>
-            <div class="cast-actions">
+            <div class="textarea-wrapper">
+                <textarea id="thoughtInput" maxlength="250" placeholder="Cast a secret, a regret, or a quiet hope into the cosmos..."></textarea>
                 <span class="char-count" id="charCount">0/250</span>
+            </div>
+            <div class="cast-actions">
                 <button class="cast-btn" id="castBtn">Cast Into the Cosmos</button>
             </div>
         </div>
