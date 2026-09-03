@@ -515,11 +515,50 @@
             text-align: center;
             box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(166, 188, 255, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2);
             transform: translateY(20px) scale(0.95);
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.3s ease;
             position: relative;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* 70% Screen Chat View for Active Conversations */
+        .modal.has-conversation {
+            max-height: 92vh;
+            height: 86vh;
+            max-width: 540px;
+            padding: 18px 22px 14px;
+        }
+
+        .modal.has-conversation .modal-text {
+            font-size: 0.96rem;
+            line-height: 1.4;
+            margin-bottom: 6px;
+            max-height: 48px;
+            overflow-y: auto;
+        }
+
+        .modal.has-conversation .modal-timestamp {
+            margin-bottom: 6px;
+            font-size: 0.70rem;
+        }
+
+        .modal.has-conversation .modal-reactions {
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .modal.has-conversation .reaction-btn {
+            padding: 4px 12px;
+            font-size: 0.74rem;
+        }
+
+        .modal.has-conversation .star-chat-container {
+            min-height: 240px;
+            max-height: calc(86vh - 170px);
+            height: 70%;
+            flex: 1;
+            padding-top: 10px;
         }
 
         .overlay.active .modal {
@@ -1873,13 +1912,13 @@
            ========================================================================== */
         const nowMs = Date.now();
         const defaultThoughts = [
-            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 0, resonate: 0, chat_enabled: true, x: 22.5, y: 26.0, created_at: new Date(nowMs - 3600000 * 3).toISOString() },
-            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 0, resonate: 0, chat_enabled: true, x: 48.0, y: 21.5, created_at: new Date(nowMs - 3600000 * 7).toISOString() },
-            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 0, resonate: 0, chat_enabled: true, x: 75.5, y: 29.0, created_at: new Date(nowMs - 3600000 * 12).toISOString() },
-            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 0, resonate: 0, chat_enabled: true, x: 33.0, y: 49.0, created_at: new Date(nowMs - 3600000 * 18).toISOString() },
-            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 0, resonate: 0, chat_enabled: true, x: 62.5, y: 53.0, created_at: new Date(nowMs - 3600000 * 26).toISOString() },
-            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 0, resonate: 0, chat_enabled: true, x: 83.0, y: 44.5, created_at: new Date(nowMs - 3600000 * 34).toISOString() },
-            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 0, resonate: 0, chat_enabled: true, x: 15.5, y: 59.0, created_at: new Date(nowMs - 3600000 * 48).toISOString() }
+            { id: "1", text: "I wonder if you still look at the moon and think of me.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 22.5, y: 26.0, created_at: new Date(nowMs - 3600000 * 3).toISOString() },
+            { id: "2", text: "Everyone thinks I have my life figured out, but I'm completely lost.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 48.0, y: 21.5, created_at: new Date(nowMs - 3600000 * 7).toISOString() },
+            { id: "3", text: "I passed my final exam today. I wish there was someone to celebrate with.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 75.5, y: 29.0, created_at: new Date(nowMs - 3600000 * 12).toISOString() },
+            { id: "4", text: "I told her I was over it, but I still check her profile every night.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 33.0, y: 49.0, created_at: new Date(nowMs - 3600000 * 18).toISOString() },
+            { id: "5", text: "Be kind to yourself tonight. You are doing the best you can.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 62.5, y: 53.0, created_at: new Date(nowMs - 3600000 * 26).toISOString() },
+            { id: "6", text: "Left a high paying job to focus on my sanity. Scared but happy.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 83.0, y: 44.5, created_at: new Date(nowMs - 3600000 * 34).toISOString() },
+            { id: "7", text: "I missed my bus today, but I got to see a beautiful sunset because of it.", warmth: 0, resonate: 0, chat_enabled: false, color_index: 0, x: 15.5, y: 59.0, created_at: new Date(nowMs - 3600000 * 48).toISOString() }
         ];
 
         function getDeterministicProps(thought, index) {
@@ -1970,7 +2009,8 @@
 
                         const newThoughts = realThoughts.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
-                            const isChatActive = !(Number(item.color_index) === 99 || item.chat_enabled === false);
+                            const hasChatHistory = Boolean((starChatCache[item.id] && starChatCache[item.id].length > 0) || (chatByStar[item.id] && chatByStar[item.id].length > 0));
+                            const isChatActive = Number(item.color_index) === 1 || hasChatHistory;
                             return {
                                 id: item.id.toString(),
                                 text: item.text,
@@ -2489,7 +2529,8 @@
 
         function setupStarChat(thought, isMine) {
             const sId = thought.id.toString();
-            const isChatEnabled = !(Number(thought.color_index) === 99 || thought.chat_enabled === false);
+            const hasChatHistory = Boolean(starChatCache[sId] && starChatCache[sId].length > 0);
+            const isChatEnabled = Number(thought.color_index) === 1 || Boolean(thought.chat_enabled === true) || hasChatHistory;
             thought.chat_enabled = isChatEnabled;
 
             if (isMine) {
@@ -2502,7 +2543,7 @@
                 if (toggleBtn) {
                     toggleBtn.onclick = async () => {
                         thought.chat_enabled = !thought.chat_enabled;
-                        thought.color_index = thought.chat_enabled ? 0 : 99;
+                        thought.color_index = thought.chat_enabled ? 1 : 0;
                         saveThoughtsLocal();
                         setupStarChat(thought, isMine);
 
@@ -2510,7 +2551,7 @@
                             try {
                                 await dbClient
                                     .from('thoughts')
-                                    .update({ color_index: thought.chat_enabled ? 0 : 99 })
+                                    .update({ color_index: thought.chat_enabled ? 1 : 0 })
                                     .eq('id', Number(thought.id));
                             } catch(e) {}
                         }
@@ -2521,9 +2562,12 @@
                 starChatStatus.innerHTML = '';
             }
 
+            const modalEl = document.querySelector('.overlay .modal');
             if (!isChatEnabled) {
+                if (modalEl) modalEl.classList.remove('has-conversation');
                 starChatMessages.innerHTML = `<div class="chat-empty-hint">🔒 Anonymous chat is closed on this star.</div>`;
                 starChatInputRow.style.display = 'none';
+                if (chatReplyBanner) chatReplyBanner.style.display = 'none';
                 return;
             }
 
@@ -2562,6 +2606,15 @@
 
         function renderStarChatMessages(starId) {
             const msgs = starChatCache[starId] || [];
+            const modalEl = document.querySelector('.overlay .modal');
+            if (modalEl) {
+                if (msgs.length > 0) {
+                    modalEl.classList.add('has-conversation');
+                } else {
+                    modalEl.classList.remove('has-conversation');
+                }
+            }
+
             if (msgs.length === 0) {
                 starChatMessages.innerHTML = `<div class="chat-empty-hint">No whispers yet. Be the first to whisper anonymously into this star ✨</div>`;
                 return;
@@ -2639,7 +2692,9 @@
         async function sendStarChatMessage() {
             if (activeThoughtIndex === null || isSendingChat) return;
             const thought = thoughtsArr[activeThoughtIndex];
-            const isChatEnabled = !(Number(thought.color_index) === 99 || thought.chat_enabled === false);
+            const sId = thought.id.toString();
+            const hasChatHistory = Boolean(starChatCache[sId] && starChatCache[sId].length > 0);
+            const isChatEnabled = Number(thought.color_index) === 1 || Boolean(thought.chat_enabled === true) || hasChatHistory;
             if (!isChatEnabled) {
                 showToast("🔒 Anonymous chat is closed on this star.");
                 return;
@@ -2649,7 +2704,6 @@
             if (!text) return;
 
             isSendingChat = true;
-            const sId = thought.id.toString();
             starChatInput.value = '';
 
             let senderName = "Anonymous Stargazer";
@@ -2715,6 +2769,8 @@
         function closeModal() {
             cancelReplying();
             overlay.classList.remove('active');
+            const modalEl = document.querySelector('.overlay .modal');
+            if (modalEl) modalEl.classList.remove('has-conversation');
             activeThoughtIndex = null;
         }
 
@@ -3257,7 +3313,8 @@
 
             const coordX = Number((Math.random() * 84 + 8).toFixed(2));
             const coordY = Number((Math.random() * 50 + 18).toFixed(2));
-            const isChatEnabled = chatEnabledCheckbox ? chatEnabledCheckbox.checked : true;
+            const isChatEnabled = Boolean(chatEnabledCheckbox && chatEnabledCheckbox.checked);
+            const colorIdx = isChatEnabled ? 1 : 0;
 
             const tempId = "local_" + Date.now().toString();
             const nowIso = new Date().toISOString();
@@ -3267,7 +3324,7 @@
                 text: text,
                 warmth: 0,
                 resonate: 0,
-                color_index: isChatEnabled ? 0 : 99,
+                color_index: colorIdx,
                 chat_enabled: isChatEnabled,
                 author_key: activeKeyHash || null,
                 created_at: nowIso,
@@ -3312,7 +3369,7 @@
                                 text: text,
                                 warmth: 0,
                                 resonate: 0,
-                                color_index: isChatEnabled ? 0 : 99,
+                                color_index: colorIdx,
                                 author_key: activeKeyHash || null,
                                 x: coordX,
                                 y: coordY
@@ -3329,7 +3386,7 @@
                                     text: text,
                                     warmth: 0,
                                     resonate: 0,
-                                    color_index: isChatEnabled ? 0 : 99,
+                                    color_index: colorIdx,
                                     x: coordX,
                                     y: coordY
                                 }
