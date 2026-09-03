@@ -1196,13 +1196,13 @@
 
         function isThoughtMine(thought) {
             if (!thought) return false;
-            if (activeKeyHash && thought.author_key && thought.author_key === activeKeyHash) {
-                return true;
+            if (activeKeyHash) {
+                // When logged into an account, ONLY thoughts cast with this account's key are mine
+                return Boolean(thought.author_key && thought.author_key === activeKeyHash);
+            } else {
+                // When in Guest mode, only thoughts cast in this guest session are marked as mine
+                return guestThoughtIds.has(thought.id ? thought.id.toString() : '');
             }
-            if (guestThoughtIds.has(thought.id ? thought.id.toString() : '')) {
-                return true;
-            }
-            return false;
         }
 
         function markThoughtAsRead(thoughtId) {
