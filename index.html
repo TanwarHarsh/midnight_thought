@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v8) — 3D Celestial Sky & Cosmic Vault</title>
+    <title>The Midnight Thought (v9) — 3D Celestial Sky & Cosmic Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -562,7 +562,7 @@
         }
 
         /* ==========================================================================
-           COSMIC VAULT & ONBOARDING / LOGIN MODAL STYLES (v8)
+           COSMIC VAULT MODAL STYLES (v9)
            ========================================================================== */
         .vault-modal {
             max-width: 580px;
@@ -608,7 +608,6 @@
             border-radius: 10px;
         }
 
-        /* Step cards & options */
         .choice-card {
             background: rgba(16, 36, 64, 0.65);
             border: 1px solid rgba(166, 188, 255, 0.25);
@@ -933,7 +932,7 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & Vault Multi-Step Modal (v8) -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v9) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
@@ -945,11 +944,11 @@
             </div>
 
             <div class="vault-body" id="vaultModalBody">
-                <!-- Dynamically rendered via JS based on state: 
+                <!-- Dynamically rendered via JS:
                      1. Choice Screen (Guest vs Create Vault)
-                     2. Key Generation & Safety Notice Screen
+                     2. Key Generation & Safety Notice Screen (Shows key to copy once)
                      3. Login / Enter Key Screen
-                     4. Active Vault Dashboard Screen -->
+                     4. Active Vault Dashboard (Secret key completely hidden) -->
             </div>
         </div>
     </div>
@@ -1017,9 +1016,7 @@
         }
 
         /* ==========================================================================
-           AUTHENTICATION & VAULT STATE MANAGEMENT (v8)
-           - Active Key & Hash (null if Guest)
-           - Local session thoughts tracking
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v9)
            ========================================================================== */
         let activeCosmicKey = localStorage.getItem('midnight_active_cosmic_key') || null;
         let activeKeyHash = null;
@@ -1053,11 +1050,9 @@
 
         function isThoughtMine(thought) {
             if (!thought) return false;
-            // If logged in with active key, match hash or local ID
             if (activeKeyHash && thought.author_key && thought.author_key === activeKeyHash) {
                 return true;
             }
-            // If guest or locally cast in this session
             if (guestThoughtIds.has(thought.id ? thought.id.toString() : '')) {
                 return true;
             }
@@ -1405,7 +1400,7 @@
 
         /* ==========================================================================
            3D CELESTIAL CANVAS & VIEWPORT
-           ========================================================================== */
+           ========================================================================= */
         const canvas = document.getElementById('sky-canvas');
         const ctx = canvas.getContext('2d');
         const skyContainer = document.getElementById('sky-container');
@@ -1417,7 +1412,6 @@
         let activeThoughtIndex = null;
         let shootingStars = [];
 
-        // 3D Camera Physics State
         let targetRotX = 0;
         let targetRotY = 0;
         let targetPanX = 0;
@@ -1769,7 +1763,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT MULTI-STEP FLOW (v8)
+           COSMIC VAULT MULTI-STEP FLOW (v9 - SECRET KEY COMPLETELY HIDDEN)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
@@ -1796,7 +1790,7 @@
             if (e.target === vaultOverlay) closeVaultModal();
         });
 
-        // VIEW 1: Initial Choice Screen (Guest vs Create/Connect Vault)
+        // VIEW 1: Choice Screen (Guest vs Create Vault)
         function renderChoiceView() {
             vaultModalTitle.innerText = "Cosmic Identity & Vault";
             vaultModalBody.innerHTML = `
@@ -1934,7 +1928,7 @@
             document.getElementById('btnGoGenFromLogin').addEventListener('click', renderKeyGeneratedView);
         }
 
-        // VIEW 4: Active Logged In Vault Dashboard (View Messages & Stats)
+        // VIEW 4: Active Logged In Vault Dashboard (Secret Key completely hidden/removed)
         function renderActiveVaultView() {
             vaultModalTitle.innerText = "My Cosmic Sanctuary";
 
@@ -1947,7 +1941,7 @@
 
             let listHtml = '';
             if (myThoughts.length === 0) {
-                listHtml = `<div class="empty-vault-state">You have not cast any thoughts with this key yet. Cast a secret into the night and it will shine here!</div>`;
+                listHtml = `<div class="empty-vault-state">You have not cast any thoughts with this vault yet. Cast a secret into the night and it will shine here!</div>`;
             } else {
                 listHtml = myThoughts.reverse().map(thought => `
                     <div class="my-thought-card" data-idx="${thought.originalIndex}">
@@ -1964,19 +1958,20 @@
             }
 
             vaultModalBody.innerHTML = `
-                <!-- Key Banner -->
-                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 16px 20px; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; text-transform: uppercase; color: #a5f3fc; font-weight: 600; margin-bottom: 8px;">
-                        <span>● Active Cosmic Key</span>
-                        <button class="btn-danger" id="btnLogoutKey">🚪 Log Out / Switch</button>
+                <!-- Vault Status Banner (Secret Key Completely Hidden) -->
+                <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.1rem;">🔒</span>
+                        <div>
+                            <div style="font-size: 0.82rem; color: #a5f3fc; font-weight: 600; letter-spacing: 0.5px;">
+                                Cosmic Vault Active
+                            </div>
+                            <div style="font-size: 0.72rem; color: #8da2c0;">
+                                Anonymous Identity Encrypted & Protected
+                            </div>
+                        </div>
                     </div>
-                    <div class="key-display-box" style="margin: 6px 0 8px;">
-                        <div class="key-text">${activeCosmicKey}</div>
-                        <button class="btn-secondary" id="btnCopyActiveKey" style="padding: 5px 12px; font-size: 0.72rem;">📋 Copy</button>
-                    </div>
-                    <div style="font-size: 0.72rem; color: #8da2c0;">
-                        Logged in securely across all devices. Use this key to reconnect anywhere.
-                    </div>
+                    <button class="btn-danger" id="btnLogoutKey">🚪 Log Out / Switch</button>
                 </div>
 
                 <!-- Stats summary -->
@@ -2002,12 +1997,6 @@
                 <div class="my-thoughts-list">${listHtml}</div>
             `;
 
-            document.getElementById('btnCopyActiveKey').addEventListener('click', () => {
-                navigator.clipboard.writeText(activeCosmicKey).then(() => {
-                    showToast("📋 Cosmic Key copied!");
-                });
-            });
-
             document.getElementById('btnLogoutKey').addEventListener('click', () => {
                 activeCosmicKey = null;
                 activeKeyHash = null;
@@ -2027,11 +2016,6 @@
             });
         }
 
-        /* ==========================================================================
-           CASTING INTERFACE (v8)
-           - Attaches activeKeyHash if logged in
-           - Tracks locally if in Guest mode
-           ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
         const charCount = document.getElementById('charCount');
@@ -2062,7 +2046,6 @@
                 y: coordY
             };
 
-            // If in guest mode, track in guest thoughts
             if (!activeKeyHash) {
                 guestThoughtIds.add(tempId);
                 localStorage.setItem('midnight_guest_thoughts', JSON.stringify([...guestThoughtIds]));
@@ -2156,9 +2139,6 @@
             }
         });
 
-        /* ==========================================================================
-           TOP CONTROLS
-           ========================================================================== */
         const constellationToggle = document.getElementById('constellationToggle');
         constellationToggle.addEventListener('click', () => {
             showConstellations = !showConstellations;
