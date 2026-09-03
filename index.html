@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v10) — 3D Celestial Sky & Cosmic Vault</title>
+    <title>The Midnight Thought (v11) — 3D Celestial Sky & Anonymous Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -562,7 +562,7 @@
         }
 
         /* ==========================================================================
-           COSMIC VAULT MODAL STYLES (v10)
+           COSMIC VAULT MODAL & FORM STYLES (v11)
            ========================================================================== */
         .vault-modal {
             max-width: 580px;
@@ -697,21 +697,68 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
         }
 
-        .key-banner {
+        .form-card {
             background: rgba(8, 22, 40, 0.9);
-            border: 1px solid rgba(0, 240, 255, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.35);
             border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 22px;
+            margin-bottom: 18px;
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a5f3fc;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(166, 188, 255, 0.35);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.88rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+        }
+
+        .form-error {
+            display: none;
+            font-size: 0.76rem;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            line-height: 1.4;
+            text-align: left;
         }
 
         .key-display-box {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(0, 240, 255, 0.35);
             border-radius: 14px;
             padding: 12px 16px;
             margin: 14px 0;
@@ -724,31 +771,6 @@
             word-break: break-all;
             flex: 1;
             user-select: text;
-        }
-
-        .connect-input-box {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 16px 0;
-        }
-
-        .connect-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(166, 188, 255, 0.35);
-            border-radius: 14px;
-            padding: 12px 16px;
-            color: #ffffff;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.88rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .connect-input:focus {
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
         }
 
         .my-thoughts-list {
@@ -931,7 +953,7 @@
         </div>
     </div>
 
-    <!-- Cosmic Identity & Vault Multi-Step Modal (v10) -->
+    <!-- Cosmic Identity & Vault Multi-Step Modal (v11) -->
     <div class="overlay" id="vaultOverlay">
         <div class="modal vault-modal">
             <div class="vault-header">
@@ -943,7 +965,13 @@
             </div>
 
             <div class="vault-body" id="vaultModalBody">
-                <!-- Dynamically rendered via JS -->
+                <!-- Dynamically rendered via JS:
+                     1. Choice View (Create Account vs Log In vs Guest)
+                     2. Create Account View (Username + Password)
+                     3. Recovery Key Notice View (Generated Secret Reset Key)
+                     4. Log In View (Username + Password)
+                     5. Forgot Password View (Username + Recovery Key + New Password)
+                     6. Active Vault Dashboard View -->
             </div>
         </div>
     </div>
@@ -967,7 +995,7 @@
         }
 
         /* ==========================================================================
-           UNHACKABLE VARIABLE-LENGTH WORD-STRING COSMIC KEY GENERATOR
+           UNHACKABLE VARIABLE-LENGTH WORD-STRING RECOVERY KEY GENERATOR
            ========================================================================== */
         const CELESTIAL_WORDS = [
             "ethereal", "sapphire", "obsidian", "twilight", "solitary", "infinite", "shimmering",
@@ -978,7 +1006,7 @@
             "supernova", "parsec", "seraph", "chronos", "mirage", "valkyrie", "quarks", "radiance"
         ];
 
-        function generateUnhackableCosmicKey() {
+        function generateUnhackableRecoveryKey() {
             const array = new Uint32Array(8);
             window.crypto.getRandomValues(array);
 
@@ -1010,14 +1038,16 @@
         }
 
         /* ==========================================================================
-           AUTHENTICATION & VAULT STATE MANAGEMENT (v10)
+           AUTHENTICATION & VAULT STATE MANAGEMENT (v11)
+           - Active User (Username + KeyHash)
+           - Persistent Login in localStorage
+           - Local/Cloud Account Registry with Username Uniqueness
            ========================================================================== */
-        let activeCosmicKey = localStorage.getItem('midnight_active_cosmic_key') || null;
+        let activeUsername = localStorage.getItem('midnight_active_username') || null;
         let activeKeyHash = null;
-        let newlyGeneratedKey = null;
 
-        if (activeCosmicKey) {
-            sha256Hex(activeCosmicKey).then(h => {
+        if (activeUsername) {
+            sha256Hex("user:" + activeUsername.toLowerCase()).then(h => {
                 activeKeyHash = h;
                 updateVaultHeaderButton();
                 renderStars();
@@ -1028,15 +1058,48 @@
         let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
         let guestThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_guest_thoughts') || '[]'));
 
+        function getLocalAccounts() {
+            return JSON.parse(localStorage.getItem('midnight_cosmic_accounts') || '{}');
+        }
+
+        function saveLocalAccount(username, passwordHash, recoveryHash) {
+            const accs = getLocalAccounts();
+            accs[username.toLowerCase()] = {
+                username: username,
+                passwordHash: passwordHash,
+                recoveryHash: recoveryHash,
+                created_at: new Date().toISOString()
+            };
+            localStorage.setItem('midnight_cosmic_accounts', JSON.stringify(accs));
+        }
+
+        async function isUsernameTaken(username) {
+            const uname = username.toLowerCase().trim();
+            const localAccs = getLocalAccounts();
+            if (localAccs[uname]) return true;
+
+            if (dbClient) {
+                try {
+                    const { data } = await dbClient
+                        .from('cosmic_accounts')
+                        .select('username')
+                        .eq('username', uname)
+                        .limit(1);
+                    if (data && data.length > 0) return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
         function updateVaultHeaderButton() {
             const btn = document.getElementById('myVaultBtn');
             const label = document.getElementById('vaultBtnLabel');
             if (!btn || !label) return;
 
-            if (activeCosmicKey && activeKeyHash) {
+            if (activeUsername && activeKeyHash) {
                 const myCount = thoughtsArr.filter(t => isThoughtMine(t)).length;
                 btn.className = 'my-vault-btn';
-                label.innerText = `My Vault (${myCount})`;
+                label.innerText = `${activeUsername} (${myCount})`;
             } else {
                 btn.className = 'my-vault-btn guest';
                 label.innerText = `Cosmic Vault (Guest)`;
@@ -1347,9 +1410,7 @@
         }
 
         /* ==========================================================================
-           UNIQUE ACCOUNT PRESENCE TRACKER (FIX FOR MULTI-BROWSER COUNT IN v10)
-           - Users on same Cosmic Key across Edge/Chrome share identical unique presence key
-           - Deduplicated into 1 online count
+           UNIQUE ACCOUNT PRESENCE TRACKER
            ========================================================================== */
         let presenceChannel = null;
 
@@ -1398,7 +1459,6 @@
 
                 function updateOnlineCount() {
                     const state = presenceChannel.presenceState();
-                    // Deduplicate by presence key and track data
                     const uniqueUserKeys = new Set();
                     for (const key in state) {
                         if (Array.isArray(state[key])) {
@@ -1801,7 +1861,7 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           COSMIC VAULT MULTI-STEP FLOW (v10)
+           COSMIC VAULT USERNAME & PASSWORD AUTHENTICATION FLOW (v11)
            ========================================================================== */
         const vaultOverlay = document.getElementById('vaultOverlay');
         const myVaultBtn = document.getElementById('myVaultBtn');
@@ -1810,7 +1870,7 @@
         const vaultModalBody = document.getElementById('vaultModalBody');
 
         function openVaultModal() {
-            if (activeCosmicKey && activeKeyHash) {
+            if (activeUsername && activeKeyHash) {
                 renderActiveVaultView();
             } else {
                 renderChoiceView();
@@ -1828,20 +1888,19 @@
             if (e.target === vaultOverlay) closeVaultModal();
         });
 
-        // VIEW 1: Choice Screen (Guest vs Create Vault vs Log In)
+        // VIEW 1: Choice Screen (Create Account vs Log In vs Guest)
         function renderChoiceView() {
             vaultModalTitle.innerText = "Cosmic Identity & Vault";
             vaultModalBody.innerHTML = `
                 <div class="choice-card">
                     <div class="choice-title">
                         <span>✨</span>
-                        <span>Option 1: Create a Cosmic Vault</span>
+                        <span>Option 1: Create Cosmic Account</span>
                     </div>
                     <div class="choice-desc">
-                        A unique, unhackable cryptographic Cosmic Key will be forged for you. 
-                        <strong>Keep this secret phrase safe</strong> — it is your only passport to access your past thoughts, view received warmth, and reconnect your stars across laptop & mobile without ever revealing your personal identity.
+                        Choose a unique anonymous username & password. A secret <strong>Recovery Key</strong> will be generated once to protect your account and reset your password if ever needed.
                     </div>
-                    <button class="btn-primary" id="btnGoGenerate">🌌 Create New Vault & Key</button>
+                    <button class="btn-primary" id="btnGoRegister">🌌 Create Account & Vault</button>
                 </div>
 
                 <div class="choice-card">
@@ -1850,9 +1909,9 @@
                         <span>Option 2: Log In to Existing Vault</span>
                     </div>
                     <div class="choice-desc">
-                        Already have a Cosmic Key? Enter your secret phrase to unlock your thoughts and stars on this device.
+                        Already have an account? Sign in with your unique username and password. You'll stay logged in across visits!
                     </div>
-                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00f0ff; color: #ffffff;">🗝️ Log In with Existing Key</button>
+                    <button class="btn-secondary" id="btnGoLogin" style="border-color: #00f0ff; color: #ffffff;">🗝️ Log In with Username</button>
                 </div>
 
                 <div class="choice-card" style="border-style: dashed; opacity: 0.9;">
@@ -1861,178 +1920,384 @@
                         <span>Option 3: Continue as a Guest</span>
                     </div>
                     <div class="choice-desc">
-                        Wander the cosmos freely. You can read and cast thoughts anonymously. (Stars you cast will stay linked to this browser session only).
+                        Wander the cosmos freely. You can read and cast thoughts anonymously without creating an account.
                     </div>
                     <button class="btn-secondary" id="btnStayGuest">Stay as Guest</button>
                 </div>
             `;
 
-            document.getElementById('btnGoGenerate').addEventListener('click', renderKeyGeneratedView);
-            document.getElementById('btnGoLogin').addEventListener('click', () => renderLoginView());
+            document.getElementById('btnGoRegister').addEventListener('click', renderRegisterView);
+            document.getElementById('btnGoLogin').addEventListener('click', renderLoginView);
             document.getElementById('btnStayGuest').addEventListener('click', () => {
                 closeVaultModal();
                 showToast("🌙 Exploring as a Wandering Stargazer (Guest)");
             });
         }
 
-        let knownKeyHashes = new Set(JSON.parse(localStorage.getItem('midnight_known_keys') || '[]'));
-
-        function isCosmicKeyFormatValid(key) {
-            if (!key || typeof key !== 'string') return false;
-            const parts = key.toLowerCase().trim().split('-');
-            if (parts.length < 5 || parts.length > 7) return false;
-            for (let i = 0; i < parts.length - 1; i++) {
-                if (!CELESTIAL_WORDS.includes(parts[i])) {
-                    return false;
-                }
-            }
-            const suffix = parts[parts.length - 1];
-            if (!suffix || suffix.length < 2 || !/^[a-z0-9]+$/i.test(suffix)) {
-                return false;
-            }
-            return true;
-        }
-
-        // VIEW 2: Key Generated Notice & Safety Warning
-        function renderKeyGeneratedView() {
-            newlyGeneratedKey = generateUnhackableCosmicKey();
-            vaultModalTitle.innerText = "Your Secret Cosmic Key";
-
-            sha256Hex(newlyGeneratedKey).then(h => {
-                knownKeyHashes.add(h);
-                localStorage.setItem('midnight_known_keys', JSON.stringify([...knownKeyHashes]));
-            });
+        // VIEW 2: Create Account View (Username + Password with Uniqueness Check)
+        function renderRegisterView() {
+            vaultModalTitle.innerText = "Create Your Anonymous Vault";
 
             vaultModalBody.innerHTML = `
-                <div class="key-banner">
+                <div class="form-card">
+                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                        Choose a unique celestial username and password. No email or personal data is ever required.
+                    </div>
+
+                    <div id="registerErrorMsg" class="form-error"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Unique Username</label>
+                        <input type="text" class="form-input" id="regUsername" maxlength="24" placeholder="e.g. lunar_drifter, zenith99">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="regPassword" placeholder="Enter password (min 4 characters)">
+                    </div>
+
+                    <button class="btn-primary" id="btnSubmitRegister" style="width: 100%; padding: 12px; margin-top: 6px;">🌌 Create Vault & Get Recovery Key</button>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
+                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromReg">← Back to Options</span>
+                        <span style="color: #00f0ff; cursor: pointer;" id="btnGoLoginFromReg">Already have account? Log in ✦</span>
+                    </div>
+                </div>
+            `;
+
+            const unameInput = document.getElementById('regUsername');
+            const passInput = document.getElementById('regPassword');
+            const errEl = document.getElementById('registerErrorMsg');
+            const submitBtn = document.getElementById('btnSubmitRegister');
+
+            async function doRegister() {
+                const username = unameInput.value.trim();
+                const password = passInput.value;
+                errEl.style.display = 'none';
+
+                if (!username || username.length < 3) {
+                    errEl.innerText = "⚠️ Username must be at least 3 characters.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                    errEl.innerText = "⚠️ Username can only contain letters, numbers, hyphens, and underscores.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                if (!password || password.length < 4) {
+                    errEl.innerText = "⚠️ Password must be at least 4 characters.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                // Check Uniqueness
+                submitBtn.innerText = "Verifying cosmos...";
+                const taken = await isUsernameTaken(username);
+                if (taken) {
+                    submitBtn.innerText = "🌌 Create Vault & Get Recovery Key";
+                    errEl.innerText = `⚠️ Username "${username}" is already claimed in the cosmos. Please choose another.`;
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                // Generate Secret Recovery Key
+                const recoveryKey = generateUnhackableRecoveryKey();
+                const passHash = await sha256Hex(username.toLowerCase() + ":" + password);
+                const recHash = await sha256Hex(recoveryKey);
+
+                // Save locally
+                saveLocalAccount(username, passHash, recHash);
+
+                // Save to Supabase table if available
+                if (dbClient) {
+                    try {
+                        await dbClient
+                            .from('cosmic_accounts')
+                            .insert([{
+                                username: username.toLowerCase(),
+                                password_hash: passHash,
+                                recovery_hash: recHash
+                            }]);
+                    } catch(e) {
+                        console.warn("Cloud account sync notice:", e.message);
+                    }
+                }
+
+                // Show Recovery Key Notice View
+                renderRecoveryNoticeView(username, recoveryKey);
+            }
+
+            submitBtn.addEventListener('click', doRegister);
+            passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRegister(); });
+            document.getElementById('btnBackFromReg').addEventListener('click', renderChoiceView);
+            document.getElementById('btnGoLoginFromReg').addEventListener('click', renderLoginView);
+        }
+
+        // VIEW 3: Recovery Key Notice View (Shown once upon account creation)
+        function renderRecoveryNoticeView(username, recoveryKey) {
+            vaultModalTitle.innerText = "Your Secret Recovery Key";
+
+            vaultModalBody.innerHTML = `
+                <div class="form-card">
                     <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: #10b981; font-weight: 600; margin-bottom: 8px;">
-                        ● Secret Key Forged Successfully
+                        ● Account Created for "${username}"
                     </div>
                     <div style="font-size: 0.84rem; color: #d0e0ff; line-height: 1.5;">
-                        Here is your private, unhackable Cosmic Key. <strong>Please copy and save it securely right now</strong>. You will need to enter this key on the next step to log in and unlock your vault.
+                        Here is your private, unhackable <strong>Secret Recovery Key</strong>. <strong>Please copy and save it securely right now</strong>. If you ever forget your password, this phrase is the ONLY way to reset it without an email.
                     </div>
 
                     <div class="key-display-box">
-                        <div class="key-text" id="newKeyText">${newlyGeneratedKey}</div>
-                        <button class="btn-secondary" id="btnCopyGeneratedKey" style="padding: 6px 14px; font-size: 0.75rem;">📋 Copy</button>
+                        <div class="key-text" id="recoveryKeyText">${recoveryKey}</div>
+                        <button class="btn-secondary" id="btnCopyRecKey" style="padding: 6px 14px; font-size: 0.75rem;">📋 Copy</button>
                     </div>
 
-                    <div style="font-size: 0.75rem; color: #fca5a5; background: rgba(239, 68, 68, 0.12); padding: 8px 12px; border-radius: 10px; border-style: solid; border-width: 1px; border-color: rgba(239, 68, 68, 0.3); margin-bottom: 16px;">
-                        ⚠️ <strong>Important Notice:</strong> Because this platform is 100% anonymous, we store zero personal info or emails. If you lose this key, your thoughts cannot be recovered!
+                    <div style="font-size: 0.75rem; color: #fca5a5; background: rgba(239, 68, 68, 0.12); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.3); margin-bottom: 16px;">
+                        ⚠️ <strong>Important Notice:</strong> Midnight Thought is 100% anonymous. We do not store your email. If you lose your password and this recovery key, access cannot be recovered!
                     </div>
 
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
-                        <button class="btn-primary" id="btnProceedToLogin" style="width: 100%; padding: 12px;">🚀 Proceed to Log In with Key →</button>
-                    </div>
+                    <button class="btn-primary" id="btnEnterVaultNow" style="width: 100%; padding: 12px;">✨ Enter Your Cosmic Vault →</button>
                 </div>
             `;
 
-            document.getElementById('btnCopyGeneratedKey').addEventListener('click', () => {
-                navigator.clipboard.writeText(newlyGeneratedKey).then(() => {
-                    showToast("📋 Cosmic Key copied to clipboard!");
+            document.getElementById('btnCopyRecKey').addEventListener('click', () => {
+                navigator.clipboard.writeText(recoveryKey).then(() => {
+                    showToast("📋 Secret Recovery Key copied to clipboard!");
                 }).catch(() => {
-                    showToast("Key copied: " + newlyGeneratedKey);
+                    showToast("Recovery key: " + recoveryKey);
                 });
             });
 
-            document.getElementById('btnProceedToLogin').addEventListener('click', () => {
-                renderLoginView(newlyGeneratedKey);
-            });
-        }
-
-        // VIEW 3: Login Page (Enter Key to Access Account) - Strictly login only
-        function renderLoginView(prefilledKey = '') {
-            vaultModalTitle.innerText = "Unlock Your Cosmic Vault";
-
-            vaultModalBody.innerHTML = `
-                <div class="key-banner">
-                    <div style="font-size: 0.95rem; font-family: 'Cinzel', serif; color: #ffffff; margin-bottom: 6px;">
-                        Enter Your Secret Cosmic Key
-                    </div>
-                    <div style="font-size: 0.8rem; color: #b0c4de; line-height: 1.5;">
-                        Paste your word-string key below to sign into your anonymous vault and retrieve all your stars across this device.
-                    </div>
-
-                    <div class="connect-input-box">
-                        <input type="text" class="connect-input" id="loginKeyInput" placeholder="e.g. ethereal-sapphire-whisper-zenith-492" value="${prefilledKey || ''}">
-                        <div id="loginErrorMsg" style="display: none; font-size: 0.76rem; color: #fca5a5; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 10px 14px; line-height: 1.4; text-align: left;"></div>
-                        <button class="btn-primary" id="btnSubmitLogin" style="width: 100%; padding: 11px;">✨ Unlock Vault & Sign In</button>
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-start; align-items: center; margin-top: 10px; font-size: 0.75rem;">
-                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackToChoice">← Back to Options</span>
-                    </div>
-                </div>
-            `;
-
-            const inputEl = document.getElementById('loginKeyInput');
-            const submitBtn = document.getElementById('btnSubmitLogin');
-            const errorMsgEl = document.getElementById('loginErrorMsg');
-
-            async function doLogin() {
-                const key = inputEl.value.trim();
-                errorMsgEl.style.display = 'none';
-                inputEl.style.borderColor = 'rgba(166, 188, 255, 0.35)';
-
-                if (!key || key.length < 6) {
-                    errorMsgEl.innerText = "⚠️ Please enter your secret Cosmic Key phrase.";
-                    errorMsgEl.style.display = 'block';
-                    inputEl.style.borderColor = '#ef4444';
-                    showToast("⚠️ Please enter a valid Cosmic Key phrase.");
-                    return;
-                }
-
-                const testHash = await sha256Hex(key);
-                const hasThoughtsInSky = thoughtsArr.some(t => t.author_key === testHash);
-                const isKnownKey = knownKeyHashes.has(testHash);
-                const isValidFormat = isCosmicKeyFormatValid(key);
-
-                let existsInCloud = false;
-                if (dbClient && !hasThoughtsInSky && !isKnownKey) {
-                    try {
-                        const { data } = await dbClient
-                            .from('thoughts')
-                            .select('id')
-                            .eq('author_key', testHash)
-                            .limit(1);
-                        if (data && data.length > 0) {
-                            existsInCloud = true;
-                        }
-                    } catch(e) {}
-                }
-
-                if (!hasThoughtsInSky && !isKnownKey && !existsInCloud && !isValidFormat) {
-                    errorMsgEl.innerText = "⚠️ Invalid Cosmic Key. Secret phrase not recognized. Please check for typos or enter the key you saved when creating your vault.";
-                    errorMsgEl.style.display = 'block';
-                    inputEl.style.borderColor = '#ef4444';
-                    showToast("⚠️ Invalid Cosmic Key. Login failed.");
-                    return;
-                }
-
-                activeCosmicKey = key;
-                localStorage.setItem('midnight_active_cosmic_key', activeCosmicKey);
-                activeKeyHash = testHash;
-                knownKeyHashes.add(activeKeyHash);
-                localStorage.setItem('midnight_known_keys', JSON.stringify([...knownKeyHashes]));
+            document.getElementById('btnEnterVaultNow').addEventListener('click', async () => {
+                activeUsername = username;
+                localStorage.setItem('midnight_active_username', activeUsername);
+                activeKeyHash = await sha256Hex("user:" + activeUsername.toLowerCase());
 
                 updateVaultHeaderButton();
                 renderStars();
                 renderActiveVaultView();
                 trackCurrentPresence();
-                showToast("✨ Welcome back! Your Cosmic Vault is unlocked.");
+                showToast(`✨ Welcome, ${activeUsername}! Your vault is unlocked.`);
+            });
+        }
+
+        // VIEW 4: Log In View (Username + Password)
+        function renderLoginView() {
+            vaultModalTitle.innerText = "Log In to Cosmic Vault";
+
+            vaultModalBody.innerHTML = `
+                <div class="form-card">
+                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                        Enter your unique username and password to access your vault and stars.
+                    </div>
+
+                    <div id="loginErrorMsg" class="form-error"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="loginUsername" placeholder="Enter your username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password">
+                    </div>
+
+                    <button class="btn-primary" id="btnSubmitLogin" style="width: 100%; padding: 12px; margin-top: 6px;">🔑 Log In to Vault</button>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem;">
+                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromLogin">← Back to Options</span>
+                        <span style="color: #ffd166; cursor: pointer;" id="btnGoForgot">Forgot Password? (Reset Key) ✦</span>
+                    </div>
+                </div>
+            `;
+
+            const unameInput = document.getElementById('loginUsername');
+            const passInput = document.getElementById('loginPassword');
+            const errEl = document.getElementById('loginErrorMsg');
+            const submitBtn = document.getElementById('btnSubmitLogin');
+
+            async function doLogin() {
+                const username = unameInput.value.trim();
+                const password = passInput.value;
+                errEl.style.display = 'none';
+
+                if (!username || !password) {
+                    errEl.innerText = "⚠️ Please enter both username and password.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                const uname = username.toLowerCase();
+                const inputPassHash = await sha256Hex(uname + ":" + password);
+
+                let isMatch = false;
+                const localAccs = getLocalAccounts();
+                if (localAccs[uname] && localAccs[uname].passwordHash === inputPassHash) {
+                    isMatch = true;
+                }
+
+                if (!isMatch && dbClient) {
+                    try {
+                        const { data } = await dbClient
+                            .from('cosmic_accounts')
+                            .select('*')
+                            .eq('username', uname)
+                            .eq('password_hash', inputPassHash)
+                            .limit(1);
+                        if (data && data.length > 0) {
+                            isMatch = true;
+                            // Cache locally
+                            saveLocalAccount(username, inputPassHash, data[0].recovery_hash || '');
+                        }
+                    } catch(e) {}
+                }
+
+                if (!isMatch) {
+                    errEl.innerText = "⚠️ Invalid username or password. Please check your credentials or reset your password.";
+                    errEl.style.display = 'block';
+                    showToast("⚠️ Login failed. Incorrect credentials.");
+                    return;
+                }
+
+                // Successful login
+                activeUsername = username;
+                localStorage.setItem('midnight_active_username', activeUsername);
+                activeKeyHash = await sha256Hex("user:" + uname);
+
+                updateVaultHeaderButton();
+                renderStars();
+                renderActiveVaultView();
+                trackCurrentPresence();
+                showToast(`✨ Welcome back, ${activeUsername}!`);
             }
 
             submitBtn.addEventListener('click', doLogin);
-            inputEl.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') doLogin();
-            });
-
-            document.getElementById('btnBackToChoice').addEventListener('click', renderChoiceView);
+            passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+            document.getElementById('btnBackFromLogin').addEventListener('click', renderChoiceView);
+            document.getElementById('btnGoForgot').addEventListener('click', renderForgotPasswordView);
         }
 
-        // VIEW 4: Active Logged In Vault Dashboard (Secret Key completely hidden/removed)
+        // VIEW 5: Forgot Password View (Username + Secret Recovery Key + New Password)
+        function renderForgotPasswordView() {
+            vaultModalTitle.innerText = "Reset Password with Recovery Key";
+
+            vaultModalBody.innerHTML = `
+                <div class="form-card">
+                    <div style="font-size: 0.82rem; color: #b0c4de; margin-bottom: 16px; line-height: 1.5;">
+                        Enter your username and the secret <strong>Recovery Key</strong> you saved during registration to set a new password.
+                    </div>
+
+                    <div id="resetErrorMsg" class="form-error"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="resetUsername" placeholder="Enter your username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Secret Recovery Key</label>
+                        <input type="text" class="form-input" id="resetRecoveryKey" placeholder="e.g. ethereal-sapphire-whisper-zenith-492" style="font-family: 'Fira Code', monospace; font-size: 0.84rem;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-input" id="resetNewPassword" placeholder="Enter new password (min 4 characters)">
+                    </div>
+
+                    <button class="btn-primary" id="btnSubmitReset" style="width: 100%; padding: 12px; margin-top: 6px;">🔄 Reset Password & Log In</button>
+
+                    <div style="display: flex; justify-content: flex-start; align-items: center; margin-top: 14px; font-size: 0.75rem;">
+                        <span style="color: #a6bcff; cursor: pointer; text-decoration: underline;" id="btnBackFromReset">← Back to Log In</span>
+                    </div>
+                </div>
+            `;
+
+            const unameInput = document.getElementById('resetUsername');
+            const recInput = document.getElementById('resetRecoveryKey');
+            const passInput = document.getElementById('resetNewPassword');
+            const errEl = document.getElementById('resetErrorMsg');
+            const submitBtn = document.getElementById('btnSubmitReset');
+
+            async function doReset() {
+                const username = unameInput.value.trim();
+                const recoveryKey = recInput.value.trim();
+                const newPassword = passInput.value;
+                errEl.style.display = 'none';
+
+                if (!username || !recoveryKey || !newPassword) {
+                    errEl.innerText = "⚠️ Please fill in all fields.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                if (newPassword.length < 4) {
+                    errEl.innerText = "⚠️ New password must be at least 4 characters.";
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                const uname = username.toLowerCase();
+                const recHash = await sha256Hex(recoveryKey);
+                const newPassHash = await sha256Hex(uname + ":" + newPassword);
+
+                let isAuthorized = false;
+                const localAccs = getLocalAccounts();
+                if (localAccs[uname] && localAccs[uname].recoveryHash === recHash) {
+                    isAuthorized = true;
+                }
+
+                if (!isAuthorized && dbClient) {
+                    try {
+                        const { data } = await dbClient
+                            .from('cosmic_accounts')
+                            .select('*')
+                            .eq('username', uname)
+                            .eq('recovery_hash', recHash)
+                            .limit(1);
+                        if (data && data.length > 0) {
+                            isAuthorized = true;
+                            // Update cloud password
+                            await dbClient
+                                .from('cosmic_accounts')
+                                .update({ password_hash: newPassHash })
+                                .eq('username', uname);
+                        }
+                    } catch(e) {}
+                }
+
+                if (!isAuthorized) {
+                    errEl.innerText = "⚠️ Incorrect username or Secret Recovery Key. Reset failed.";
+                    errEl.style.display = 'block';
+                    showToast("⚠️ Password reset failed.");
+                    return;
+                }
+
+                // Update local storage
+                saveLocalAccount(username, newPassHash, recHash);
+
+                // Log in
+                activeUsername = username;
+                localStorage.setItem('midnight_active_username', activeUsername);
+                activeKeyHash = await sha256Hex("user:" + uname);
+
+                updateVaultHeaderButton();
+                renderStars();
+                renderActiveVaultView();
+                trackCurrentPresence();
+                showToast("✨ Password reset successfully! Welcome back.");
+            }
+
+            submitBtn.addEventListener('click', doReset);
+            passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doReset(); });
+            document.getElementById('btnBackFromReset').addEventListener('click', renderLoginView);
+        }
+
+        // VIEW 6: Active Logged In Vault Dashboard
         function renderActiveVaultView() {
-            vaultModalTitle.innerText = "My Cosmic Sanctuary";
+            vaultModalTitle.innerText = `${activeUsername}'s Sanctuary`;
 
             const myThoughts = thoughtsArr
                 .map((t, idx) => ({ ...t, originalIndex: idx }))
@@ -2060,20 +2325,20 @@
             }
 
             vaultModalBody.innerHTML = `
-                <!-- Vault Status Banner (Secret Key Completely Hidden) -->
+                <!-- Vault Status Banner -->
                 <div style="background: rgba(8, 22, 40, 0.85); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 1.1rem;">🔒</span>
                         <div>
                             <div style="font-size: 0.82rem; color: #a5f3fc; font-weight: 600; letter-spacing: 0.5px;">
-                                Cosmic Vault Active
+                                Logged in as: <strong>${activeUsername}</strong>
                             </div>
                             <div style="font-size: 0.72rem; color: #8da2c0;">
-                                Anonymous Identity Encrypted & Protected
+                                Anonymous Identity Encrypted & Active
                             </div>
                         </div>
                     </div>
-                    <button class="btn-danger" id="btnLogoutKey">🚪 Log Out / Switch</button>
+                    <button class="btn-danger" id="btnLogoutUser">🚪 Log Out</button>
                 </div>
 
                 <!-- Stats summary -->
@@ -2099,10 +2364,10 @@
                 <div class="my-thoughts-list">${listHtml}</div>
             `;
 
-            document.getElementById('btnLogoutKey').addEventListener('click', () => {
-                activeCosmicKey = null;
+            document.getElementById('btnLogoutUser').addEventListener('click', () => {
+                activeUsername = null;
                 activeKeyHash = null;
-                localStorage.removeItem('midnight_active_cosmic_key');
+                localStorage.removeItem('midnight_active_username');
                 updateVaultHeaderButton();
                 renderStars();
                 renderChoiceView();
@@ -2119,6 +2384,9 @@
             });
         }
 
+        /* ==========================================================================
+           CASTING INTERFACE (v11)
+           ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
         const charCount = document.getElementById('charCount');
