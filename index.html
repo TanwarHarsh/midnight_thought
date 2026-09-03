@@ -1041,7 +1041,7 @@
            AUTHENTICATION & VAULT STATE MANAGEMENT (v11)
            - Active User (Username + KeyHash)
            - Persistent Login in localStorage
-           - Local/Cloud Account Registry with Username Uniqueness
+           - Universal Cross-Browser Cloud Account Registry in Supabase
            ========================================================================== */
         let activeUsername = localStorage.getItem('midnight_active_username') || null;
         let activeKeyHash = null;
@@ -1073,22 +1073,110 @@
             localStorage.setItem('midnight_cosmic_accounts', JSON.stringify(accs));
         }
 
-        async function isUsernameTaken(username) {
+        async function getCloudAccount(username) {
             const uname = username.toLowerCase().trim();
-            const localAccs = getLocalAccounts();
-            if (localAccs[uname]) return true;
+            const unameHash = await sha256Hex(uname);
 
             if (dbClient) {
                 try {
-                    const { data } = await dbClient
-                        .from('cosmic_accounts')
-                        .select('username')
-                        .eq('username', uname)
+                    const { data, error } = await dbClient
+                        .from('thoughts')
+                        .select('id, text, author_key')
+                        .eq('author_key', 'sys_acc_' + unameHash)
                         .limit(1);
-                    if (data && data.length > 0) return true;
-                } catch(e) {}
+
+                    if (!error && data && data.length > 0) {
+                        const rawText = data[0].text;
+                        if (rawText && rawText.startsWith('__SYS_ACC__:')) {
+                            const accData = JSON.parse(rawText.substring(12));
+                            return { id: data[0].id, ...accData };
+                        }
+                    }
+                } catch(e) {
+                    console.warn("getCloudAccount notice:", e);
+                }
             }
-            return false;
+
+            const localAccs = getLocalAccounts();
+            if (localAccs[uname]) {
+                return {
+                    u: localAccs[uname].username,
+                    p: localAccs[uname].passwordHash,
+                    r: localAccs[uname].recoveryHash
+                };
+            }
+            return null;
+        }
+
+        async function isUsernameTaken(username) {
+            const acc = await getCloudAccount(username);
+            return acc !== null;
+        }
+
+        async function saveCloudAccount(username, passwordHash, recoveryHash) {
+            const uname = username.toLowerCase().trim();
+            const unameHash = await sha256Hex(uname);
+            saveLocalAccount(username, passwordHash, recoveryHash);
+
+            if (dbClient) {
+                try {
+                    const payload = {
+                        u: uname,
+                        p: passwordHash,
+                        r: recoveryHash,
+                        created_at: new Date().toISOString()
+                    };
+
+                    await dbClient
+                        .from('thoughts')
+                        .insert([{
+                            text: '__SYS_ACC__:' + JSON.stringify(payload),
+                            warmth: -1,
+                            resonate: 0,
+                            color_index: 0,
+                            author_key: 'sys_acc_' + unameHash,
+                            x: -999,
+                            y: -999
+                        }]);
+                } catch(e) {
+                    console.warn("saveCloudAccount notice:", e);
+                }
+            }
+        }
+
+        async function updateCloudPassword(accountId, username, newPasswordHash, recoveryHash) {
+            const uname = username.toLowerCase().trim();
+            const unameHash = await sha256Hex(uname);
+            saveLocalAccount(username, newPasswordHash, recoveryHash);
+
+            if (dbClient) {
+                try {
+                    const payload = {
+                        u: uname,
+                        p: newPasswordHash,
+                        r: recoveryHash,
+                        updated_at: new Date().toISOString()
+                    };
+
+                    if (accountId) {
+                        await dbClient
+                            .from('thoughts')
+                            .update({
+                                text: '__SYS_ACC__:' + JSON.stringify(payload)
+                            })
+                            .eq('id', accountId);
+                    } else {
+                        await dbClient
+                            .from('thoughts')
+                            .update({
+                                text: '__SYS_ACC__:' + JSON.stringify(payload)
+                            })
+                            .eq('author_key', 'sys_acc_' + unameHash);
+                    }
+                } catch(e) {
+                    console.warn("updateCloudPassword notice:", e);
+                }
+            }
         }
 
         function updateVaultHeaderButton() {
@@ -1377,7 +1465,16 @@
                     if (error) {
                         console.warn("Supabase load notice:", error.message);
                     } else if (Array.isArray(data) && data.length > 0) {
-                        const newThoughts = data.map((item, idx) => {
+                        // Filter out internal system account records
+                        const realThoughts = data.filter(item => {
+                            if (!item.text) return false;
+                            if (item.text.startsWith('__SYS_ACC__:')) return false;
+                            if (item.author_key && (item.author_key === 'sys_account_record' || item.author_key.startsWith('sys_acc_'))) return false;
+                            if (item.warmth !== undefined && Number(item.warmth) < 0) return false;
+                            return true;
+                        });
+
+                        const newThoughts = realThoughts.map((item, idx) => {
                             const props = getDeterministicProps(item, idx);
                             return {
                                 id: item.id.toString(),
@@ -2008,23 +2105,8 @@
                 const passHash = await sha256Hex(username.toLowerCase() + ":" + password);
                 const recHash = await sha256Hex(recoveryKey);
 
-                // Save locally
-                saveLocalAccount(username, passHash, recHash);
-
-                // Save to Supabase table if available
-                if (dbClient) {
-                    try {
-                        await dbClient
-                            .from('cosmic_accounts')
-                            .insert([{
-                                username: username.toLowerCase(),
-                                password_hash: passHash,
-                                recovery_hash: recHash
-                            }]);
-                    } catch(e) {
-                        console.warn("Cloud account sync notice:", e.message);
-                    }
-                }
+                // Save to Cloud & Local Storage
+                await saveCloudAccount(username, passHash, recHash);
 
                 // Show Recovery Key Notice View
                 renderRecoveryNoticeView(username, recoveryKey);
@@ -2130,37 +2212,22 @@
                     return;
                 }
 
+                submitBtn.innerText = "Authenticating...";
                 const uname = username.toLowerCase();
                 const inputPassHash = await sha256Hex(uname + ":" + password);
 
-                let isMatch = false;
-                const localAccs = getLocalAccounts();
-                if (localAccs[uname] && localAccs[uname].passwordHash === inputPassHash) {
-                    isMatch = true;
-                }
+                const cloudAcc = await getCloudAccount(username);
+                submitBtn.innerText = "🔑 Log In to Vault";
 
-                if (!isMatch && dbClient) {
-                    try {
-                        const { data } = await dbClient
-                            .from('cosmic_accounts')
-                            .select('*')
-                            .eq('username', uname)
-                            .eq('password_hash', inputPassHash)
-                            .limit(1);
-                        if (data && data.length > 0) {
-                            isMatch = true;
-                            // Cache locally
-                            saveLocalAccount(username, inputPassHash, data[0].recovery_hash || '');
-                        }
-                    } catch(e) {}
-                }
-
-                if (!isMatch) {
+                if (!cloudAcc || cloudAcc.p !== inputPassHash) {
                     errEl.innerText = "⚠️ Invalid username or password. Please check your credentials or reset your password.";
                     errEl.style.display = 'block';
                     showToast("⚠️ Login failed. Incorrect credentials.");
                     return;
                 }
+
+                // Cache locally
+                saveLocalAccount(username, inputPassHash, cloudAcc.r || '');
 
                 // Successful login
                 activeUsername = username;
@@ -2239,44 +2306,23 @@
                     return;
                 }
 
+                submitBtn.innerText = "Verifying...";
                 const uname = username.toLowerCase();
                 const recHash = await sha256Hex(recoveryKey);
                 const newPassHash = await sha256Hex(uname + ":" + newPassword);
 
-                let isAuthorized = false;
-                const localAccs = getLocalAccounts();
-                if (localAccs[uname] && localAccs[uname].recoveryHash === recHash) {
-                    isAuthorized = true;
-                }
+                const cloudAcc = await getCloudAccount(username);
+                submitBtn.innerText = "🔄 Reset Password & Log In";
 
-                if (!isAuthorized && dbClient) {
-                    try {
-                        const { data } = await dbClient
-                            .from('cosmic_accounts')
-                            .select('*')
-                            .eq('username', uname)
-                            .eq('recovery_hash', recHash)
-                            .limit(1);
-                        if (data && data.length > 0) {
-                            isAuthorized = true;
-                            // Update cloud password
-                            await dbClient
-                                .from('cosmic_accounts')
-                                .update({ password_hash: newPassHash })
-                                .eq('username', uname);
-                        }
-                    } catch(e) {}
-                }
-
-                if (!isAuthorized) {
+                if (!cloudAcc || cloudAcc.r !== recHash) {
                     errEl.innerText = "⚠️ Incorrect username or Secret Recovery Key. Reset failed.";
                     errEl.style.display = 'block';
                     showToast("⚠️ Password reset failed.");
                     return;
                 }
 
-                // Update local storage
-                saveLocalAccount(username, newPassHash, recHash);
+                // Update in cloud and local
+                await updateCloudPassword(cloudAcc.id, username, newPassHash, recHash);
 
                 // Log in
                 activeUsername = username;
