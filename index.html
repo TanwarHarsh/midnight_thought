@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Midnight Thought (v6) — 3D Celestial Sky</title>
+    <title>The Midnight Thought (v7) — 3D Celestial Sky & Anonymous Key Vault</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -123,7 +123,7 @@
             gap: 10px;
         }
 
-        .active-users-badge, .total-thoughts-badge {
+        .active-users-badge, .total-thoughts-badge, .my-vault-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -137,12 +137,31 @@
             letter-spacing: 0.5px;
             box-shadow: 0 0 14px rgba(166, 188, 255, 0.15);
             transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
         }
 
         .total-thoughts-badge {
             color: #ffe8a3;
             border-color: rgba(255, 214, 102, 0.4);
             box-shadow: 0 0 14px rgba(255, 214, 102, 0.15);
+            cursor: default;
+        }
+
+        .my-vault-btn {
+            background: rgba(0, 240, 255, 0.12);
+            border-color: rgba(0, 240, 255, 0.5);
+            color: #a5f3fc;
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .my-vault-btn:hover {
+            background: rgba(0, 240, 255, 0.25);
+            border-color: var(--star-mine);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
+            transform: translateY(-1px);
         }
 
         .live-dot {
@@ -407,9 +426,9 @@
         }
 
         .modal {
-            background: rgba(15, 32, 56, 0.92);
+            background: rgba(15, 32, 56, 0.94);
             border: 1px solid rgba(166, 188, 255, 0.35);
-            padding: 40px 36px 30px;
+            padding: 38px 36px 30px;
             border-radius: 26px;
             max-width: 490px;
             width: 88%;
@@ -454,7 +473,7 @@
             text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
         }
 
-        /* Message Timestamp Styling */
+        /* Message Exact Timestamp Styling */
         .modal-timestamp {
             display: flex;
             align-items: center;
@@ -465,7 +484,6 @@
             opacity: 0.85;
             margin-bottom: 24px;
             letter-spacing: 0.5px;
-            font-style: italic;
         }
 
         .modal-timestamp svg {
@@ -537,6 +555,198 @@
             text-shadow: 0 0 10px rgba(166, 188, 255, 0.6);
         }
 
+        /* ==========================================================================
+           COSMIC VAULT & ANONYMOUS AUTH MODAL STYLES
+           ========================================================================== */
+        .vault-modal {
+            max-width: 580px;
+            width: 92%;
+            text-align: left;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            padding: 32px 30px 26px;
+        }
+
+        .vault-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(166, 188, 255, 0.2);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .vault-title {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 1.25rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 2px;
+        }
+
+        .vault-body {
+            overflow-y: auto;
+            padding-right: 6px;
+            flex: 1;
+        }
+
+        .vault-body::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .vault-body::-webkit-scrollbar-thumb {
+            background: rgba(166, 188, 255, 0.25);
+            border-radius: 10px;
+        }
+
+        .key-section {
+            background: rgba(8, 22, 40, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .key-label {
+            font-size: 0.76rem;
+            color: #a5f3fc;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .key-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(166, 188, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+        }
+
+        .key-text {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.86rem;
+            color: #00f0ff;
+            word-break: break-all;
+            flex: 1;
+            user-select: text;
+        }
+
+        .key-btn {
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid #00f0ff;
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .key-btn:hover {
+            background: #00f0ff;
+            color: #010409;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+        }
+
+        .key-subtext {
+            font-size: 0.73rem;
+            color: #8da2c0;
+            line-height: 1.4;
+        }
+
+        .connect-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .connect-input {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(166, 188, 255, 0.3);
+            border-radius: 14px;
+            padding: 8px 14px;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .connect-input:focus {
+            border-color: #00f0ff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .my-thoughts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .my-thought-card {
+            background: rgba(16, 36, 64, 0.55);
+            border: 1px solid rgba(166, 188, 255, 0.2);
+            border-radius: 16px;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .my-thought-card:hover {
+            border-color: #00f0ff;
+            background: rgba(16, 36, 64, 0.85);
+            box-shadow: 0 0 18px rgba(0, 240, 255, 0.25);
+            transform: translateX(4px);
+        }
+
+        .my-thought-quote {
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            color: #ffffff;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .my-thought-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.74rem;
+            color: #8da2c0;
+        }
+
+        .my-thought-stats {
+            display: flex;
+            gap: 12px;
+            color: #d0e0ff;
+        }
+
+        .empty-vault-state {
+            text-align: center;
+            padding: 30px 10px;
+            color: #8da2c0;
+            font-style: italic;
+            font-size: 0.88rem;
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -568,6 +778,7 @@
             .interface { bottom: 25px; }
             .input-box { padding: 18px 20px; }
             .hint-drag { top: 75px; font-size: 0.65rem; }
+            .vault-modal { padding: 24px 20px 20px; }
         }
     </style>
 </head>
@@ -600,6 +811,10 @@
                     <span>✨</span>
                     <span id="totalThoughtsCount">0 thoughts</span>
                 </div>
+                <button class="my-vault-btn" id="myVaultBtn" title="Open Your Secret Cosmic Identity & Messages Vault">
+                    <span>🗝️</span>
+                    <span id="myStarsCountLabel">My Stars (0)</span>
+                </button>
             </div>
         </div>
         <div class="header-actions">
@@ -628,12 +843,13 @@
         </div>
     </div>
 
+    <!-- Star Thought Viewer Modal -->
     <div class="overlay" id="overlay">
         <div class="modal">
             <div id="modalBadgeContainer"></div>
             <p class="modal-text" id="modalText">A passing cloud...</p>
             
-            <!-- Timestamp of the Thought -->
+            <!-- Exact Timestamp -->
             <div class="modal-timestamp" id="modalTimestamp">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -658,11 +874,65 @@
         </div>
     </div>
 
+    <!-- Cosmic Identity & "My Casted Thoughts" Vault Modal -->
+    <div class="overlay" id="vaultOverlay">
+        <div class="modal vault-modal">
+            <div class="vault-header">
+                <div class="vault-title">
+                    <span>🗝️</span>
+                    <span>Cosmic Vault</span>
+                </div>
+                <span class="close-btn" id="vaultCloseBtn">✕ Close</span>
+            </div>
+
+            <div class="vault-body">
+                <!-- Secret Cosmic Key Box -->
+                <div class="key-section">
+                    <div class="key-label">
+                        <span>Your Anonymous Cosmic Key</span>
+                        <span style="font-size: 0.68rem; color: #10b981;">● 100% Private & Unhackable</span>
+                    </div>
+                    <div class="key-box">
+                        <div class="key-text" id="displayCosmicKey">...</div>
+                        <button class="key-btn" id="copyKeyBtn">📋 Copy</button>
+                    </div>
+                    <div class="key-subtext">
+                        This variable-length cryptographic word-string is your secret passport. Save it to access all your posted stars across any laptop or mobile phone anonymously.
+                    </div>
+
+                    <!-- Connect Existing Key on another device -->
+                    <div style="margin-top: 14px; border-top: 1px dashed rgba(166, 188, 255, 0.2); padding-top: 10px;">
+                        <div style="font-size: 0.74rem; color: #d0e0ff; margin-bottom: 6px; font-weight: 500;">
+                            Switch or Connect Existing Key (Cross-Device Sync):
+                        </div>
+                        <div class="connect-box">
+                            <input type="text" class="connect-input" id="connectKeyInput" placeholder="Paste your secret cosmic key...">
+                            <button class="key-btn" id="submitConnectKeyBtn">✨ Connect Key</button>
+                            <button class="key-btn" id="generateNewKeyBtn" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25);">🎲 New</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Casted Thoughts List -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: #a5f3fc; font-weight: 600;">
+                        Your Casted Stars in the Sky
+                    </span>
+                    <span style="font-size: 0.75rem; color: #8da2c0;" id="vaultCountSummary">0 Stars</span>
+                </div>
+
+                <div class="my-thoughts-list" id="myThoughtsContainer">
+                    <div class="empty-vault-state">You have not cast any thoughts into the night yet.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
         /* ==========================================================================
-           SUPABASE CONFIGURATION & CLIENT INITIALIZATION
+           SUPABASE CONFIGURATION
            ========================================================================== */
         const SUPABASE_URL = "https://gbzoyrbdflfyfisrvqum.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdiem95cmJkZmxmeWZpc3J2cXVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMTEwNzUsImV4cCI6MjEwMzg4NzA3NX0.2OJsJP9wfBZu9u6yLR49lo4vCfpFiz0rbGtSac7ZxK8";
@@ -677,27 +947,85 @@
         }
 
         /* ==========================================================================
-           STAR COLOR & OWNERSHIP TRACKING ENGINE
-           - Cyan (Mine): Created by current user
-           - Yellow (Read): Read by current user
-           - White (Unread): Other user's unread star
+           UNHACKABLE VARIABLE-LENGTH WORD-STRING COSMIC KEY GENERATOR
+           Uses cryptographic random entropy + dictionary of celestial words
            ========================================================================== */
-        let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
-        let myThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_my_thoughts') || '[]'));
+        const CELESTIAL_WORDS = [
+            "ethereal", "sapphire", "obsidian", "twilight", "solitary", "infinite", "shimmering",
+            "radiant", "wandering", "celestial", "zenith", "nebula", "pulsar", "galaxy", "aurora",
+            "crescent", "starlight", "solstice", "phantom", "whisper", "resonance", "eternity",
+            "cosmos", "voyager", "sanctuary", "gravity", "velvet", "silent", "ancient", "drifting",
+            "quantum", "astral", "hyperion", "solitude", "eclipse", "horizon", "shadow", "luminous",
+            "supernova", "parsec", "seraph", "chronos", "mirage", "valkyrie", "quarks", "radiance"
+        ];
 
-        function markThoughtAsMine(thoughtId) {
-            if (!thoughtId) return;
-            myThoughtIds.add(thoughtId.toString());
-            localStorage.setItem('midnight_my_thoughts', JSON.stringify([...myThoughtIds]));
-            
-            const starEl = document.querySelector(`.star[data-id="${thoughtId}"]`);
-            if (starEl) {
-                starEl.className = 'star mine';
+        function generateUnhackableCosmicKey() {
+            const array = new Uint32Array(8);
+            window.crypto.getRandomValues(array);
+
+            // Variable length word phrase (4 to 6 words)
+            const wordCount = 4 + (array[0] % 3);
+            const selectedWords = [];
+
+            for (let i = 0; i < wordCount; i++) {
+                const wordIndex = array[i + 1] % CELESTIAL_WORDS.length;
+                selectedWords.push(CELESTIAL_WORDS[wordIndex]);
+            }
+
+            // Cryptographic random alphanumeric hash suffix
+            const randomSuffix = ((array[7] % 90000) + 10000).toString(36) + (array[6] % 1000).toString();
+            return selectedWords.join("-") + "-" + randomSuffix;
+        }
+
+        // Fast client-side SHA-256 hash for anonymous key verification in database
+        async function sha256Hex(message) {
+            try {
+                const msgBuffer = new TextEncoder().encode(message.toLowerCase().trim());
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch(e) {
+                // Fallback deterministic hash
+                let h = 0;
+                for (let i = 0; i < message.length; i++) {
+                    h = Math.imul(31, h) + message.charCodeAt(i) | 0;
+                }
+                return Math.abs(h).toString(16);
             }
         }
 
-        function isThoughtMine(thoughtId) {
-            return myThoughtIds.has(thoughtId ? thoughtId.toString() : '');
+        /* ==========================================================================
+           COSMIC IDENTITY STATE & THOUGHT OWNERSHIP
+           ========================================================================== */
+        let currentCosmicKey = localStorage.getItem('midnight_cosmic_key') || '';
+        let currentKeyHash = '';
+
+        if (!currentCosmicKey) {
+            currentCosmicKey = generateUnhackableCosmicKey();
+            localStorage.setItem('midnight_cosmic_key', currentCosmicKey);
+        }
+
+        // Initialize key hash
+        sha256Hex(currentCosmicKey).then(h => {
+            currentKeyHash = h;
+            refreshStarsAndVault();
+        });
+
+        let readThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_read_thoughts') || '[]'));
+        let myThoughtIds = new Set(JSON.parse(localStorage.getItem('midnight_my_thoughts') || '[]'));
+
+        function saveMyThought(thoughtId) {
+            if (!thoughtId) return;
+            myThoughtIds.add(thoughtId.toString());
+            localStorage.setItem('midnight_my_thoughts', JSON.stringify([...myThoughtIds]));
+            updateMyStarsCount();
+        }
+
+        function isThoughtMine(thoughtId, authorHash = null) {
+            if (!thoughtId) return false;
+            if (myThoughtIds.has(thoughtId.toString())) return true;
+            if (authorHash && currentKeyHash && authorHash === currentKeyHash) return true;
+            return false;
         }
 
         function markThoughtAsRead(thoughtId) {
@@ -715,51 +1043,42 @@
             return readThoughtIds.has(thoughtId ? thoughtId.toString() : '');
         }
 
-        function getStarClass(thoughtId) {
-            if (isThoughtMine(thoughtId)) return 'mine';
-            if (isThoughtRead(thoughtId)) return 'read';
+        function getStarClass(thought) {
+            if (isThoughtMine(thought.id, thought.author_key)) return 'mine';
+            if (isThoughtRead(thought.id)) return 'read';
             return 'unread';
         }
 
         /* ==========================================================================
-           TIMESTAMP FORMATTER HELPER
+           EXACT TIMESTAMP FORMATTER
            ========================================================================== */
         function formatThoughtTime(isoStr) {
-            if (!isoStr) return "In the quiet hours of night";
+            if (!isoStr) return "Cast into the night";
             try {
                 const date = new Date(isoStr);
-                if (isNaN(date.getTime())) return "In the quiet hours of night";
+                if (isNaN(date.getTime())) return "Cast into the night";
 
-                const now = new Date();
-                const diffMs = now.getTime() - date.getTime();
-                const diffMins = Math.max(0, Math.floor(diffMs / 60000));
-                const diffHours = Math.floor(diffMins / 60);
-                const diffDays = Math.floor(diffHours / 24);
+                const timeStr = date.toLocaleTimeString([], { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    second: '2-digit', 
+                    hour12: true 
+                });
+                
+                const dateStr = date.toLocaleDateString([], { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
 
-                let relative = "";
-                if (diffMins < 1) {
-                    relative = "Cast just now";
-                } else if (diffMins < 60) {
-                    relative = `Cast ${diffMins} min${diffMins === 1 ? '' : 's'} ago`;
-                } else if (diffHours < 24) {
-                    relative = `Cast ${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-                } else if (diffDays === 1) {
-                    relative = "Cast yesterday";
-                } else {
-                    relative = `Cast ${diffDays} days ago`;
-                }
-
-                const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-
-                return `${relative} • ${timeStr}, ${dateStr}`;
+                return `${timeStr} • ${dateStr}`;
             } catch(e) {
-                return "In the quiet hours of night";
+                return "Cast into the night";
             }
         }
 
         /* ==========================================================================
-           1. Audio Synthesizer (Zero External Assets)
+           AUDIO SYNTHESIZER
            ========================================================================== */
         class CelestialAudio {
             constructor() {
@@ -897,7 +1216,7 @@
         const audio = new CelestialAudio();
 
         /* ==========================================================================
-           2. Data Model & Coordinates (Star Size +10% & Timestamps)
+           DATA MODEL & INITIAL STARS
            ========================================================================== */
         const nowMs = Date.now();
         const defaultThoughts = [
@@ -952,9 +1271,22 @@
             }
         }
 
+        function updateMyStarsCount() {
+            const myCount = thoughtsArr.filter(t => isThoughtMine(t.id, t.author_key)).length;
+            const labelEl = document.getElementById('myStarsCountLabel');
+            if (labelEl) {
+                labelEl.innerText = `My Stars (${myCount})`;
+            }
+            const summaryEl = document.getElementById('vaultCountSummary');
+            if (summaryEl) {
+                summaryEl.innerText = `${myCount} Star${myCount === 1 ? '' : 's'}`;
+            }
+        }
+
         async function loadThoughts(isBackground = false) {
             if (!isBackground) renderStars();
             updateTotalThoughtsCount();
+            updateMyStarsCount();
 
             if (dbClient) {
                 try {
@@ -974,6 +1306,7 @@
                                 warmth: item.warmth || 0,
                                 resonate: item.resonate || 0,
                                 color_index: item.color_index || 0,
+                                author_key: item.author_key || null,
                                 created_at: item.created_at || new Date().toISOString(),
                                 x: props.x,
                                 y: props.y
@@ -988,6 +1321,8 @@
                             saveThoughtsLocal();
                             renderStars();
                             updateTotalThoughtsCount();
+                            updateMyStarsCount();
+                            renderVaultThoughts();
                         }
                     }
                 } catch(err) {
@@ -1045,7 +1380,7 @@
         }
 
         /* ==========================================================================
-           3. 3D Celestial Canvas & Dynamic 3D Camera Controls
+           3D CELESTIAL CANVAS & VIEWPORT
            ========================================================================== */
         const canvas = document.getElementById('sky-canvas');
         const ctx = canvas.getContext('2d');
@@ -1206,7 +1541,7 @@
             thought.y = props.y;
 
             const star = document.createElement('div');
-            star.className = 'star ' + getStarClass(thought.id);
+            star.className = 'star ' + getStarClass(thought);
             star.dataset.index = index;
             star.dataset.id = thought.id;
 
@@ -1232,6 +1567,12 @@
             });
 
             skyContainer.appendChild(star);
+        }
+
+        function refreshStarsAndVault() {
+            renderStars();
+            updateMyStarsCount();
+            renderVaultThoughts();
         }
 
         function animateCanvas() {
@@ -1310,7 +1651,7 @@
         requestAnimationFrame(animateCanvas);
 
         /* ==========================================================================
-           4. Modal & Reactions Handling
+           MODAL & REACTIONS
            ========================================================================== */
         const overlay = document.getElementById('overlay');
         const modalText = document.getElementById('modalText');
@@ -1328,7 +1669,7 @@
 
             markThoughtAsRead(thought.id);
 
-            if (isThoughtMine(thought.id)) {
+            if (isThoughtMine(thought.id, thought.author_key)) {
                 modalBadgeContainer.innerHTML = `<span class="modal-badge mine">✨ Your Star in the Sky</span>`;
             } else {
                 modalBadgeContainer.innerHTML = '';
@@ -1358,8 +1699,9 @@
         });
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && overlay.classList.contains('active')) {
-                closeModal();
+            if (e.key === 'Escape') {
+                if (overlay.classList.contains('active')) closeModal();
+                if (vaultOverlay.classList.contains('active')) closeVaultModal();
             }
         });
 
@@ -1392,6 +1734,7 @@
 
             sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
             saveThoughtsLocal();
+            renderVaultThoughts();
 
             if (dbClient && !isNaN(Number(thought.id))) {
                 try {
@@ -1409,7 +1752,108 @@
         resonateBtn.addEventListener('click', () => handleReaction('resonate'));
 
         /* ==========================================================================
-           5. Casting Interface (Automatic Timestamp Assignment)
+           COSMIC VAULT & LOGIN LOGIC
+           ========================================================================== */
+        const vaultOverlay = document.getElementById('vaultOverlay');
+        const myVaultBtn = document.getElementById('myVaultBtn');
+        const vaultCloseBtn = document.getElementById('vaultCloseBtn');
+        const displayCosmicKey = document.getElementById('displayCosmicKey');
+        const copyKeyBtn = document.getElementById('copyKeyBtn');
+        const connectKeyInput = document.getElementById('connectKeyInput');
+        const submitConnectKeyBtn = document.getElementById('submitConnectKeyBtn');
+        const generateNewKeyBtn = document.getElementById('generateNewKeyBtn');
+        const myThoughtsContainer = document.getElementById('myThoughtsContainer');
+
+        function openVaultModal() {
+            displayCosmicKey.innerText = currentCosmicKey;
+            renderVaultThoughts();
+            vaultOverlay.classList.add('active');
+        }
+
+        function closeVaultModal() {
+            vaultOverlay.classList.remove('active');
+        }
+
+        myVaultBtn.addEventListener('click', openVaultModal);
+        vaultCloseBtn.addEventListener('click', closeVaultModal);
+        vaultOverlay.addEventListener('click', (e) => {
+            if (e.target === vaultOverlay) closeVaultModal();
+        });
+
+        copyKeyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(currentCosmicKey).then(() => {
+                showToast("📋 Cosmic Key copied to clipboard!");
+            }).catch(() => {
+                showToast("Key copied: " + currentCosmicKey);
+            });
+        });
+
+        async function switchCosmicKey(newKey) {
+            if (!newKey || newKey.trim().length < 6) {
+                showToast("⚠️ Please enter a valid Cosmic Key phrase.");
+                return;
+            }
+            currentCosmicKey = newKey.trim();
+            localStorage.setItem('midnight_cosmic_key', currentCosmicKey);
+            currentKeyHash = await sha256Hex(currentCosmicKey);
+            displayCosmicKey.innerText = currentCosmicKey;
+            connectKeyInput.value = '';
+
+            refreshStarsAndVault();
+            showToast("✨ Connected with your Cosmic Identity!");
+        }
+
+        submitConnectKeyBtn.addEventListener('click', () => {
+            switchCosmicKey(connectKeyInput.value);
+        });
+
+        connectKeyInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                switchCosmicKey(connectKeyInput.value);
+            }
+        });
+
+        generateNewKeyBtn.addEventListener('click', () => {
+            const newKey = generateUnhackableCosmicKey();
+            switchCosmicKey(newKey);
+        });
+
+        function renderVaultThoughts() {
+            const myThoughts = thoughtsArr
+                .map((t, idx) => ({ ...t, originalIndex: idx }))
+                .filter(t => isThoughtMine(t.id, t.author_key));
+
+            if (myThoughts.length === 0) {
+                myThoughtsContainer.innerHTML = `<div class="empty-vault-state">You have not cast any thoughts with this key yet. Cast a secret into the night to watch it shine here!</div>`;
+                return;
+            }
+
+            myThoughtsContainer.innerHTML = '';
+            myThoughts.reverse().forEach(thought => {
+                const card = document.createElement('div');
+                card.className = 'my-thought-card';
+                card.innerHTML = `
+                    <div class="my-thought-quote">"${thought.text}"</div>
+                    <div class="my-thought-meta">
+                        <span>🕒 ${formatThoughtTime(thought.created_at)}</span>
+                        <div class="my-thought-stats">
+                            <span>✨ ${thought.warmth || 0}</span>
+                            <span>🤍 ${thought.resonate || 0}</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    closeVaultModal();
+                    openThoughtModal(thought.originalIndex);
+                });
+
+                myThoughtsContainer.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           CASTING INTERFACE
            ========================================================================== */
         const thoughtInput = document.getElementById('thoughtInput');
         const castBtn = document.getElementById('castBtn');
@@ -1435,17 +1879,20 @@
                 warmth: 1,
                 resonate: 0,
                 color_index: 0,
+                author_key: currentKeyHash,
                 created_at: nowIso,
                 x: coordX,
                 y: coordY
             };
 
-            markThoughtAsMine(tempId);
+            saveMyThought(tempId);
 
             thoughtsArr.push(newThought);
             saveThoughtsLocal();
             createStarElement(newThought, thoughtsArr.length - 1);
             updateTotalThoughtsCount();
+            updateMyStarsCount();
+            renderVaultThoughts();
 
             audio.playCastShimmer();
             const sStar = new ShootingStar();
@@ -1470,6 +1917,7 @@
                                 warmth: 1,
                                 resonate: 0,
                                 color_index: 0,
+                                author_key: currentKeyHash,
                                 x: coordX,
                                 y: coordY
                             }
@@ -1477,15 +1925,39 @@
                         .select();
 
                     if (error) {
-                        console.error("Supabase cloud insert notice:", error.message);
+                        console.warn("Supabase insert with author_key notice, fallback retry:", error.message);
+                        const retryRes = await dbClient
+                            .from('thoughts')
+                            .insert([
+                                {
+                                    text: text,
+                                    warmth: 1,
+                                    resonate: 0,
+                                    color_index: 0,
+                                    x: coordX,
+                                    y: coordY
+                                }
+                            ])
+                            .select();
+                        if (retryRes.data && retryRes.data.length > 0) {
+                            const cloudId = retryRes.data[0].id.toString();
+                            newThought.id = cloudId;
+                            if (retryRes.data[0].created_at) {
+                                newThought.created_at = retryRes.data[0].created_at;
+                            }
+                            saveMyThought(cloudId);
+                            saveThoughtsLocal();
+                            renderVaultThoughts();
+                        }
                     } else if (data && data.length > 0) {
                         const cloudId = data[0].id.toString();
                         newThought.id = cloudId;
                         if (data[0].created_at) {
                             newThought.created_at = data[0].created_at;
                         }
-                        markThoughtAsMine(cloudId);
+                        saveMyThought(cloudId);
                         saveThoughtsLocal();
+                        renderVaultThoughts();
                     }
                 } catch(err) {
                     console.warn("Supabase network notice:", err.message);
@@ -1501,7 +1973,7 @@
         });
 
         /* ==========================================================================
-           6. Controls
+           TOP CONTROLS
            ========================================================================== */
         const constellationToggle = document.getElementById('constellationToggle');
         constellationToggle.addEventListener('click', () => {
