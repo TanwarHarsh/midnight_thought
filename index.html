@@ -1837,14 +1837,16 @@
            AUTHENTICATION & VAULT STATE MANAGEMENT (v16)
            ========================================================================== */
         let activeUsername = localStorage.getItem('midnight_active_username') || null;
-        let activeKeyHash = null;
+        let activeKeyHash = localStorage.getItem('midnight_active_key_hash') || null;
 
         if (activeUsername) {
             sha256Hex("user:" + activeUsername.toLowerCase()).then(h => {
                 activeKeyHash = h;
+                localStorage.setItem('midnight_active_key_hash', h);
                 updateVaultHeaderButton();
                 renderStars();
                 trackCurrentPresence();
+                loadThoughts(true);
             });
         }
 
@@ -2046,11 +2048,16 @@
 
         function isThoughtMine(thought) {
             if (!thought) return false;
-            if (activeKeyHash) {
-                return Boolean(thought.author_key && thought.author_key === activeKeyHash);
-            } else {
-                return guestThoughtIds.has(thought.id ? thought.id.toString() : '');
+            if (activeKeyHash && thought.author_key && thought.author_key === activeKeyHash) {
+                return true;
             }
+            if (activeUsername && thought.author_key) {
+                const u = activeUsername.toLowerCase().trim();
+                if (thought.author_key === 'sys_acc_' + u || thought.author_key === u) {
+                    return true;
+                }
+            }
+            return guestThoughtIds.has(thought.id ? thought.id.toString() : '');
         }
 
         function markThoughtAsRead(thoughtId) {
@@ -3937,11 +3944,13 @@
                 activeUsername = username;
                 localStorage.setItem('midnight_active_username', activeUsername);
                 activeKeyHash = await sha256Hex("user:" + activeUsername.toLowerCase());
+                localStorage.setItem('midnight_active_key_hash', activeKeyHash);
 
                 updateVaultHeaderButton();
                 renderStars();
                 renderActiveVaultView();
                 trackCurrentPresence();
+                loadThoughts(true);
                 showToast(`✨ Welcome, ${activeUsername}! Your vault is unlocked.`);
             });
         }
@@ -4012,11 +4021,13 @@
                 activeUsername = username;
                 localStorage.setItem('midnight_active_username', activeUsername);
                 activeKeyHash = await sha256Hex("user:" + uname);
+                localStorage.setItem('midnight_active_key_hash', activeKeyHash);
 
                 updateVaultHeaderButton();
                 renderStars();
                 renderActiveVaultView();
                 trackCurrentPresence();
+                loadThoughts(true);
                 showToast(`✨ Welcome back, ${activeUsername}!`);
             }
 
