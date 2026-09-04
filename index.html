@@ -2678,81 +2678,35 @@
                             }
                         }
 
-                        let knownReactions = JSON.parse(localStorage.getItem('midnight_known_reactions') || '{}');
-
-                        newThoughts.forEach(t => {
-                            const sId = t.id.toString();
-                            if (isThoughtMine(t)) {
-                                const prev = knownReactions[sId];
-                                const curWarmth = Number(t.warmth || 0);
-                                const curResonate = Number(t.resonate || 0);
-
-                                if (prev) {
-                                    if (curResonate > Number(prev.resonate || 0)) {
-                                        const notifId = 'resonate_' + sId + '_' + curResonate;
-                                        const isNew = addCelestialNotification({
-                                            id: notifId,
-                                            type: 'resonate',
-                                            title: 'Resonated 🤍',
-                                            body: `A stargazer resonated with your star: "${t.text.substring(0, 30)}..."`,
-                                            starId: sId,
-                                            time: new Date().toISOString()
-                                        });
-                                        if (isNew) {
-                                            showLoudCosmicAlert({
-                                                icon: '🤍',
-                                                title: 'Resonated 🤍',
-                                                body: `A stargazer resonated with your star`,
-                                                btnText: 'View 🤍',
-                                                onAction: () => {
-                                                    const idx = thoughtsArr.findIndex(item => item.id.toString() === sId);
-                                                    if (idx !== -1) openThoughtModal(idx);
-                                                }
-                                            });
-                                        }
-                                    }
-
-                                    if (curWarmth > Number(prev.warmth || 0)) {
-                                        const notifId = 'warmth_' + sId + '_' + curWarmth;
-                                        const isNew = addCelestialNotification({
-                                            id: notifId,
-                                            type: 'warmth',
-                                            title: 'Warmth Received ✨',
-                                            body: `A stargazer sent warmth to your star: "${t.text.substring(0, 30)}..."`,
-                                            starId: sId,
-                                            time: new Date().toISOString()
-                                        });
-                                        if (isNew) {
-                                            showLoudCosmicAlert({
-                                                icon: '✨',
-                                                title: 'Warmth Received',
-                                                body: `A stargazer sent warmth to your star`,
-                                                btnText: 'View ✨',
-                                                onAction: () => {
-                                                    const idx = thoughtsArr.findIndex(item => item.id.toString() === sId);
-                                                    if (idx !== -1) openThoughtModal(idx);
-                                                }
-                                            });
-                                        }
-                                    }
-                                }
-
-                                knownReactions[sId] = { warmth: curWarmth, resonate: curResonate };
+                        // Tally latest reaction counts directly from Supabase & event records
+                        reactionEvents.forEach(r => {
+                            const sId = r.star_id ? r.star_id.toString() : '';
+                            const star = newThoughts.find(t => t.id.toString() === sId);
+                            if (star && r.type && r.val !== undefined) {
+                                star[r.type] = Math.max(Number(star[r.type] || 0), Number(r.val || 0));
                             }
                         });
 
+                        // Check reaction events and notify the star owner
                         reactionEvents.forEach(r => {
-                            const sId = r.star_id.toString();
+                            const sId = r.star_id ? r.star_id.toString() : '';
                             const star = newThoughts.find(t => t.id.toString() === sId);
                             if (star && isThoughtMine(star)) {
-                                const notifId = 'rx_evt_' + (r.id || r.time || sId);
+                                // Do not self-notify
+                                if (r.sender && activeUsername && r.sender.toLowerCase().trim() === activeUsername.toLowerCase().trim()) {
+                                    return;
+                                }
+
+                                const notifId = 'rx_' + (r.id || (sId + '_' + r.type + '_' + r.val));
                                 const rType = r.type || 'resonate';
                                 const isResonate = rType === 'resonate';
+                                const senderName = r.sender || 'A stargazer';
+
                                 const isNew = addCelestialNotification({
                                     id: notifId,
                                     type: rType,
                                     title: isResonate ? 'Resonated 🤍' : 'Warmth Received ✨',
-                                    body: `A stargazer ${isResonate ? 'resonated with' : 'sent warmth to'} your star: "${star.text.substring(0, 30)}..."`,
+                                    body: `${senderName} ${isResonate ? 'resonated with' : 'sent warmth to'} your star: "${star.text.substring(0, 30)}..."`,
                                     starId: sId,
                                     time: r.time || new Date().toISOString()
                                 });
@@ -2760,8 +2714,8 @@
                                 if (isNew) {
                                     showLoudCosmicAlert({
                                         icon: isResonate ? '🤍' : '✨',
-                                        title: isResonate ? 'Resonated 🤍' : 'Warmth Received',
-                                        body: `A stargazer ${isResonate ? 'resonated with' : 'sent warmth to'} your star`,
+                                        title: isResonate ? 'Resonated 🤍' : 'Warmth Received ✨',
+                                        body: `${senderName} ${isResonate ? 'resonated with' : 'sent warmth to'} your star`,
                                         btnText: isResonate ? 'View 🤍' : 'View ✨',
                                         onAction: () => {
                                             const idx = thoughtsArr.findIndex(item => item.id.toString() === sId);
@@ -2771,8 +2725,6 @@
                                 }
                             }
                         });
-
-                        localStorage.setItem('midnight_known_reactions', JSON.stringify(knownReactions));
 
                         if (isBackground && knownCloudThoughtIds.size > 0) {
                             newThoughts.forEach(t => {
@@ -2784,28 +2736,20 @@
 
                         newThoughts.forEach(t => knownCloudThoughtIds.add(t.id));
 
+                        // Always sync thoughtsArr with latest database state
+                        thoughtsArr = newThoughts;
+                        saveThoughtsLocal();
+                        renderStars();
+                        updateTotalThoughtsCount();
+                        updateVaultHeaderButton();
+
+                        // Update open modal counters live in real-time
                         if (activeThoughtIndex !== null && thoughtsArr[activeThoughtIndex]) {
-                            const curId = thoughtsArr[activeThoughtIndex].id.toString();
-                            const liveT = newThoughts.find(item => item.id.toString() === curId);
-                            if (liveT) {
-                                thoughtsArr[activeThoughtIndex].warmth = liveT.warmth;
-                                thoughtsArr[activeThoughtIndex].resonate = liveT.resonate;
-                                const wCountEl = document.getElementById('warmthCount');
-                                const rCountEl = document.getElementById('resonateCount');
-                                if (wCountEl) wCountEl.innerText = liveT.warmth || 0;
-                                if (rCountEl) rCountEl.innerText = liveT.resonate || 0;
-                            }
-                        }
-
-                        const hasChanges = newThoughts.length !== thoughtsArr.length || 
-                                           newThoughts.some((t, i) => !thoughtsArr[i] || t.id !== thoughtsArr[i].id || t.warmth !== thoughtsArr[i].warmth || t.resonate !== thoughtsArr[i].resonate || t.chat_enabled !== thoughtsArr[i].chat_enabled || t.color_index !== thoughtsArr[i].color_index);
-
-                        if (hasChanges) {
-                            thoughtsArr = newThoughts;
-                            saveThoughtsLocal();
-                            renderStars();
-                            updateTotalThoughtsCount();
-                            updateVaultHeaderButton();
+                            const curStar = thoughtsArr[activeThoughtIndex];
+                            const wCountEl = document.getElementById('warmthCount');
+                            const rCountEl = document.getElementById('resonateCount');
+                            if (wCountEl) wCountEl.innerText = curStar.warmth || 0;
+                            if (rCountEl) rCountEl.innerText = curStar.resonate || 0;
                         }
                     }
                 } catch(err) {
@@ -3099,7 +3043,9 @@
             star.addEventListener('click', (e) => {
                 if (hasMoved) return;
                 e.stopPropagation();
-                openThoughtModal(index);
+                const starId = star.dataset.id;
+                const foundIdx = thoughtsArr.findIndex(t => t.id && t.id.toString() === starId.toString());
+                openThoughtModal(foundIdx !== -1 ? foundIdx : index);
             });
 
             skyContainer.appendChild(star);
@@ -3260,9 +3206,12 @@
         const starChatStatus = document.getElementById('starChatStatus');
         const starChatInputRow = document.getElementById('starChatInputRow');
 
-        function openThoughtModal(index) {
+        function openThoughtModal(indexOrId) {
+            let index = typeof indexOrId === 'number' ? indexOrId : thoughtsArr.findIndex(t => t.id && t.id.toString() === indexOrId.toString());
+            if (index === -1) index = 0;
             activeThoughtIndex = index;
             const thought = thoughtsArr[index];
+            if (!thought) return;
 
             markThoughtAsRead(thought.id);
 
@@ -3681,26 +3630,29 @@
         });
 
         async function handleReaction(type) {
-            if (activeThoughtIndex === null) return;
+            if (activeThoughtIndex === null || !thoughtsArr[activeThoughtIndex]) return;
             const thought = thoughtsArr[activeThoughtIndex];
-            const sessionKey = `reacted_${thought.id}`;
+            const sId = thought.id ? thought.id.toString() : '';
+            const sessionKey = `reacted_${sId}`;
             let sessionReactions = JSON.parse(sessionStorage.getItem(sessionKey) || '{}');
 
             const isInc = !sessionReactions[type];
             sessionReactions[type] = isInc;
 
+            const curVal = Number(thought[type] || 0);
+            const nextVal = Math.max(0, curVal + (isInc ? 1 : -1));
+            thought[type] = nextVal;
+
             if (type === 'warmth') {
-                thought.warmth = Math.max(0, (thought.warmth || 0) + (isInc ? 1 : -1));
                 warmthBtn.classList.toggle('reacted', isInc);
-                warmthCount.innerText = thought.warmth;
+                warmthCount.innerText = nextVal;
                 if (isInc) {
                     showToast("✨ Sent warmth into the cosmos");
                     audio.playChime(activeThoughtIndex + 2);
                 }
             } else if (type === 'resonate') {
-                thought.resonate = Math.max(0, (thought.resonate || 0) + (isInc ? 1 : -1));
                 resonateBtn.classList.toggle('reacted', isInc);
-                resonateCount.innerText = thought.resonate;
+                resonateCount.innerText = nextVal;
                 if (isInc) {
                     showToast("🤍 You are not alone in this feeling");
                     audio.playChime(activeThoughtIndex + 4);
@@ -3710,19 +3662,18 @@
             sessionStorage.setItem(sessionKey, JSON.stringify(sessionReactions));
             saveThoughtsLocal();
 
-            if (dbClient && thought.id) {
-                const sId = thought.id.toString();
+            if (dbClient && sId) {
                 const numId = Number(sId);
                 try {
-                    // 1. Update the row in Supabase
+                    // 1. Update the row directly in Supabase
                     if (!isNaN(numId)) {
                         await dbClient
                             .from('thoughts')
-                            .update({ [type]: Number(thought[type]) })
+                            .update({ [type]: nextVal })
                             .eq('id', numId);
                     }
 
-                    // 2. Broadcast the reaction event so all clients and accounts receive live notification instantly
+                    // 2. Broadcast the reaction event so all stargazers receive live notification instantly
                     if (isInc) {
                         await dbClient
                             .from('thoughts')
@@ -3730,7 +3681,8 @@
                                 text: '__STAR_REACTION__:' + JSON.stringify({
                                     star_id: sId,
                                     type: type,
-                                    val: Number(thought[type]),
+                                    val: nextVal,
+                                    sender: activeUsername || 'A stargazer',
                                     time: new Date().toISOString()
                                 }),
                                 warmth: -4,
