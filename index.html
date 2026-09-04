@@ -1951,10 +1951,14 @@
 
             const localAccs = getLocalAccounts();
             if (localAccs[uname]) {
+                const local = localAccs[uname];
+                if (dbClient) {
+                    saveCloudAccount(local.username || uname, local.passwordHash, local.recoveryHash || '');
+                }
                 return {
-                    u: localAccs[uname].username,
-                    p: localAccs[uname].passwordHash,
-                    r: localAccs[uname].recoveryHash
+                    u: local.username || uname,
+                    p: local.passwordHash,
+                    r: local.recoveryHash || ''
                 };
             }
             return null;
@@ -2028,6 +2032,29 @@
                 } catch(e) {
                     console.warn("updateCloudPassword notice:", e);
                 }
+            }
+        }
+
+        async function syncLocalAccountsToCloud() {
+            if (!dbClient) return;
+            try {
+                const accs = getLocalAccounts();
+                for (const uname in accs) {
+                    const acc = accs[uname];
+                    if (acc && acc.passwordHash) {
+                        const unameHash = await sha256Hex(uname.toLowerCase().trim());
+                        const { data, error } = await dbClient
+                            .from('thoughts')
+                            .select('id')
+                            .eq('author_key', 'sys_acc_' + unameHash)
+                            .limit(1);
+                        if (!error && (!data || data.length === 0)) {
+                            await saveCloudAccount(acc.username || uname, acc.passwordHash, acc.recoveryHash || '');
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn("syncLocalAccountsToCloud notice:", e);
             }
         }
 
@@ -2511,7 +2538,22 @@
 
                     if (error) {
                         console.warn("Supabase load notice:", error.message);
-                    } else if (Array.isArray(data) && data.length > 0) {
+                    } else if (Array.isArray(data)) {
+                        if (data.length === 0) {
+                            thoughtsArr = [];
+                            knownCloudThoughtIds.clear();
+                            starChatRequests = {};
+                            localStorage.setItem('midnight_chat_requests', JSON.stringify({}));
+                            starChatCache = {};
+                            localStorage.setItem('midnight_star_chats', JSON.stringify({}));
+                            saveThoughtsLocal();
+                            renderStars();
+                            updateTotalThoughtsCount();
+                            updateVaultHeaderButton();
+                            updateNotificationBadge();
+                            return;
+                        }
+
                         const chatByStar = {};
                         const reqCounts = {};
                         const reactionEvents = [];
@@ -4426,6 +4468,7 @@
 
         loadThoughts();
         initRealtime();
+        syncLocalAccountsToCloud();
 
         // 3.5s background polling to guarantee real-time reaction and whisper sync across all devices
         setInterval(() => {
