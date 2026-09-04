@@ -2727,11 +2727,24 @@
                         });
 
                         if (isBackground && knownCloudThoughtIds.size > 0) {
-                            newThoughts.forEach(t => {
-                                if (!knownCloudThoughtIds.has(t.id) && !isThoughtMine(t)) {
-                                    featureNewIncomingStar(t);
+                            const newIncoming = newThoughts.filter(t => !knownCloudThoughtIds.has(t.id) && !isThoughtMine(t));
+                            if (newIncoming.length > 0) {
+                                if (newIncoming.length === 1) {
+                                    featureNewIncomingStar(newIncoming[0]);
+                                } else {
+                                    showToast(`✨ ${newIncoming.length} new stars have taken their place in the cosmos!`);
+                                    audio.playNewStarArrivedSound();
+                                    setTimeout(() => {
+                                        newIncoming.forEach(t => {
+                                            const starEl = document.querySelector(`.star[data-id="${t.id}"]`);
+                                            if (starEl) {
+                                                starEl.classList.add('featured-new');
+                                                setTimeout(() => starEl.classList.remove('featured-new'), 5000);
+                                            }
+                                        });
+                                    }, 400);
                                 }
-                            });
+                            }
                         }
 
                         newThoughts.forEach(t => knownCloudThoughtIds.add(t.id));
