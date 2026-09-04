@@ -3128,34 +3128,112 @@
 
                 starElements.forEach(el => {
                     const idx = parseInt(el.dataset.index);
+                    const sId = el.dataset.id;
+                    const thought = thoughtsArr.find(t => t.id && t.id.toString() === (sId || '').toString()) || thoughtsArr[idx];
+                    const isMine = isThoughtMine(thought);
                     const rect = el.getBoundingClientRect();
                     starPoints.push({
                         index: idx,
+                        thought: thought,
+                        isMine: isMine,
                         x: (rect.left + rect.width / 2 - stageRect.left) + canvas.width * 0.166,
                         y: (rect.top + rect.height / 2 - stageRect.top) + canvas.height * 0.166
                     });
                 });
 
-                const maxDistance = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+                // Separate user's stars from other users' stars
+                const myStars = starPoints.filter(p => p.isMine);
+                const otherStars = starPoints.filter(p => !p.isMine);
 
-                for (let i = 0; i < starPoints.length; i++) {
-                    for (let j = i + 1; j < starPoints.length; j++) {
-                        const p1 = starPoints[i];
-                        const p2 = starPoints[j];
+                // 1. User's Personal Constellation (all user's stars tied to each other into one cohesive constellation)
+                if (myStars.length > 1) {
+                    const inTree = new Set([0]);
+                    const myEdges = [];
+
+                    // Prim's algorithm connects every single user star into one unified constellation
+                    while (inTree.size < myStars.length) {
+                        let minD = Infinity;
+                        let bestEdge = null;
+
+                        inTree.forEach(u => {
+                            for (let v = 0; v < myStars.length; v++) {
+                                if (!inTree.has(v)) {
+                                    const dx = myStars[u].x - myStars[v].x;
+                                    const dy = myStars[u].y - myStars[v].y;
+                                    const d = Math.sqrt(dx * dx + dy * dy);
+                                    if (d < minD) {
+                                        minD = d;
+                                        bestEdge = [u, v, d];
+                                    }
+                                }
+                            }
+                        });
+
+                        if (bestEdge) {
+                            inTree.add(bestEdge[1]);
+                            myEdges.push(bestEdge);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Optional close secondary edges for richer geometric constellation aesthetics
+                    for (let i = 0; i < myStars.length; i++) {
+                        for (let j = i + 1; j < myStars.length; j++) {
+                            const dx = myStars[i].x - myStars[j].x;
+                            const dy = myStars[i].y - myStars[j].y;
+                            const d = Math.sqrt(dx * dx + dy * dy);
+                            if (d < 180 && !myEdges.some(e => (e[0] === i && e[1] === j) || (e[0] === j && e[1] === i))) {
+                                myEdges.push([i, j, d]);
+                            }
+                        }
+                    }
+
+                    // Draw the user's unified glowing golden constellation
+                    myEdges.forEach(([u, v]) => {
+                        const p1 = myStars[u];
+                        const p2 = myStars[v];
+                        const isHoverLinked = (hoveredStarIndex === p1.index || hoveredStarIndex === p2.index);
+
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+
+                        if (isHoverLinked) {
+                            ctx.strokeStyle = 'rgba(255, 235, 120, 0.95)';
+                            ctx.lineWidth = 2.2;
+                            ctx.shadowBlur = 14;
+                            ctx.shadowColor = '#ffd700';
+                        } else {
+                            ctx.strokeStyle = 'rgba(255, 215, 0, 0.65)';
+                            ctx.lineWidth = 1.4;
+                            ctx.shadowBlur = 7;
+                            ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+                        }
+                        ctx.stroke();
+                    });
+                }
+
+                // 2. Other users' stars (strictly separated from user's stars)
+                const maxOtherDist = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+                for (let i = 0; i < otherStars.length; i++) {
+                    for (let j = i + 1; j < otherStars.length; j++) {
+                        const p1 = otherStars[i];
+                        const p2 = otherStars[j];
                         const dx = p1.x - p2.x;
                         const dy = p1.y - p2.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
 
-                        if (dist < maxDistance) {
+                        if (dist < maxOtherDist) {
                             const isHoverLinked = (hoveredStarIndex === p1.index || hoveredStarIndex === p2.index);
                             const alpha = isHoverLinked 
-                                ? (1 - dist / maxDistance) * 0.85 + 0.35 
-                                : (1 - dist / maxDistance) * 0.24;
+                                ? (1 - dist / maxOtherDist) * 0.85 + 0.35 
+                                : (1 - dist / maxOtherDist) * 0.24;
 
                             ctx.beginPath();
                             ctx.moveTo(p1.x, p1.y);
                             ctx.lineTo(p2.x, p2.y);
-                            
+
                             if (isHoverLinked) {
                                 ctx.strokeStyle = `rgba(166, 188, 255, ${alpha})`;
                                 ctx.lineWidth = 1.8;
